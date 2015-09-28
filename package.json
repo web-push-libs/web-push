@@ -1,0 +1,26 @@
+{
+  "name": "web-push",
+  "version": "0.0.1",
+  "description": "Web Push library for Node.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marco-c/web-push.git"
+  },
+  "keywords": [
+    "web push",
+  ],
+  "author": "Marco Castelluccio",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/marco-c/web-push/issues"
+  },
+  "homepage": "https://github.com/marco-c/web-push#readme",
+  "devDependencies": {
+    "urlsafe-base64": "^1.0.0",
+    "encrypted-content-encoding": "git://github.com/martinthomson/encrypted-content-encoding.git"
+  }
+}
