@@ -1,6 +1,7 @@
 const urlBase64 = require('urlsafe-base64');
 const crypto    = require('crypto');
 const ece       = require('encrypted-content-encoding');
+const url       = require('url');
 
 function encrypt(userPublicKey, payload) {
   var localCurve = crypto.createECDH('prime256v1');
