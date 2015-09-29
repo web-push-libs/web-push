@@ -19,7 +19,7 @@
     "url": "https://github.com/marco-c/web-push/issues"
   },
   "homepage": "https://github.com/marco-c/web-push#readme",
-  "devDependencies": {
+  "dependencies": {
     "urlsafe-base64": "^1.0.0",
     "encrypted-content-encoding": "git://github.com/martinthomson/encrypted-content-encoding.git"
   }
