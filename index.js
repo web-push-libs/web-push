@@ -27,7 +27,7 @@ function encrypt(userPublicKey, payload) {
 }
 
 function sendNotification(endpoint, userPublicKey, payload) {
-  var encrypted = webPush.encrypt(urlBase64.decode(userPublicKey), payload);
+  var encrypted = encrypt(urlBase64.decode(userPublicKey), payload);
 
   var urlParts = url.parse(endpoint);
   var options = {
