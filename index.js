@@ -4,7 +4,13 @@ const ece       = require('encrypted-content-encoding');
 const url       = require('url');
 const https     = require('https');
 
-function encrypt(userPublicKey, payload) {
+var gcmAPIKey = '';
+
+function setGCMAPIKey(apiKey) {
+  gcmAPIKey = apiKey;
+}
+
+function encrypt(userPublicKey, payload) {console.log(gcmAPIKey);
   var localCurve = crypto.createECDH('prime256v1');
 
   var localPublicKey = localCurve.generateKeys();
@@ -52,8 +58,27 @@ function sendNotification(endpoint, userPublicKey, payload) {
     };
   }
 
+  var gcmPayload;
+  if (endpoint.indexOf('https://android.googleapis.com/gcm/send') === 0) {
+    if (payload) {
+      throw new Error("Payload not supported with GCM");
+    }
+
+    var endpointSections = endpoint.split('/');
+    var subscriptionId = endpointSections[endpointSections.length - 1];
+    gcmPayload = JSON.stringify({
+      registration_ids: [ subscriptionId ],
+    });
+    options.path = options.path.substring(0, options.path.length - subscriptionId.length - 1);
+
+    options.headers['Authorization'] = 'key=' + gcmAPIKey;
+    options.headers['Content-Type'] = 'application/json';
+    options.headers['Content-Length'] = gcmPayload.length;
+  }
+
+  var expectedStatusCode = gcmPayload ? 200 : 201;
   var pushRequest = https.request(options, function(pushResponse) {
-    if (pushResponse.statusCode !== 201) {
+    if (pushResponse.statusCode !== expectedStatusCode) {
       console.log("statusCode: ", pushResponse.statusCode);
       console.log("headers: ", pushResponse.headers);
     }
@@ -61,6 +86,9 @@ function sendNotification(endpoint, userPublicKey, payload) {
 
   if (typeof payload !== 'undefined') {
     pushRequest.write(encrypted.cipherText);
+  }
+  if (gcmPayload) {
+    pushRequest.write(gcmPayload);
   }
   pushRequest.end();
 
@@ -72,4 +100,5 @@ function sendNotification(endpoint, userPublicKey, payload) {
 module.exports = {
   encrypt: encrypt,
   sendNotification: sendNotification,
+  setGCMAPIKey: setGCMAPIKey,
 }
