@@ -18,6 +18,11 @@ Encrypts the payload according to the [Message Encryption for Web Push](https://
 - *userPublicKey* is the public key of the browser;
 - *payload* is the message to attach to the notification.
 
+## setGCMAPIKey(apiKey)
+
+Sets the GCM API key that the library should use in making requests to GCM endpoints (in Chromium/Google Chrome).
+- *apiKey* is your GCM API key, you can obtain it from the Google Developer Console.
+
 ## Projects using web-push
 
 - TicTacToe with offline and Push support using Service Workers - https://github.com/marco-c/tictactoe
