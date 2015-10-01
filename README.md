@@ -1,4 +1,4 @@
-# web-push
+# web-push [![Build Status](https://travis-ci.org/marco-c/web-push.svg)](https://travis-ci.org/marco-c/web-push)
 Web Push library for Node.js
 
 ## encrypt(userPublicKey, payload)
