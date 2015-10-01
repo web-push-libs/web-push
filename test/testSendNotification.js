@@ -18,7 +18,7 @@ suite('sendNotification', function() {
   var userPublicKey = userCurve.generateKeys();
   var userPrivateKey = userCurve.getPrivateKey();
 
-  function startServer(listening, done) {
+  function startServer(message, listening, done) {
     var pem = fs.readFileSync('test/cert.pem');
 
     var options = {
@@ -34,7 +34,8 @@ suite('sendNotification', function() {
       });
 
       req.on('end', function() {
-        assert.equal(req.headers['content-length'], 22, 'Content-Length header correct');
+        assert(body.length > 0);
+        assert.equal(req.headers['content-length'], body.length, 'Content-Length header correct');
         assert.equal(req.headers['content-type'], 'application/octet-stream', 'Content-Type header correct');
         assert.equal(req.headers['encryption-key'].indexOf('keyid=p256dh;dh='), 0, 'Encryption-Key header correct');
         assert.equal(req.headers['encryption'].indexOf('keyid=p256dh;salt='), 0, 'Encryption header correct');
@@ -52,7 +53,7 @@ suite('sendNotification', function() {
           salt: salt,
         });
 
-        assert(decrypted.equals(new Buffer('hello')), "Cipher text correctly decoded");
+        assert(decrypted.equals(new Buffer(message)), "Cipher text correctly decoded");
 
         res.writeHead(201);
 
@@ -66,14 +67,20 @@ suite('sendNotification', function() {
   }
 
   test('send/receive string', function(done) {
-    startServer(function() {
+    startServer('hello', function() {
       webPush.sendNotification('https://127.0.0.1:50005', urlBase64.encode(userPublicKey), 'hello');
     }, done);
   });
 
   test('send/receive buffer', function(done) {
-    startServer(function() {
+    startServer('hello', function() {
       webPush.sendNotification('https://127.0.0.1:50005', urlBase64.encode(userPublicKey), new Buffer('hello'));
+    }, done);
+  });
+
+  test('send/receive empty message', function(done) {
+    startServer('', function() {
+      webPush.sendNotification('https://127.0.0.1:50005', urlBase64.encode(userPublicKey), '');
     }, done);
   });
 });
