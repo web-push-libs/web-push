@@ -34,6 +34,7 @@ function sendNotification(endpoint, userPublicKey, payload) {
   var urlParts = url.parse(endpoint);
   var options = {
     hostname: urlParts.hostname,
+    port: urlParts.port,
     path: urlParts.pathname,
     method: 'POST',
     headers: {
