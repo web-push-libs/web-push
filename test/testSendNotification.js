@@ -34,26 +34,29 @@ suite('sendNotification', function() {
       });
 
       req.on('end', function() {
-        assert(body.length > 0);
         assert.equal(req.headers['content-length'], body.length, 'Content-Length header correct');
-        assert.equal(req.headers['content-type'], 'application/octet-stream', 'Content-Type header correct');
-        assert.equal(req.headers['encryption-key'].indexOf('keyid=p256dh;dh='), 0, 'Encryption-Key header correct');
-        assert.equal(req.headers['encryption'].indexOf('keyid=p256dh;salt='), 0, 'Encryption header correct');
-        assert.equal(req.headers['content-encoding'], 'aesgcm128', 'Content-Encoding header correct');
 
-        var appServerPublicKey = urlBase64.decode(req.headers['encryption-key'].substring('keyid=p256dh;dh='.length));
-        var salt = req.headers['encryption'].substring('keyid=p256dh;salt='.length);
+        if (typeof message !== 'undefined') {
+          assert(body.length > 0);
+          assert.equal(req.headers['content-type'], 'application/octet-stream', 'Content-Type header correct');
+          assert.equal(req.headers['encryption-key'].indexOf('keyid=p256dh;dh='), 0, 'Encryption-Key header correct');
+          assert.equal(req.headers['encryption'].indexOf('keyid=p256dh;salt='), 0, 'Encryption header correct');
+          assert.equal(req.headers['content-encoding'], 'aesgcm128', 'Content-Encoding header correct');
 
-        var sharedSecret = userCurve.computeSecret(appServerPublicKey);
+          var appServerPublicKey = urlBase64.decode(req.headers['encryption-key'].substring('keyid=p256dh;dh='.length));
+          var salt = req.headers['encryption'].substring('keyid=p256dh;salt='.length);
 
-        ece.saveKey('webpushKey', sharedSecret);
+          var sharedSecret = userCurve.computeSecret(appServerPublicKey);
 
-        var decrypted = ece.decrypt(body, {
-          keyid: 'webpushKey',
-          salt: salt,
-        });
+          ece.saveKey('webpushKey', sharedSecret);
 
-        assert(decrypted.equals(new Buffer(message)), "Cipher text correctly decoded");
+          var decrypted = ece.decrypt(body, {
+            keyid: 'webpushKey',
+            salt: salt,
+          });
+
+          assert(decrypted.equals(new Buffer(message)), "Cipher text correctly decoded");
+        }
 
         res.writeHead(201);
 
@@ -81,6 +84,12 @@ suite('sendNotification', function() {
   test('send/receive empty message', function(done) {
     startServer('', function() {
       webPush.sendNotification('https://127.0.0.1:50005', urlBase64.encode(userPublicKey), '');
+    }, done);
+  });
+
+  test('send/receive without message', function(done) {
+    startServer(undefined, function() {
+      webPush.sendNotification('https://127.0.0.1:50005');
     }, done);
   });
 });
