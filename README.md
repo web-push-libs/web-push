@@ -13,3 +13,7 @@ Send a Push notification containing a message to an endpoint.
 - *endpoint* is the endpoint URL;
 - *userPublicKey* is the public key of the browser;
 - *payload* is the message to attach to the notification.
+
+## Projects using web-push
+
+- TicTacToe with offline and Push support using Service Workers - https://github.com/marco-c/tictactoe
