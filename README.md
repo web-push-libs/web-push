@@ -1,5 +1,9 @@
-# web-push [![Build Status](https://travis-ci.org/marco-c/web-push.svg)](https://travis-ci.org/marco-c/web-push)
-Web Push library for Node.js
+# web-push
+> Web Push library for Node.js
+
+[![Build Status](https://travis-ci.org/marco-c/web-push.svg)](https://travis-ci.org/marco-c/web-push)
+[![dependencies](https://david-dm.org/marco-c/web-push.png)](https://david-dm.org/marco-c/web-push)
+[![devdependencies](https://david-dm.org/marco-c/web-push/dev-status.png)](https://david-dm.org/marco-c/web-push#info=devDependencies)
 
 ## sendNotification(endpoint, userPublicKey, payload)
 
