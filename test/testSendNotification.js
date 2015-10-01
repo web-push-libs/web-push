@@ -58,16 +58,22 @@ suite('sendNotification', function() {
 
         res.end('ok');
 
-        done();
+        server.close(done);
       });
     }).listen(50005);
 
     server.on('listening', listening);
   }
 
-  test('send', function(done) {
+  test('send/receive string', function(done) {
     startServer(function() {
       webPush.sendNotification('https://127.0.0.1:50005', urlBase64.encode(userPublicKey), 'hello');
+    }, done);
+  });
+
+  test('send/receive buffer', function(done) {
+    startServer(function() {
+      webPush.sendNotification('https://127.0.0.1:50005', urlBase64.encode(userPublicKey), new Buffer('hello'));
     }, done);
   });
 });
