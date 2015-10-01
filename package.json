@@ -12,7 +12,9 @@
   },
   "keywords": [
     "web push",
-    "push"
+    "push",
+    "notifications",
+    "push notifications"
   ],
   "author": "Marco Castelluccio",
   "license": "MPL-2.0",
