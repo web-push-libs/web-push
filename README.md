@@ -1,6 +1,9 @@
 # web-push
 > Web Push library for Node.js
 
+Supports Firefox 43+ and Chromium/Chrome 42+.
+Notification with payloads are currently only supported in Firefox (see https://code.google.com/p/chromium/issues/detail?id=486040 for the status in Chromium).
+
 [![Build Status](https://travis-ci.org/marco-c/web-push.svg)](https://travis-ci.org/marco-c/web-push)
 [![dependencies](https://david-dm.org/marco-c/web-push.png)](https://david-dm.org/marco-c/web-push)
 [![devdependencies](https://david-dm.org/marco-c/web-push/dev-status.png)](https://david-dm.org/marco-c/web-push#info=devDependencies)
