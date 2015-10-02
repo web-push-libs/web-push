@@ -61,12 +61,24 @@ var webdriver = require('selenium-webdriver'),
     By = require('selenium-webdriver').By,
     until = require('selenium-webdriver').until;
 
-var driver = new webdriver.Builder()
-    .forBrowser('firefox')
-    .build();
+var firefox = require('selenium-webdriver/firefox');
+
+var profile = new firefox.Profile();
+profile.acceptUntrustedCerts();
+profile.setPreference('security.turn_off_all_security_so_that_viruses_can_take_over_this_computer', true);
+
+var options = new firefox.Options().setProfile(profile);
+var driver = new firefox.Driver(options);
 
 driver.wait(function() {
   return serverListening;
+});
+driver.executeScript(function() {
+  netscape.security.PrivilegeManager.enablePrivilege('UniversalXPConnect');
+  Components.utils.import('resource://gre/modules/Services.jsm');
+  var uri = Services.io.newURI('https://127.0.0.1:50005', null, null);
+  var principal = Services.scriptSecurityManager.getNoAppCodebasePrincipal(uri);
+  Services.perms.addFromPrincipal(principal, 'push', Services.perms.ALLOW_ACTION);
 });
 /*
 This currently doesn't work in Firefox Nightly.
