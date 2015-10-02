@@ -18,7 +18,7 @@ suite('sendNotification', function() {
   var userPublicKey = userCurve.generateKeys();
   var userPrivateKey = userCurve.getPrivateKey();
 
-  function startServer(message, listening, done) {
+  function startServer(message, listening, done, isGCM) {
     var pem = fs.readFileSync('test/cert.pem');
 
     var options = {
@@ -58,7 +58,14 @@ suite('sendNotification', function() {
           assert(decrypted.equals(new Buffer(message)), "Cipher text correctly decoded");
         }
 
-        res.writeHead(201);
+        if (isGCM) {
+          assert.equal(body.toString(), '{"registration_ids":["someSubscriptionID"]}');
+          assert.equal(req.headers['authorization'], 'key=my_gcm_key', 'Authorization header correct');
+          assert.equal(req.headers['content-type'], 'application/json', 'Content-Type header correct');
+          assert.equal(req.headers['content-length'], 43, 'Content-Length header correct');
+        }
+
+        res.writeHead(isGCM ? 200 : 201);
 
         res.end('ok');
 
@@ -91,5 +98,21 @@ suite('sendNotification', function() {
     startServer(undefined, function() {
       webPush.sendNotification('https://127.0.0.1:50005');
     }, done);
+  });
+
+  test('send/receive GCM', function(done) {
+    var httpsrequest = https.request;
+    https.request = function(options, listener) {
+      options.hostname = '127.0.0.1';
+      options.port = '50005';
+      options.path = '/';
+      return httpsrequest.call(https, options, listener);
+    }
+
+    webPush.setGCMAPIKey('my_gcm_key');
+
+    startServer(undefined, function() {
+      webPush.sendNotification('https://android.googleapis.com/gcm/send/someSubscriptionID');
+    }, done, true);
   });
 });
