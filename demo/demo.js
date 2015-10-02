@@ -4,31 +4,26 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-function sendReq(obj) {
+function sendRegister(endpoint, key) {
   return new Promise(function(resolve, reject) {
     var request = new XMLHttpRequest();
 
     request.open('POST', 'https://127.0.0.1:50005');
     request.setRequestHeader('Content-Type', 'application/json');
 
-    request.send(JSON.stringify(obj));
+    request.send(JSON.stringify({
+      endpoint: endpoint,
+      key: btoa(String.fromCharCode.apply(null, new Uint8Array(key))),
+    }));
 
     request.onload = resolve;
     request.onerror = reject;
   });
 }
 
-function sendRegister(endpoint, key) {
-  sendReq({
-    endpoint: endpoint,
-    key: btoa(String.fromCharCode.apply(null, new Uint8Array(key))),
-  });
-}
-
 navigator.serviceWorker.ready.then(function(reg) {
   var channel = new MessageChannel();
   channel.port1.onmessage = function(e) {
-    console.log(e.data);
     window.document.title = e.data;
   }
   reg.active.postMessage('setup', [channel.port2]);
