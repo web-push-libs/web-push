@@ -3,6 +3,8 @@ var https   = require('https');
 var fs      = require('fs');
 var path    = require('path');
 
+webPush.setGCMAPIKey('AIzaSyAwmdX6KKd4hPfIcGU2SOfj9vuRDW6u-wo');
+
 var pem = fs.readFileSync('test/cert.pem');
 
 var options = {
