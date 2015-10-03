@@ -1,11 +1,15 @@
 language: node_js
 node_js:
   - "0.12"
+env:
+  - DISPLAY=:99.0
 before_script:
+  - "sh -e /etc/init.d/xvfb start"
   - npm install mocha
 script:
   - npm test
   - npm run selenium-init
+  - npm run test-selenium
 sudo: false
 cache:
   directories:
