@@ -5,6 +5,7 @@ before_script:
   - npm install mocha
 script:
   - npm test
+  - npm run selenium-init
 sudo: false
 cache:
   directories:
