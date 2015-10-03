@@ -10,7 +10,7 @@ function setGCMAPIKey(apiKey) {
   gcmAPIKey = apiKey;
 }
 
-function encrypt(userPublicKey, payload) {console.log(gcmAPIKey);
+function encrypt(userPublicKey, payload) {
   var localCurve = crypto.createECDH('prime256v1');
 
   var localPublicKey = localCurve.generateKeys();
