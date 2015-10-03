@@ -62,5 +62,6 @@ driver.executeScript(function() {
 driver.sleep(1000);
 driver.wait(until.titleIs(server.pushPayload ? server.pushPayload : 'no payload'), 60000);
 driver.quit().then(function() {
+  console.log('Test completed.');
   server.close();
 });
