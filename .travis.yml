@@ -10,6 +10,7 @@ script:
   - npm test
   - npm run selenium-init
   - npm run test-selenium
+  - npm run test-selenium-payload
 sudo: false
 cache:
   directories:
