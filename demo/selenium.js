@@ -51,6 +51,7 @@ driver.get('https://127.0.0.1:50005');
 driver.executeScript(function() {
   window.location = 'https://127.0.0.1:50005';
 });
+driver.sleep(1000);
 driver.wait(until.titleIs(server.pushPayload ? server.pushPayload : 'no payload'), 60000);
 driver.quit().then(function() {
   server.close();
