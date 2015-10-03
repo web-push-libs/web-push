@@ -39,7 +39,11 @@ var server = https.createServer(options, function(req, res) {
 
     req.on('end', function() {
       var obj = JSON.parse(body);
-      webPush.sendNotification(obj.endpoint, obj.key, 'marco');
+      if (!server.pushPayload) {
+        webPush.sendNotification(obj.endpoint);
+      } else {
+        webPush.sendNotification(obj.endpoint, obj.key, server.pushPayload);
+      }
     });
 
     res.writeHead(200, {
