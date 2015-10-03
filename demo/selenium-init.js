@@ -66,6 +66,6 @@ wget(destDir, 'https://www.googleapis.com/download/storage/v1/b/chromium-browser
 wget(destDir, 'http://chromedriver.storage.googleapis.com/LATEST_RELEASE').then(function() {
   var version = fs.readFileSync(path.join(destDir, 'LATEST_RELEASE'), 'utf8');
   wget(destDir, 'http://chromedriver.storage.googleapis.com/' + version + '/chromedriver_linux64.zip').then(function() {
-    unzip(destDir, 'chromedriver_linux64.zip');
+    unzip(destDir, 'test_tools/chromedriver_linux64.zip');
   });
 });
