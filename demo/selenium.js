@@ -3,6 +3,10 @@ var https   = require('https');
 var fs      = require('fs');
 var path    = require('path');
 
+if (process.argv.length < 3 || !fs.existsSync(process.argv[2])) {
+  throw new Error('The third argument should be the path to firefox-bin');
+}
+
 var pem = fs.readFileSync('test/cert.pem');
 
 var options = {
@@ -67,8 +71,14 @@ var profile = new firefox.Profile();
 profile.acceptUntrustedCerts();
 profile.setPreference('security.turn_off_all_security_so_that_viruses_can_take_over_this_computer', true);
 
-var options = new firefox.Options().setProfile(profile);
-var driver = new firefox.Driver(options);
+var firefoxBinary = new firefox.Binary(process.argv[2]);
+
+var firefoxOptions = new firefox.Options().setProfile(profile).setBinary(firefoxBinary);
+
+var driver = new webdriver.Builder()
+  .forBrowser('firefox')
+  .setFirefoxOptions(firefoxOptions)
+  .build();
 
 driver.wait(function() {
   return serverListening;
@@ -91,4 +101,4 @@ driver.sleep(5000);
 driver.wait(until.titleIs('marco'), 5000);
 driver.quit().then(function() {
   server.close();
-})
+});
