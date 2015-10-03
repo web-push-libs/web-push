@@ -1,12 +1,20 @@
 var fs = require('fs');
 
-if (process.argv.length < 3 || !fs.existsSync(process.argv[2])) {
-  throw new Error('The third argument should be the path to the browser executable.');
+var firefoxBinaryPath = 'test_tools/firefox/firefox-bin';
+if (!fs.existsSync(firefoxBinaryPath)) {
+  throw new Error('Firefox binary doesn\'t exist at ' + firefoxBinaryPath);
 }
+
+var chromeBinaryPath = 'test_tools/chrome-linux/chrome';
+if (!fs.existsSync(chromeBinaryPath)) {
+  throw new Error('Chrome binary doesn\'t exist at ' + chromeBinaryPath);
+}
+
+process.env.PATH = 'test_tools/:' + process.env.PATH;
 
 var server = require('./server');
 
-server.pushPayload = process.argv[3];
+server.pushPayload = process.argv[2];
 
 var webdriver = require('selenium-webdriver'),
     By = require('selenium-webdriver').By,
@@ -18,13 +26,13 @@ var profile = new firefox.Profile();
 profile.acceptUntrustedCerts();
 profile.setPreference('security.turn_off_all_security_so_that_viruses_can_take_over_this_computer', true);
 
-var firefoxBinary = new firefox.Binary(process.argv[2]);
+var firefoxBinary = new firefox.Binary(firefoxBinaryPath);
 
 var firefoxOptions = new firefox.Options().setProfile(profile).setBinary(firefoxBinary);
 
 var chrome = require('selenium-webdriver/chrome');
 
-var chromeOptions = new chrome.Options().setChromeBinaryPath(process.argv[2]).addArguments('--no-sandbox');
+var chromeOptions = new chrome.Options().setChromeBinaryPath(chromeBinaryPath).addArguments('--no-sandbox');
 
 var driver = new webdriver.Builder()
   .forBrowser('firefox')
