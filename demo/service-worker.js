@@ -6,7 +6,7 @@ self.addEventListener('push', function(event) {
     tag: 'push',
   }));
 
-  port.postMessage(event.data.text());
+  port.postMessage(event.data ? event.data.text() : 'no payload');
 });
 
 self.onmessage = function(e) {
