@@ -7,6 +7,14 @@ function spawnHelper(command, args) {
   return new Promise(function(resolve, reject) {
     var child = child_process.spawn(command, args);
 
+    child.stdout.on('data', function(data) {
+      process.stdout.write(data);
+    });
+
+    child.stderr.on('data', function(data) {
+      process.stderr.write(data);
+    });
+
     child.on('exit', function(code) {
       if (code === 0) {
         console.log('Done ' + command + ' with args: ' + args);
