@@ -9,6 +9,7 @@ function spawnHelper(command, args) {
 
     child.on('exit', function(code) {
       if (code === 0) {
+        console.log('Done ' + command + ' with args: ' + args);
         resolve();
       } else {
         console.log('Error running ' + command + ' with args: ' + args);
