@@ -17,16 +17,16 @@ Send a Push notification to an endpoint. *userPublicKey* and *payload* can be un
 - *userPublicKey* is the public key of the browser;
 - *payload* is the message to attach to the notification.
 
-## encrypt(userPublicKey, payload)
-
-Encrypts the payload according to the [Message Encryption for Web Push](https://tools.ietf.org/html/draft-thomson-webpush-encryption-00) standard.
-- *userPublicKey* is the public key of the browser;
-- *payload* is the message to attach to the notification.
-
 ## setGCMAPIKey(apiKey)
 
 Sets the GCM API key that the library should use in making requests to GCM endpoints (in Chromium/Google Chrome).
 - *apiKey* is your GCM API key, you can obtain it from the Google Developer Console.
+
+## encrypt(userPublicKey, payload)
+
+Encrypts the payload according to the [Message Encryption for Web Push](https://tools.ietf.org/html/draft-thomson-webpush-encryption-00) standard. (*sendNotification* will automatically encrypt the payload for you, so if you use *sendNotification* you don't need to worry about it).
+- *userPublicKey* is the public key of the browser;
+- *payload* is the message to attach to the notification.
 
 ## Projects using web-push
 
