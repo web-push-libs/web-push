@@ -31,6 +31,7 @@
     "encrypted-content-encoding": "git://github.com/martinthomson/encrypted-content-encoding.git"
   },
   "devDependencies": {
+    "github": "^0.2.4",
     "selenium-webdriver": "^2.47.0"
   }
 }

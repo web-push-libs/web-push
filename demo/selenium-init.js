@@ -2,6 +2,7 @@ var util = require('util');
 var fs   = require('fs');
 var path = require('path');
 var child_process = require('child_process');
+var GitHubAPI = require('github');
 
 function spawnHelper(command, args) {
   return new Promise(function(resolve, reject) {
@@ -40,6 +41,14 @@ function unzip(dir, file) {
   return spawnHelper('unzip', [ '-o', '-d', dir, file ]);
 }
 
+function gunzip(file) {
+  return spawnHelper('gunzip', [ file, '-k', '-N' ]);
+}
+
+function getFileNameFromURL(url) {
+  return url.substring(url.lastIndexOf('/') + 1)
+}
+
 var destDir = 'test_tools';
 
 // Download Firefox Nightly
@@ -50,6 +59,28 @@ var firefoxURL = 'https://ftp.mozilla.org/pub/mozilla.org/firefox/nightly/latest
 
 wget(destDir, firefoxURL).then(function() {
   untar(destDir, path.join(destDir, firefoxFileName));
+});
+
+// Download wires
+
+new GitHubAPI({
+  version: '3.0.0'
+}).releases.listReleases({
+  owner: 'jgraham',
+  repo: 'wires',
+}, function(err, res) {
+  for (var i = 0; i < res[0].assets.length; i++) {
+    var asset = res[0].assets[i];
+    if (asset.name.indexOf('linux64') != -1) {
+      wget(destDir, asset.browser_download_url).then(function() {
+        gunzip(path.join(destDir, asset.name)).then(function() {
+          fs.chmod(path.join(destDir, 'wires'), 0744);
+        });
+      });
+
+      return;
+    }
+  }
 });
 
 // Download Chrome Canary
