@@ -3,6 +3,7 @@ var fs   = require('fs');
 var path = require('path');
 var child_process = require('child_process');
 var request = require('request');
+var fse = require('fs-extra');
 
 function spawnHelper(command, args) {
   return new Promise(function(resolve, reject) {
@@ -45,6 +46,11 @@ var destDir = 'test_tools';
 
 // Download Firefox Nightly
 
+var firefoxVersionFile = path.join(destDir, 'firefoxVersion');
+var firefoxVersion = -Infinity;
+if (fs.existsSync(firefoxVersionFile)) {
+  firefoxVersion = Number(fs.readFileSync(firefoxVersionFile, 'utf8'));
+}
 var firefoxFileNameFmt = 'firefox-%d.0a1.en-US.linux-x86_64.tar.bz2';
 var firefoxBaseURL = 'https://ftp.mozilla.org/pub/mozilla.org/firefox/nightly/latest-mozilla-central/';
 
@@ -57,6 +63,11 @@ request(firefoxBaseURL + 'test_packages.json', function(error, response, body) {
   var obj = JSON.parse(body);
 
   var version = Number(obj.mochitest[0].substr(8, 2));
+
+  if (version > firefoxVersion) {
+    fs.writeFileSync(firefoxVersionFile, version, 'utf8');
+    fs.unlinkSync(path.join(destDir, util.format(firefoxFileNameFmt, firefoxVersion)));
+  }
 
   var firefoxFileName = util.format(firefoxFileNameFmt, version);
 
@@ -77,10 +88,13 @@ if (fs.existsSync(chromeVersionFile)) {
 
 wget(destDir, 'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Linux_x64%2FLAST_CHANGE?alt=media').then(function() {
   var newVersion = Number(fs.readFileSync(path.join(destDir, 'Linux_x64%2FLAST_CHANGE?alt=media'), 'utf8'));
+  fs.renameSync(path.join(destDir, 'Linux_x64%2FLAST_CHANGE?alt=media'), chromeVersionFile);
   if (newVersion > chromeVersion) {
-    fs.renameSync(path.join(destDir, 'Linux_x64%2FLAST_CHANGE?alt=media'), chromeVersionFile);
+    fse.removeSync('test_tools/chrome-linux');
     wget(destDir, 'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Linux_x64%2F' + newVersion + '%2Fchrome-linux.zip?alt=media').then(function() {
-      unzip(destDir, 'test_tools/Linux_x64%2F' + newVersion + '%2Fchrome-linux.zip?alt=media')
+      unzip(destDir, 'test_tools/Linux_x64%2F' + newVersion + '%2Fchrome-linux.zip?alt=media').then(function() {
+        fs.unlink('test_tools/Linux_x64%2F' + newVersion + '%2Fchrome-linux.zip?alt=media');
+      });
     });
   }
 });
