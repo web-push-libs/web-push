@@ -7,6 +7,7 @@ before_script:
   - "sh -e /etc/init.d/xvfb start"
   - npm install mocha
 script:
+  - mkdir /etc/opt/chrome
   - mkdir /etc/opt/chrome/policies
 sudo: false
 cache:
