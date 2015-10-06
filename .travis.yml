@@ -9,7 +9,7 @@ before_script:
 script:
   - npm test
   - npm run selenium-init
-  - sudo node demo/selenium-chrome-init.js
+  - sudo $(which node) demo/selenium-chrome-init.js
   - npm run test-selenium
   - npm run test-selenium-payload
 sudo: required
