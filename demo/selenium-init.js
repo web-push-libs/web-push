@@ -2,6 +2,7 @@ var util = require('util');
 var fs   = require('fs');
 var path = require('path');
 var child_process = require('child_process');
+var request = require('request');
 
 function spawnHelper(command, args) {
   return new Promise(function(resolve, reject) {
@@ -43,13 +44,27 @@ function unzip(dir, file) {
 var destDir = 'test_tools';
 
 // Download Firefox Nightly
-// XXX: Automatically get the latest release!
 
-var firefoxFileName = 'firefox-44.0a1.en-US.linux-x86_64.tar.bz2';
-var firefoxURL = 'https://ftp.mozilla.org/pub/mozilla.org/firefox/nightly/latest-mozilla-central/' + firefoxFileName;
+var firefoxFileNameFmt = 'firefox-%d.0a1.en-US.linux-x86_64.tar.bz2';
+var firefoxBaseURL = 'https://ftp.mozilla.org/pub/mozilla.org/firefox/nightly/latest-mozilla-central/';
 
-wget(destDir, firefoxURL).then(function() {
-  untar(destDir, path.join(destDir, firefoxFileName));
+request(firefoxBaseURL + 'test_packages.json', function(error, response, body) {
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  var obj = JSON.parse(body);
+
+  var version = Number(obj.mochitest[0].substr(8, 2));
+
+  var firefoxFileName = util.format(firefoxFileNameFmt, version);
+
+  var firefoxURL = firefoxBaseURL + firefoxFileName;
+
+  wget(destDir, firefoxURL).then(function() {
+    untar(destDir, path.join(destDir, firefoxFileName));
+  });
 });
 
 // Download Chrome Canary
