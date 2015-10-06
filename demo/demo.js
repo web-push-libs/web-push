@@ -4,27 +4,6 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-function sendRegister(endpoint, key) {
-  var obj = {
-    endpoint: endpoint,
-  };
-  if (key) {
-    obj.key = btoa(String.fromCharCode.apply(null, new Uint8Array(key)));
-  }
-
-  return new Promise(function(resolve, reject) {
-    var request = new XMLHttpRequest();
-
-    request.open('POST', 'https://127.0.0.1:50005');
-    request.setRequestHeader('Content-Type', 'application/json');
-
-    request.send(JSON.stringify(obj));
-
-    request.onload = resolve;
-    request.onerror = reject;
-  });
-}
-
 navigator.serviceWorker.ready.then(function(reg) {
   var channel = new MessageChannel();
   channel.port1.onmessage = function(e) {
@@ -42,5 +21,16 @@ navigator.serviceWorker.ready.then(function(reg) {
     }
   });
 }).then(function(subscription) {
-  sendRegister(subscription.endpoint, subscription.getKey ? subscription.getKey('p256dh') : '');
+  var key = subscription.getKey ? subscription.getKey('p256dh') : '';
+
+  return fetch('https://127.0.0.1:50005', {
+    method: 'post',
+    headers: {
+      'Content-type': 'application/json'
+    },
+    body: JSON.stringify({
+      endpoint: subscription.endpoint,
+      key: key ? btoa(String.fromCharCode.apply(null, new Uint8Array(key))) : '',
+    }),
+  });
 });
