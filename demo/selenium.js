@@ -49,7 +49,7 @@ driver.executeScript(function() {
     Components.utils.import('resource://gre/modules/Services.jsm');
     var uri = Services.io.newURI('https://127.0.0.1:50005', null, null);
     var principal = Services.scriptSecurityManager.getNoAppCodebasePrincipal(uri);
-    Services.perms.addFromPrincipal(principal, 'push', Services.perms.ALLOW_ACTION);
+    Services.perms.addFromPrincipal(principal, 'desktop-notification', Services.perms.ALLOW_ACTION);
   }
 });
 /*
