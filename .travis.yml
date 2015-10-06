@@ -12,7 +12,7 @@ script:
   - sudo node demo/selenium-chrome-init.js
   - npm run test-selenium
   - npm run test-selenium-payload
-sudo: false
+sudo: required
 cache:
   directories:
     - node_modules
