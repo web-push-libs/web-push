@@ -99,19 +99,6 @@ wget(destDir, 'https://www.googleapis.com/download/storage/v1/b/chromium-browser
   }
 });
 
-try {
-  if (!fs.existsSync('/etc/chromium/policies/managed/test_policy.json')) {
-    fse.mkdirsSync('/etc/chromium/policies/managed');
-    fse.mkdirsSync('/etc/chromium/policies/recommended');
-    fse.writeJSONSync('/etc/chromium/policies/managed/test_policy.json', { 'DefaultNotificationsSetting': 1 });
-  }
-} catch (e) {
-  if (e.code === 'EACCES') {
-    console.error('You might need to run this script with sudo.');
-  }
-  throw e;
-}
-
 // Download ChromeDriver
 
 wget(destDir, 'http://chromedriver.storage.googleapis.com/LATEST_RELEASE').then(function() {
