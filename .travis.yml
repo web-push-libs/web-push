@@ -7,10 +7,7 @@ before_script:
   - "sh -e /etc/init.d/xvfb start"
   - npm install mocha
 script:
-  - npm test
-  - npm run selenium-init
-  - npm run test-selenium
-  - npm run test-selenium-payload
+  - mkdir /etc/opt/chrome/policies
 sudo: false
 cache:
   directories:
