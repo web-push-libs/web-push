@@ -6,9 +6,10 @@
   "scripts": {
     "test": "mocha --ui tdd",
     "selenium-init": "node demo/selenium-init.js",
-    "test-selenium": "node demo/selenium.js",
-    "test-selenium-payload": "node demo/selenium.js marco",
-    "test-selenium-chrome": "SELENIUM_BROWSER=chrome node demo/selenium.js"
+    "test-selenium": "node demo/selenium.js 0",
+    "test-selenium-payload": "node demo/selenium.js 0 marco",
+    "test-selenium-chrome": "SELENIUM_BROWSER=chrome node demo/selenium.js 0",
+    "test-selenium-chrome-restart": "SELENIUM_BROWSER=chrome node demo/selenium.js 2"
   },
   "repository": {
     "type": "git",
@@ -33,6 +34,7 @@
   "devDependencies": {
     "fs-extra": "^0.24.0",
     "request": "^2.64.0",
-    "selenium-webdriver": "^2.47.0"
+    "selenium-webdriver": "^2.47.0",
+    "temp": "^0.8.3"
   }
 }
