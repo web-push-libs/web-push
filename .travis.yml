@@ -13,7 +13,6 @@ script:
   - npm run test-selenium
   - npm run test-selenium-payload
   - SELENIUM_BROWSER=chrome npm run test-selenium
-  - SELENIUM_BROWSER=chrome npm run test-selenium-restart
 sudo: required
 cache:
   directories:
