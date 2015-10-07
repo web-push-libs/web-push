@@ -18,7 +18,7 @@ suite('sendNotification', function() {
   var userPublicKey = userCurve.generateKeys();
   var userPrivateKey = userCurve.getPrivateKey();
 
-  function startServer(message, listening, isGCM) {
+  function startServer(message, listening, TTL, isGCM) {
     var pem = fs.readFileSync('test/cert.pem');
 
     var options = {
@@ -35,6 +35,9 @@ suite('sendNotification', function() {
 
       req.on('end', function() {
         assert.equal(req.headers['content-length'], body.length, 'Content-Length header correct');
+        if (typeof TTL !== 'undefined') {
+          assert.equal(req.headers['ttl'], TTL, 'TTL header correct');
+        }
 
         if (typeof message !== 'undefined') {
           assert(body.length > 0);
@@ -83,7 +86,7 @@ suite('sendNotification', function() {
       }, function() {
         assert(false, 'sendNotification promise rejected')
       }).then(done);
-    });
+    }, 0);
   });
 
   test('send/receive buffer', function(done) {
@@ -93,7 +96,7 @@ suite('sendNotification', function() {
       }, function() {
         assert(false, 'sendNotification promise rejected')
       }).then(done);
-    });
+    }, 0);
   });
 
   test('send/receive empty message', function(done) {
@@ -103,7 +106,7 @@ suite('sendNotification', function() {
       }, function() {
         assert(false, 'sendNotification promise rejected')
       }).then(done);
-    });
+    }, 0);
   });
 
   test('send/receive without message', function(done) {
@@ -114,6 +117,16 @@ suite('sendNotification', function() {
         assert(false, 'sendNotification promise rejected');
       }).then(done);
     });
+  });
+
+  test('send/receive without message with TTL', function(done) {
+    startServer(undefined, function() {
+      webPush.sendNotification('https://127.0.0.1:50005', 5).then(function() {
+        assert(true, 'sendNotification promise resolved');
+      }, function() {
+        assert(false, 'sendNotification promise rejected');
+      }).then(done);
+    }, 5);
   });
 
   test('send/receive GCM', function(done) {
@@ -133,6 +146,6 @@ suite('sendNotification', function() {
       }, function() {
         assert(false, 'sendNotification promise rejected');
       }).then(done);
-    }, true);
+    }, undefined, true);
   });
 });
