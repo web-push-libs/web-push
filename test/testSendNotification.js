@@ -78,7 +78,7 @@ suite('sendNotification', function() {
 
   test('send/receive string', function(done) {
     startServer('hello', function() {
-      webPush.sendNotification('https://127.0.0.1:50005', urlBase64.encode(userPublicKey), 'hello').then(function() {
+      webPush.sendNotification('https://127.0.0.1:50005', 0, urlBase64.encode(userPublicKey), 'hello').then(function() {
         assert(true, 'sendNotification promise resolved');
       }, function() {
         assert(false, 'sendNotification promise rejected')
@@ -88,7 +88,7 @@ suite('sendNotification', function() {
 
   test('send/receive buffer', function(done) {
     startServer('hello', function() {
-      webPush.sendNotification('https://127.0.0.1:50005', urlBase64.encode(userPublicKey), new Buffer('hello')).then(function() {
+      webPush.sendNotification('https://127.0.0.1:50005', 0, urlBase64.encode(userPublicKey), new Buffer('hello')).then(function() {
         assert(true, 'sendNotification promise resolved');
       }, function() {
         assert(false, 'sendNotification promise rejected')
@@ -98,7 +98,7 @@ suite('sendNotification', function() {
 
   test('send/receive empty message', function(done) {
     startServer('', function() {
-      webPush.sendNotification('https://127.0.0.1:50005', urlBase64.encode(userPublicKey), '').then(function() {
+      webPush.sendNotification('https://127.0.0.1:50005', 0, urlBase64.encode(userPublicKey), '').then(function() {
         assert(true, 'sendNotification promise resolved');
       }, function() {
         assert(false, 'sendNotification promise rejected')

@@ -55,7 +55,7 @@ var server = https.createServer(options, function(req, res) {
             }
           });
         } else {
-          webPush.sendNotification(obj.endpoint, obj.key, server.pushPayload).then(function() {
+          webPush.sendNotification(obj.endpoint, server.pushTimeout, obj.key, server.pushPayload).then(function() {
             server.notificationSent = true;
             if (server.onNotificationSent) {
               server.onNotificationSent();

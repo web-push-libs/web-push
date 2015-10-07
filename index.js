@@ -34,7 +34,7 @@ function encrypt(userPublicKey, payload) {
   };
 }
 
-function sendNotification(endpoint, userPublicKey, payload) {
+function sendNotification(endpoint, TTL, userPublicKey, payload) {
   return new Promise(function(resolve, reject) {
     var urlParts = url.parse(endpoint);
     var options = {
@@ -75,6 +75,10 @@ function sendNotification(endpoint, userPublicKey, payload) {
       options.headers['Authorization'] = 'key=' + gcmAPIKey;
       options.headers['Content-Type'] = 'application/json';
       options.headers['Content-Length'] = gcmPayload.length;
+    }
+
+    if (typeof TTL !== 'undefined') {
+      options.headers['TTL'] = TTL;
     }
 
     var expectedStatusCode = gcmPayload ? 200 : 201;
