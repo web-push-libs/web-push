@@ -91,11 +91,22 @@ function checkEnd(driver) {
 if (server.pushTimeout) {
   var driver = startBrowser();
 
+  function restart() {
+    setTimeout(function() {
+      checkEnd(startBrowser());
+    }, server.pushTimeout * 2000);
+  }
+
   driver.close().then(function() {
     driver.quit().then(function() {
-      setTimeout(function() {
-        checkEnd(startBrowser());
-      }, server.pushTimeout * 2000);
+      if (server.notificationSent) {
+        restart();
+      } else {
+        server.onNotificationSent = function() {
+          server.onNotificationSent = null;
+          restart();
+        };
+      }
     });
   });
 } else {

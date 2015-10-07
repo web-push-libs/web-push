@@ -48,9 +48,19 @@ var server = https.createServer(options, function(req, res) {
 
       setTimeout(function() {
         if (!server.pushPayload) {
-          webPush.sendNotification(obj.endpoint);
+          webPush.sendNotification(obj.endpoint).then(function() {
+            server.notificationSent = true;
+            if (server.onNotificationSent) {
+              server.onNotificationSent();
+            }
+          });
         } else {
-          webPush.sendNotification(obj.endpoint, obj.key, server.pushPayload);
+          webPush.sendNotification(obj.endpoint, obj.key, server.pushPayload).then(function() {
+            server.notificationSent = true;
+            if (server.onNotificationSent) {
+              server.onNotificationSent();
+            }
+          });
         }
       }, server.pushTimeout * 1000);
     });
@@ -64,6 +74,8 @@ var server = https.createServer(options, function(req, res) {
     res.end('ok');
   }
 }).listen(50005);
+
+server.notificationSent = false;
 
 server.listening = false;
 server.on('listening', function() {
