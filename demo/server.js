@@ -41,6 +41,9 @@ var server = https.createServer(options, function(req, res) {
 
     req.on('end', function() {
       var obj = JSON.parse(body);
+
+      server.clientRegistered = true;
+
       if (!server.pushPayload) {
         webPush.sendNotification(obj.endpoint);
       } else {
@@ -57,6 +60,8 @@ var server = https.createServer(options, function(req, res) {
     res.end('ok');
   }
 }).listen(50005);
+
+server.clientRegistered = false;
 
 server.listening = false;
 server.on('listening', function() {
