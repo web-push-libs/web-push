@@ -8,8 +8,8 @@
     "selenium-init": "node demo/selenium-init.js",
     "test-selenium": "node demo/selenium.js 0",
     "test-selenium-payload": "node demo/selenium.js 0 marco",
-    "test-selenium-chrome": "SELENIUM_BROWSER=chrome node demo/selenium.js 0",
-    "test-selenium-chrome-restart": "SELENIUM_BROWSER=chrome node demo/selenium.js 2"
+    "test-selenium-restart": "node demo/selenium.js 2",
+    "test-selenium-restart-payload": "node demo/selenium.js 2 marco"
   },
   "repository": {
     "type": "git",
