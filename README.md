@@ -10,12 +10,15 @@ Notification with payloads are currently only supported in Firefox (see https://
 [![dependencies](https://david-dm.org/marco-c/web-push.svg)](https://david-dm.org/marco-c/web-push)
 [![devdependencies](https://david-dm.org/marco-c/web-push/dev-status.svg)](https://david-dm.org/marco-c/web-push#info=devDependencies)
 
-## sendNotification(endpoint, userPublicKey, payload)
+## sendNotification(endpoint, TTL, userPublicKey, payload)
 
 Send a Push notification to an endpoint. *userPublicKey* and *payload* can be undefined, if you want to send a notification without a message.
 - *endpoint* is the endpoint URL;
+- *TTL* is a value in seconds that describes how long a push message is retained by the push service;
 - *userPublicKey* is the public key of the browser;
 - *payload* is the message to attach to the notification.
+
+The function returns a Promise, resolved when the request to the push service is successful.
 
 ## setGCMAPIKey(apiKey)
 
