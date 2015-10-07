@@ -35,65 +35,70 @@ function encrypt(userPublicKey, payload) {
 }
 
 function sendNotification(endpoint, userPublicKey, payload) {
-  var urlParts = url.parse(endpoint);
-  var options = {
-    hostname: urlParts.hostname,
-    port: urlParts.port,
-    path: urlParts.pathname,
-    method: 'POST',
-    headers: {
-      'Content-Length': 0,
-    }
-  };
-
-  var encrypted;
-  if (typeof payload !== 'undefined') {
-    encrypted = encrypt(urlBase64.decode(userPublicKey), payload);
-    options.headers = {
-      'Content-Length': encrypted.cipherText.length,
-      'Content-Type': 'application/octet-stream',
-      'Encryption-Key': 'keyid=p256dh;dh=' + urlBase64.encode(encrypted.localPublicKey),
-      'Encryption': 'keyid=p256dh;salt=' + urlBase64.encode(encrypted.salt),
-      'Content-Encoding': 'aesgcm128',
+  return new Promise(function(resolve, reject) {
+    var urlParts = url.parse(endpoint);
+    var options = {
+      hostname: urlParts.hostname,
+      port: urlParts.port,
+      path: urlParts.pathname,
+      method: 'POST',
+      headers: {
+        'Content-Length': 0,
+      }
     };
-  }
 
-  var gcmPayload;
-  if (endpoint.indexOf('https://android.googleapis.com/gcm/send') === 0) {
-    if (payload) {
-      throw new Error("Payload not supported with GCM");
+    var encrypted;
+    if (typeof payload !== 'undefined') {
+      encrypted = encrypt(urlBase64.decode(userPublicKey), payload);
+      options.headers = {
+        'Content-Length': encrypted.cipherText.length,
+        'Content-Type': 'application/octet-stream',
+        'Encryption-Key': 'keyid=p256dh;dh=' + urlBase64.encode(encrypted.localPublicKey),
+        'Encryption': 'keyid=p256dh;salt=' + urlBase64.encode(encrypted.salt),
+        'Content-Encoding': 'aesgcm128',
+      };
     }
 
-    var endpointSections = endpoint.split('/');
-    var subscriptionId = endpointSections[endpointSections.length - 1];
-    gcmPayload = JSON.stringify({
-      registration_ids: [ subscriptionId ],
+    var gcmPayload;
+    if (endpoint.indexOf('https://android.googleapis.com/gcm/send') === 0) {
+      if (payload) {
+        throw new Error("Payload not supported with GCM");
+      }
+
+      var endpointSections = endpoint.split('/');
+      var subscriptionId = endpointSections[endpointSections.length - 1];
+      gcmPayload = JSON.stringify({
+        registration_ids: [ subscriptionId ],
+      });
+      options.path = options.path.substring(0, options.path.length - subscriptionId.length - 1);
+
+      options.headers['Authorization'] = 'key=' + gcmAPIKey;
+      options.headers['Content-Type'] = 'application/json';
+      options.headers['Content-Length'] = gcmPayload.length;
+    }
+
+    var expectedStatusCode = gcmPayload ? 200 : 201;
+    var pushRequest = https.request(options, function(pushResponse) {
+      if (pushResponse.statusCode !== expectedStatusCode) {
+        console.log("statusCode: ", pushResponse.statusCode);
+        console.log("headers: ", pushResponse.headers);
+        reject();
+      } else {
+        resolve();
+      }
     });
-    options.path = options.path.substring(0, options.path.length - subscriptionId.length - 1);
 
-    options.headers['Authorization'] = 'key=' + gcmAPIKey;
-    options.headers['Content-Type'] = 'application/json';
-    options.headers['Content-Length'] = gcmPayload.length;
-  }
-
-  var expectedStatusCode = gcmPayload ? 200 : 201;
-  var pushRequest = https.request(options, function(pushResponse) {
-    if (pushResponse.statusCode !== expectedStatusCode) {
-      console.log("statusCode: ", pushResponse.statusCode);
-      console.log("headers: ", pushResponse.headers);
+    if (typeof payload !== 'undefined') {
+      pushRequest.write(encrypted.cipherText);
     }
-  });
+    if (gcmPayload) {
+      pushRequest.write(gcmPayload);
+    }
+    pushRequest.end();
 
-  if (typeof payload !== 'undefined') {
-    pushRequest.write(encrypted.cipherText);
-  }
-  if (gcmPayload) {
-    pushRequest.write(gcmPayload);
-  }
-  pushRequest.end();
-
-  pushRequest.on('error', function(e) {
-    console.error(e);
+    pushRequest.on('error', function(e) {
+      console.error(e);
+    });
   });
 }
 
