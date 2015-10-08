@@ -12,6 +12,8 @@ script:
   - sudo $(which node) demo/selenium-chrome-init.js
   - npm run test-selenium
   - npm run test-selenium-payload
+  - npm run test-selenium-restart
+  - npm run test-selenium-restart-payload
   - SELENIUM_BROWSER=chrome npm run test-selenium
 sudo: required
 cache:
