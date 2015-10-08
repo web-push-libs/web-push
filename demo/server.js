@@ -42,26 +42,30 @@ var server = https.createServer(options, function(req, res) {
     req.on('end', function() {
       var obj = JSON.parse(body);
 
+      console.log('Push Application Server - Register: ' + obj.endpoint);
+
       if (server.onClientRegistered && server.onClientRegistered()) {
         return;
       }
 
       setTimeout(function() {
+        console.log('Push Application Server - Send notification to ' + obj.endpoint);
+
+        var promise;
         if (!server.pushPayload) {
-          webPush.sendNotification(obj.endpoint, 200).then(function() {
-            server.notificationSent = true;
-            if (server.onNotificationSent) {
-              server.onNotificationSent();
-            }
-          });
+          promise = webPush.sendNotification(obj.endpoint, 200);
         } else {
-          webPush.sendNotification(obj.endpoint, 200, obj.key, server.pushPayload).then(function() {
-            server.notificationSent = true;
-            if (server.onNotificationSent) {
-              server.onNotificationSent();
-            }
-          });
+          promise = webPush.sendNotification(obj.endpoint, 200, obj.key, server.pushPayload);
         }
+
+        promise.then(function() {
+          console.log('Push Application Server - Notification sent to ' + obj.endpoint);
+
+          server.notificationSent = true;
+          if (server.onNotificationSent) {
+            server.onNotificationSent();
+          }
+        });
       }, server.pushTimeout * 1000);
     });
 
