@@ -53,9 +53,9 @@ var server = https.createServer(options, function(req, res) {
 
         var promise;
         if (!server.pushPayload) {
-          promise = webPush.sendNotification(obj.endpoint, 200);
+          promise = webPush.sendNotification(obj.endpoint, server.pushTimeout ? 200 : undefined);
         } else {
-          promise = webPush.sendNotification(obj.endpoint, 200, obj.key, server.pushPayload);
+          promise = webPush.sendNotification(obj.endpoint, server.pushTimeout ? 200 : undefined, obj.key, server.pushPayload);
         }
 
         promise.then(function() {
