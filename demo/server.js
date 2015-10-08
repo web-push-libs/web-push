@@ -48,14 +48,14 @@ var server = https.createServer(options, function(req, res) {
 
       setTimeout(function() {
         if (!server.pushPayload) {
-          webPush.sendNotification(obj.endpoint).then(function() {
+          webPush.sendNotification(obj.endpoint, 200).then(function() {
             server.notificationSent = true;
             if (server.onNotificationSent) {
               server.onNotificationSent();
             }
           });
         } else {
-          webPush.sendNotification(obj.endpoint, server.pushTimeout, obj.key, server.pushPayload).then(function() {
+          webPush.sendNotification(obj.endpoint, 200, obj.key, server.pushPayload).then(function() {
             server.notificationSent = true;
             if (server.onNotificationSent) {
               server.onNotificationSent();
