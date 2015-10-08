@@ -30,28 +30,30 @@ var webdriver = require('selenium-webdriver'),
     until = require('selenium-webdriver').until;
 
 var firefox = require('selenium-webdriver/firefox');
-
-var profile = new firefox.Profile();
-profile.acceptUntrustedCerts();
-profile.setPreference('security.turn_off_all_security_so_that_viruses_can_take_over_this_computer', true);
-
-var firefoxBinary = new firefox.Binary(firefoxBinaryPath);
-
-var firefoxOptions = new firefox.Options().setProfile(profile).setBinary(firefoxBinary);
-
 var chrome = require('selenium-webdriver/chrome');
 
-var chromeOptions = new chrome.Options()
-  .setChromeBinaryPath(chromeBinaryPath)
-  .addArguments('--no-sandbox')
-  .addArguments('user-data-dir=' + temp.mkdir('marco'));
-
-var builder = new webdriver.Builder()
-  .forBrowser('firefox')
-  .setFirefoxOptions(firefoxOptions)
-  .setChromeOptions(chromeOptions);
+var profilePath = temp.mkdirSync('marco');
 
 function startBrowser() {
+  var profile = new firefox.Profile(profilePath);
+  profile.acceptUntrustedCerts();
+  profile.setPreference('security.turn_off_all_security_so_that_viruses_can_take_over_this_computer', true);
+  //profile.setPreference('dom.push.debug', true);
+  //profile.setPreference('browser.dom.window.dump.enabled', true);
+
+  var firefoxBinary = new firefox.Binary(firefoxBinaryPath);
+
+  var firefoxOptions = new firefox.Options().setProfile(profile).setBinary(firefoxBinary);
+
+  var chromeOptions = new chrome.Options()
+    .setChromeBinaryPath(chromeBinaryPath)
+    .addArguments('--no-sandbox')
+    .addArguments('user-data-dir=' + profilePath);
+
+  var builder = new webdriver.Builder()
+    .forBrowser('firefox')
+    .setFirefoxOptions(firefoxOptions)
+    .setChromeOptions(chromeOptions);
   var driver = builder.build();
 
   driver.wait(function() {
@@ -93,12 +95,15 @@ if (server.pushTimeout) {
 
   function restart() {
     setTimeout(function() {
+      console.log('Browser - Restart');
       checkEnd(startBrowser());
     }, server.pushTimeout * 2000);
   }
 
   driver.close().then(function() {
     driver.quit().then(function() {
+      console.log('Browser - Closed');
+
       if (server.notificationSent) {
         restart();
       } else {
