@@ -1,4 +1,5 @@
 var fs = require('fs');
+var path = require('path');
 var fse = require('fs-extra');
 var temp = require('temp').track();
 
@@ -19,8 +20,10 @@ var server = require('./server');
 server.pushTimeout = process.argv.length >= 3 ? Number(process.argv[2]) : 0;
 server.pushPayload = process.argv.length >= 4 ? process.argv[3] : 0;
 
+var pageLoaded = false;
 var clientRegistered = 0;
 server.onClientRegistered = function() {
+  pageLoaded = true;
   clientRegistered++;
   return clientRegistered > 1;
 }
@@ -76,7 +79,7 @@ function startBrowser() {
     window.location = 'https://127.0.0.1:50005';
   });
   driver.wait(function() {
-    return clientRegistered > 0;
+    return pageLoaded;
   });
 
   return driver;
@@ -94,15 +97,26 @@ if (server.pushTimeout) {
   var driver = startBrowser();
 
   function restart() {
-    setTimeout(function() {
-      console.log('Browser - Restart');
-      checkEnd(startBrowser());
-    }, server.pushTimeout * 2000);
+    console.log('Browser - Restart');
+    checkEnd(startBrowser());
   }
 
   driver.close().then(function() {
-    driver.quit().then(function() {
-      console.log('Browser - Closed');
+    console.log('Browser - Closed');
+
+    pageLoaded = false;
+
+    setTimeout(function() {
+      try {
+        // In Firefox, we need to copy the storage directory (because the PushDB is
+        // stored in an IndexedDB) and the prefs.js file, which contains a preference
+        // (dom.push.userAgentID) storing the User Agent ID.
+        // We need to wait a bit before copying these files because Firefox updates
+        // some of them when shutting down.
+        [ 'storage', 'prefs.js' ].forEach(function(file) {
+          fse.copySync(path.join(driver.profilePath_, file), path.join(profilePath, file));
+        });
+      } catch (e) {}
 
       if (server.notificationSent) {
         restart();
@@ -112,7 +126,7 @@ if (server.pushTimeout) {
           restart();
         };
       }
-    });
+    }, 1000);
   });
 } else {
   checkEnd(startBrowser());
