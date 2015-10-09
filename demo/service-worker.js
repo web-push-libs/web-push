@@ -6,14 +6,14 @@ self.addEventListener('push', function(event) {
 
   dump('Service Worker - Received: ' + pushMessage + '\n');
 
+  if (port) {
+    port.postMessage(pushMessage);
+  }
+
   event.waitUntil(self.registration.showNotification('Web Push Demo', {
     body: 'Notification!',
     tag: 'push',
   }));
-
-  if (port) {
-    port.postMessage(pushMessage);
-  }
 });
 
 self.onmessage = function(e) {
