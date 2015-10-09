@@ -2,7 +2,13 @@ var port;
 var pushMessage;
 
 self.addEventListener('push', function(event) {
+  dump('push0\n');
+
+  dump('event.data: ' + event.data + '\n');
+
   pushMessage = event.data ? event.data.text() : 'no payload';
+
+  dump('push1\n');
 
   dump('Service Worker - Received: ' + pushMessage + '\n');
 
