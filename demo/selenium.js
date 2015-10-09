@@ -41,8 +41,8 @@ function startBrowser() {
   var profile = new firefox.Profile(profilePath);
   profile.acceptUntrustedCerts();
   profile.setPreference('security.turn_off_all_security_so_that_viruses_can_take_over_this_computer', true);
-  //profile.setPreference('dom.push.debug', true);
-  //profile.setPreference('browser.dom.window.dump.enabled', true);
+  profile.setPreference('dom.push.debug', true);
+  profile.setPreference('browser.dom.window.dump.enabled', true);
 
   var firefoxBinary = new firefox.Binary(firefoxBinaryPath);
 
@@ -114,9 +114,13 @@ if (server.pushTimeout) {
         // We need to wait a bit before copying these files because Firefox updates
         // some of them when shutting down.
         [ 'storage', 'prefs.js' ].forEach(function(file) {
+          console.log('Copying: ' + path.join(driver.profilePath_, file));
+          console.log('To: ' + path.join(profilePath, file));
           fse.copySync(path.join(driver.profilePath_, file), path.join(profilePath, file));
         });
-      } catch (e) {}
+      } catch (e) {
+        console.log('Error while copying: ' + e);
+      }
 
       if (server.notificationSent) {
         restart();
@@ -126,7 +130,7 @@ if (server.pushTimeout) {
           restart();
         };
       }
-    }, 1000);
+    }, 15000);
   });
 } else {
   checkEnd(startBrowser());

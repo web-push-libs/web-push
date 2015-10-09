@@ -66,7 +66,7 @@ var server = https.createServer(options, function(req, res) {
             server.onNotificationSent();
           }
         });
-      }, server.pushTimeout * 1000);
+      }, server.pushTimeout * 5000);
     });
 
     res.writeHead(200, {
