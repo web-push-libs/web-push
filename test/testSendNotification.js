@@ -18,7 +18,7 @@ suite('sendNotification', function() {
   var userPublicKey = userCurve.generateKeys();
   var userPrivateKey = userCurve.getPrivateKey();
 
-  function startServer(message, listening, TTL, isGCM) {
+  function startServer(message, listening, TTL, statusCode, isGCM) {
     var pem = fs.readFileSync('test/cert.pem');
 
     var options = {
@@ -68,7 +68,7 @@ suite('sendNotification', function() {
           assert.equal(req.headers['content-length'], 43, 'Content-Length header correct');
         }
 
-        res.writeHead(isGCM ? 200 : 201);
+        res.writeHead(statusCode ? statusCode : 201);
 
         res.end('ok');
 
@@ -129,12 +129,22 @@ suite('sendNotification', function() {
     }, 5);
   });
 
-  test('sendNotification rejects promise when it can\'t connect to the server', function(done) {
+  test('promise rejected when it can\'t connect to the server', function(done) {
     webPush.sendNotification('https://127.0.0.1:50005').then(function() {
       assert(false, 'sendNotification promise resolved');
     }, function() {
       assert(true, 'sendNotification promise rejected');
     }).then(done);
+  });
+
+  test('promise rejected when the response status code is unexpected', function(done) {
+    startServer(undefined, function() {
+      webPush.sendNotification('https://127.0.0.1:50005').then(function() {
+        assert(false, 'sendNotification promise resolved');
+      }, function() {
+        assert(true, 'sendNotification promise rejected');
+      }).then(done);
+    }, undefined, 404);
   });
 
   test('send/receive GCM', function(done) {
@@ -154,6 +164,6 @@ suite('sendNotification', function() {
       }, function() {
         assert(false, 'sendNotification promise rejected');
       }).then(done);
-    }, undefined, true);
+    }, undefined, 200, true);
   });
 });
