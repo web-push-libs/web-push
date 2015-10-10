@@ -129,6 +129,14 @@ suite('sendNotification', function() {
     }, 5);
   });
 
+  test('sendNotification rejects promise when it can\'t connect to the server', function(done) {
+    webPush.sendNotification('https://127.0.0.1:50005').then(function() {
+      assert(false, 'sendNotification promise resolved');
+    }, function() {
+      assert(true, 'sendNotification promise rejected');
+    }).then(done);
+  });
+
   test('send/receive GCM', function(done) {
     var httpsrequest = https.request;
     https.request = function(options, listener) {
