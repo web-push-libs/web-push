@@ -7,7 +7,7 @@ before_script:
   - "sh -e /etc/init.d/xvfb start"
   - npm install mocha
 script:
-  - npm run selenium-init
+  - node test/selenium-init.js
   - sudo $(which node) demo/selenium-chrome-init.js
   - npm test
 sudo: required

@@ -4,8 +4,7 @@
   "description": "Web Push library for Node.js",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --ui tdd",
-    "selenium-init": "node demo/selenium-init.js"
+    "test": "mocha --ui tdd test/tests/"
   },
   "repository": {
     "type": "git",

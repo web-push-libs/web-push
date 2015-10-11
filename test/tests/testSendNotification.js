@@ -2,7 +2,7 @@ var assert    = require('assert');
 var crypto    = require('crypto');
 var https     = require('https');
 var fs        = require('fs');
-var webPush   = require('../index');
+var webPush   = require('../../index');
 var ece       = require('encrypted-content-encoding');
 var urlBase64 = require('urlsafe-base64');
 
@@ -19,7 +19,7 @@ suite('sendNotification', function() {
   var userPrivateKey = userCurve.getPrivateKey();
 
   function startServer(message, listening, TTL, statusCode, isGCM) {
-    var pem = fs.readFileSync('test/cert.pem');
+    var pem = fs.readFileSync('demo/cert.pem');
 
     var options = {
       key: pem,

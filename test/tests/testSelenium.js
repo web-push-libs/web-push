@@ -19,7 +19,7 @@ process.env.PATH = 'test_tools/:' + process.env.PATH;
 var pageLoaded = false;
 var clientRegistered = 0;
 
-var createServer = require('../demo/server');
+var createServer = require('../../demo/server');
 
 var server;
 function startServer(pushTimeout, pushPayload) {

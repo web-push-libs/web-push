@@ -5,7 +5,7 @@ var path    = require('path');
 
 webPush.setGCMAPIKey('AIzaSyAwmdX6KKd4hPfIcGU2SOfj9vuRDW6u-wo');
 
-var pem = fs.readFileSync('test/cert.pem');
+var pem = fs.readFileSync('demo/cert.pem');
 
 var options = {
   key: pem,
