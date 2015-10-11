@@ -22,11 +22,8 @@ var clientRegistered = 0;
 var createServer = require('../../demo/server');
 
 var server;
-function startServer(pushTimeout, pushPayload) {
-  server = createServer();
-
-  server.pushTimeout = pushTimeout ? pushTimeout : 0;
-  server.pushPayload = pushPayload;
+function startServer(pushPayload, pushTimeout) {
+  server = createServer(pushPayload, pushTimeout ? pushTimeout : 0);
 
   pageLoaded = false;
   clientRegistered = 0;
@@ -95,27 +92,31 @@ function startBrowser() {
   return driver;
 }
 
-function checkEnd(driver, done) {
-  driver.wait(until.titleIs(server.pushPayload ? server.pushPayload : 'no payload'), 60000);
+function checkEnd(driver, done, pushPayload) {
+  driver.wait(until.titleIs(pushPayload ? pushPayload : 'no payload'), 60000);
   driver.quit().then(function() {
     server.close(done);
   });
 }
 
-function noRestartTest(browser, done) {
+function noRestartTest(browser, done, pushPayload, pushTimeout) {
   process.env.SELENIUM_BROWSER = browser;
 
-  checkEnd(startBrowser(), done);
+  startServer(pushPayload, pushTimeout);
+
+  checkEnd(startBrowser(), done, pushPayload);
 }
 
-function restartTest(browser, done) {
+function restartTest(browser, done, pushPayload, pushTimeout) {
   process.env.SELENIUM_BROWSER = browser;
+
+  startServer(pushPayload, pushTimeout);
 
   var driver = startBrowser();
 
   function restart() {
     console.log('Browser - Restart');
-    checkEnd(startBrowser());
+    checkEnd(startBrowser(), done, pushPayload);
   }
 
   driver.close().then(function() {
@@ -151,42 +152,34 @@ suite('selenium', function() {
   this.timeout(0);
 
   test('send/receive notification without payload with Firefox', function(done) {
-    startServer();
     noRestartTest('firefox', done);
   });
 
   test('send/receive notification without payload with Chrome', function(done) {
-    startServer();
     noRestartTest('chrome', done);
   });
 
   test('send/receive notification with payload with Firefox', function(done) {
-    startServer(0, 'marco');
-    noRestartTest('firefox', done);
+    noRestartTest('firefox', done, 'marco');
   });
 
   /*test('send/receive notification with payload with Chrome', function(done) {
-    startServer(0, 'marco');
-    noRestartTest('chrome', done);
+    noRestartTest('chrome', done, 'marco');
   });*/
 
   /*test('send/receive notification without payload with TTL with Firefox (closing and restarting the browser)', function(done) {
-    startServer(2);
-    restartTest('firefox', done);
+    restartTest('firefox', done, undefined, 2);
   });*/
 
   test('send/receive notification without payload with TTL with Chrome (closing and restarting the browser)', function(done) {
-    startServer(2);
-    restartTest('chrome', done);
+    restartTest('chrome', done, undefined, 2);
   });
 
   /*test('send/receive notification with payload with TTL with Firefox (closing and restarting the browser)', function(done) {
-    startServer(2, 'marco');
-    restartTest('firefox', done);
+    restartTest('firefox', done, 'marco', 2);
   });*/
 
   /*test('send/receive notification with payload with TTL with Chrome (closing and restarting the browser)', function(done) {
-    startServer(2, 'marco');
-    restartTest('chrome', done);
+    restartTest('chrome', done, 'marco', 2);
   });*/
 });

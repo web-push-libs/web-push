@@ -12,7 +12,7 @@ var options = {
   cert: pem,
 };
 
-function createServer() {
+function createServer(pushPayload, pushTimeout) {
   var server = https.createServer(options, function(req, res) {
     if (req.method === 'GET') {
       if (req.url === '/') {
@@ -53,10 +53,10 @@ function createServer() {
           console.log('Push Application Server - Send notification to ' + obj.endpoint);
 
           var promise;
-          if (!server.pushPayload) {
-            promise = webPush.sendNotification(obj.endpoint, server.pushTimeout ? 200 : undefined);
+          if (!pushPayload) {
+            promise = webPush.sendNotification(obj.endpoint, pushTimeout ? 200 : undefined);
           } else {
-            promise = webPush.sendNotification(obj.endpoint, server.pushTimeout ? 200 : undefined, obj.key, server.pushPayload);
+            promise = webPush.sendNotification(obj.endpoint, pushTimeout ? 200 : undefined, obj.key, pushPayload);
           }
 
           promise.then(function() {
@@ -67,7 +67,7 @@ function createServer() {
               server.onNotificationSent();
             }
           });
-        }, server.pushTimeout * 1000);
+        }, pushTimeout * 1000);
       });
 
       res.writeHead(200, {
