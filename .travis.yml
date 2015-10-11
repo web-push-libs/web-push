@@ -8,7 +8,7 @@ before_script:
   - npm install mocha
 script:
   - node test/selenium-init.js
-  - sudo $(which node) demo/selenium-chrome-init.js
+  - sudo $(which node) test/selenium-chrome-init.js
   - npm test
 sudo: required
 cache:
