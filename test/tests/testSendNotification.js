@@ -129,6 +129,16 @@ suite('sendNotification', function() {
     }, 5);
   });
 
+  test('send/receive string with TTL', function(done) {
+    startServer('hello', function() {
+      webPush.sendNotification('https://127.0.0.1:50005', 5, urlBase64.encode(userPublicKey), 'hello').then(function() {
+        assert(true, 'sendNotification promise resolved');
+      }, function() {
+        assert(false, 'sendNotification promise rejected');
+      }).then(done);
+    }, 5);
+  });
+
   test('promise rejected when it can\'t connect to the server', function(done) {
     webPush.sendNotification('https://127.0.0.1:50005').then(function() {
       assert(false, 'sendNotification promise resolved');
