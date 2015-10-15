@@ -94,7 +94,9 @@ function startBrowser() {
 }
 
 function checkEnd(driver, done, pushPayload) {
-  driver.wait(until.titleIs(pushPayload ? pushPayload : 'no payload'), 60000).then(done);
+  driver.wait(until.titleIs(pushPayload ? pushPayload : 'no payload'), 60000).then(function() {
+    done();
+  });
 }
 
 function noRestartTest(browser, done, pushPayload, pushTimeout) {
