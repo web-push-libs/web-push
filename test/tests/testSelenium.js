@@ -34,7 +34,6 @@ function startServer(pushPayload, pushTimeout) {
   }
 }
 
-
 var webdriver = require('selenium-webdriver'),
     By = require('selenium-webdriver').By,
     until = require('selenium-webdriver').until;
@@ -43,6 +42,8 @@ var firefox = require('selenium-webdriver/firefox');
 var chrome = require('selenium-webdriver/chrome');
 
 var profilePath = temp.mkdirSync('marco');
+
+var driver;
 
 function startBrowser() {
   var profile = new firefox.Profile(profilePath);
@@ -93,10 +94,7 @@ function startBrowser() {
 }
 
 function checkEnd(driver, done, pushPayload) {
-  driver.wait(until.titleIs(pushPayload ? pushPayload : 'no payload'), 60000);
-  driver.quit().then(function() {
-    server.close(done);
-  });
+  driver.wait(until.titleIs(pushPayload ? pushPayload : 'no payload'), 60000).then(done);
 }
 
 function noRestartTest(browser, done, pushPayload, pushTimeout) {
@@ -104,7 +102,9 @@ function noRestartTest(browser, done, pushPayload, pushTimeout) {
 
   startServer(pushPayload, pushTimeout);
 
-  checkEnd(startBrowser(), done, pushPayload);
+  driver = startBrowser();
+
+  checkEnd(driver, done, pushPayload);
 }
 
 function restartTest(browser, done, pushPayload, pushTimeout) {
@@ -112,11 +112,12 @@ function restartTest(browser, done, pushPayload, pushTimeout) {
 
   startServer(pushPayload, pushTimeout);
 
-  var driver = startBrowser();
+  driver = startBrowser();
 
   function restart() {
     console.log('Browser - Restart');
-    checkEnd(startBrowser(), done, pushPayload);
+    driver = startBrowser();
+    checkEnd(driver, done, pushPayload);
   }
 
   driver.close().then(function() {
@@ -154,6 +155,12 @@ function restartTest(browser, done, pushPayload, pushTimeout) {
 
 suite('selenium', function() {
   this.timeout(0);
+
+  teardown(function(done) {
+    driver.quit().then(function() {
+      server.close(done);
+    });
+  });
 
   test('send/receive notification without payload with Firefox', function(done) {
     noRestartTest('firefox', done);
