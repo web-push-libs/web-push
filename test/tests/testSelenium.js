@@ -148,7 +148,7 @@ function restartTest(browser, done, pushPayload, pushTimeout) {
           restart();
         };
       }
-    }, 15000);
+    }, 1000);
   });
 }
 
@@ -171,17 +171,17 @@ suite('selenium', function() {
     noRestartTest('chrome', done, 'marco');
   });*/
 
-  /*test('send/receive notification without payload with TTL with Firefox (closing and restarting the browser)', function(done) {
+  test('send/receive notification without payload with TTL with Firefox (closing and restarting the browser)', function(done) {
     restartTest('firefox', done, undefined, 2);
-  });*/
+  });
 
   test('send/receive notification without payload with TTL with Chrome (closing and restarting the browser)', function(done) {
     restartTest('chrome', done, undefined, 2);
   });
 
-  /*test('send/receive notification with payload with TTL with Firefox (closing and restarting the browser)', function(done) {
+  test('send/receive notification with payload with TTL with Firefox (closing and restarting the browser)', function(done) {
     restartTest('firefox', done, 'marco', 2);
-  });*/
+  });
 
   /*test('send/receive notification with payload with TTL with Chrome (closing and restarting the browser)', function(done) {
     restartTest('chrome', done, 'marco', 2);
