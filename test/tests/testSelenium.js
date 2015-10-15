@@ -1,3 +1,4 @@
+var assert = require('assert');
 var fs = require('fs');
 var path = require('path');
 var fse = require('fs-extra');
@@ -15,18 +16,24 @@ if (!fs.existsSync(chromeBinaryPath)) {
 
 process.env.PATH = 'test_tools/:' + process.env.PATH;
 
-var server = require('./server');
-
-server.pushTimeout = process.argv.length >= 3 ? Number(process.argv[2]) : 0;
-server.pushPayload = process.argv.length >= 4 ? process.argv[3] : 0;
-
 var pageLoaded = false;
 var clientRegistered = 0;
-server.onClientRegistered = function() {
-  pageLoaded = true;
-  clientRegistered++;
-  return clientRegistered > 1;
+
+var createServer = require('../../demo/server');
+
+var server;
+function startServer(pushPayload, pushTimeout) {
+  server = createServer(pushPayload, pushTimeout ? pushTimeout : 0);
+
+  pageLoaded = false;
+  clientRegistered = 0;
+  server.onClientRegistered = function() {
+    pageLoaded = true;
+    clientRegistered++;
+    return clientRegistered > 1;
+  }
 }
+
 
 var webdriver = require('selenium-webdriver'),
     By = require('selenium-webdriver').By,
@@ -85,20 +92,31 @@ function startBrowser() {
   return driver;
 }
 
-function checkEnd(driver) {
-  driver.wait(until.titleIs(server.pushPayload ? server.pushPayload : 'no payload'), 60000);
+function checkEnd(driver, done, pushPayload) {
+  driver.wait(until.titleIs(pushPayload ? pushPayload : 'no payload'), 60000);
   driver.quit().then(function() {
-    console.log('Test completed.');
-    server.close();
+    server.close(done);
   });
 }
 
-if (server.pushTimeout) {
+function noRestartTest(browser, done, pushPayload, pushTimeout) {
+  process.env.SELENIUM_BROWSER = browser;
+
+  startServer(pushPayload, pushTimeout);
+
+  checkEnd(startBrowser(), done, pushPayload);
+}
+
+function restartTest(browser, done, pushPayload, pushTimeout) {
+  process.env.SELENIUM_BROWSER = browser;
+
+  startServer(pushPayload, pushTimeout);
+
   var driver = startBrowser();
 
   function restart() {
     console.log('Browser - Restart');
-    checkEnd(startBrowser());
+    checkEnd(startBrowser(), done, pushPayload);
   }
 
   driver.close().then(function() {
@@ -132,6 +150,40 @@ if (server.pushTimeout) {
       }
     }, 15000);
   });
-} else {
-  checkEnd(startBrowser());
 }
+
+suite('selenium', function() {
+  this.timeout(0);
+
+  test('send/receive notification without payload with Firefox', function(done) {
+    noRestartTest('firefox', done);
+  });
+
+  test('send/receive notification without payload with Chrome', function(done) {
+    noRestartTest('chrome', done);
+  });
+
+  test('send/receive notification with payload with Firefox', function(done) {
+    noRestartTest('firefox', done, 'marco');
+  });
+
+  /*test('send/receive notification with payload with Chrome', function(done) {
+    noRestartTest('chrome', done, 'marco');
+  });*/
+
+  /*test('send/receive notification without payload with TTL with Firefox (closing and restarting the browser)', function(done) {
+    restartTest('firefox', done, undefined, 2);
+  });*/
+
+  test('send/receive notification without payload with TTL with Chrome (closing and restarting the browser)', function(done) {
+    restartTest('chrome', done, undefined, 2);
+  });
+
+  /*test('send/receive notification with payload with TTL with Firefox (closing and restarting the browser)', function(done) {
+    restartTest('firefox', done, 'marco', 2);
+  });*/
+
+  /*test('send/receive notification with payload with TTL with Chrome (closing and restarting the browser)', function(done) {
+    restartTest('chrome', done, 'marco', 2);
+  });*/
+});

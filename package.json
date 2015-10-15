@@ -4,12 +4,7 @@
   "description": "Web Push library for Node.js",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --ui tdd",
-    "selenium-init": "node demo/selenium-init.js",
-    "test-selenium": "node demo/selenium.js 0",
-    "test-selenium-payload": "node demo/selenium.js 0 marco",
-    "test-selenium-restart": "node demo/selenium.js 2",
-    "test-selenium-restart-payload": "node demo/selenium.js 2 marco"
+    "test": "mocha --ui tdd test/tests/"
   },
   "repository": {
     "type": "git",

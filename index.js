@@ -102,6 +102,7 @@ function sendNotification(endpoint, TTL, userPublicKey, payload) {
 
     pushRequest.on('error', function(e) {
       console.error(e);
+      reject(e);
     });
   });
 }

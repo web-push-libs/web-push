@@ -2,7 +2,7 @@ var assert    = require('assert');
 var crypto    = require('crypto');
 var https     = require('https');
 var fs        = require('fs');
-var webPush   = require('../index');
+var webPush   = require('../../index');
 var ece       = require('encrypted-content-encoding');
 var urlBase64 = require('urlsafe-base64');
 
@@ -18,8 +18,8 @@ suite('sendNotification', function() {
   var userPublicKey = userCurve.generateKeys();
   var userPrivateKey = userCurve.getPrivateKey();
 
-  function startServer(message, listening, TTL, isGCM) {
-    var pem = fs.readFileSync('test/cert.pem');
+  function startServer(message, listening, TTL, statusCode, isGCM) {
+    var pem = fs.readFileSync('demo/cert.pem');
 
     var options = {
       key: pem,
@@ -68,7 +68,7 @@ suite('sendNotification', function() {
           assert.equal(req.headers['content-length'], 43, 'Content-Length header correct');
         }
 
-        res.writeHead(isGCM ? 200 : 201);
+        res.writeHead(statusCode ? statusCode : 201);
 
         res.end('ok');
 
@@ -129,6 +129,34 @@ suite('sendNotification', function() {
     }, 5);
   });
 
+  test('send/receive string with TTL', function(done) {
+    startServer('hello', function() {
+      webPush.sendNotification('https://127.0.0.1:50005', 5, urlBase64.encode(userPublicKey), 'hello').then(function() {
+        assert(true, 'sendNotification promise resolved');
+      }, function() {
+        assert(false, 'sendNotification promise rejected');
+      }).then(done);
+    }, 5);
+  });
+
+  test('promise rejected when it can\'t connect to the server', function(done) {
+    webPush.sendNotification('https://127.0.0.1:50005').then(function() {
+      assert(false, 'sendNotification promise resolved');
+    }, function() {
+      assert(true, 'sendNotification promise rejected');
+    }).then(done);
+  });
+
+  test('promise rejected when the response status code is unexpected', function(done) {
+    startServer(undefined, function() {
+      webPush.sendNotification('https://127.0.0.1:50005').then(function() {
+        assert(false, 'sendNotification promise resolved');
+      }, function() {
+        assert(true, 'sendNotification promise rejected');
+      }).then(done);
+    }, undefined, 404);
+  });
+
   test('send/receive GCM', function(done) {
     var httpsrequest = https.request;
     https.request = function(options, listener) {
@@ -146,6 +174,6 @@ suite('sendNotification', function() {
       }, function() {
         assert(false, 'sendNotification promise rejected');
       }).then(done);
-    }, undefined, true);
+    }, undefined, 200, true);
   });
 });
