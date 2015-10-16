@@ -3,7 +3,7 @@ var crypto    = require('crypto');
 var https     = require('https');
 var fs        = require('fs');
 var webPush   = require('../../index');
-var ece       = require('encrypted-content-encoding');
+var ece       = require('http_ece');
 var urlBase64 = require('urlsafe-base64');
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';

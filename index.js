@@ -1,6 +1,6 @@
 const urlBase64 = require('urlsafe-base64');
 const crypto    = require('crypto');
-const ece       = require('encrypted-content-encoding');
+const ece       = require('http_ece');
 const url       = require('url');
 const https     = require('https');
 
