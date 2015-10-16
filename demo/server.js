@@ -5,9 +5,9 @@ var path    = require('path');
 
 if (!process.env.GCM_API_KEY) {
   console.error('If you want Chrome to work, you need to set the GCM_API_KEY environment variable to your GCM API key.');
+} else {
+  webPush.setGCMAPIKey(process.env.GCM_API_KEY);
 }
-
-webPush.setGCMAPIKey(process.env.GCM_API_KEY);
 
 var pem = fs.readFileSync('demo/cert.pem');
 
