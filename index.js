@@ -65,6 +65,10 @@ function sendNotification(endpoint, TTL, userPublicKey, payload) {
         throw new Error('Payload not supported with GCM');
       }
 
+      if (!gcmAPIKey) {
+        console.warn('Attempt to send push notification to GCM endpoint, but no GCM key is defined');
+      }
+
       var endpointSections = endpoint.split('/');
       var subscriptionId = endpointSections[endpointSections.length - 1];
       gcmPayload = JSON.stringify({
