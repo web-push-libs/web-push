@@ -20,10 +20,10 @@ function encrypt(userPublicKey, payload) {
 
   var salt = crypto.randomBytes(16);
 
-  ece.saveKey("webpushKey", sharedSecret);
+  ece.saveKey('webpushKey', sharedSecret);
 
   var cipherText = ece.encrypt(payload, {
-    keyid: "webpushKey",
+    keyid: 'webpushKey',
     salt: urlBase64.encode(salt),
   });
 
@@ -62,7 +62,7 @@ function sendNotification(endpoint, TTL, userPublicKey, payload) {
     var gcmPayload;
     if (endpoint.indexOf('https://android.googleapis.com/gcm/send') === 0) {
       if (payload) {
-        throw new Error("Payload not supported with GCM");
+        throw new Error('Payload not supported with GCM');
       }
 
       var endpointSections = endpoint.split('/');
@@ -84,8 +84,8 @@ function sendNotification(endpoint, TTL, userPublicKey, payload) {
     var expectedStatusCode = gcmPayload ? 200 : 201;
     var pushRequest = https.request(options, function(pushResponse) {
       if (pushResponse.statusCode !== expectedStatusCode) {
-        console.log("statusCode: ", pushResponse.statusCode);
-        console.log("headers: ", pushResponse.headers);
+        console.log('statusCode: ', pushResponse.statusCode);
+        console.log('headers: ', pushResponse.headers);
         reject();
       } else {
         resolve();
