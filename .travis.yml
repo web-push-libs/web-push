@@ -3,7 +3,8 @@ os:
   - osx
 env:
   global:
-    - DISPLAY=:99.0
+    - DISPLAY=$(if [[ $TRAVIS_OS_NAME == "linux" ]]; then echo ':99.0'; fi)
+    - MOZ_XVFB=$(if [[ $TRAVIS_OS_NAME == "linux" ]]; then echo 1; fi)
     - NODE_VERSION="0.12"
 before_install:
   - git clone https://github.com/creationix/nvm.git /tmp/.nvm
@@ -14,7 +15,7 @@ install:
   - npm install
   - npm install mocha
 before_script:
-  - "sh -e /etc/init.d/xvfb start"
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then "sh -e /etc/init.d/xvfb start"; fi
 script:
   - node test/selenium-init.js
   - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo $(which node) test/selenium-chrome-init.js; fi
