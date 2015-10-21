@@ -8,7 +8,7 @@ var firefoxBinaryPath = process.env.FIREFOX;
 if (!firefoxBinaryPath) {
   if (process.platform === 'linux') {
     firefoxBinaryPath = 'test_tools/firefox/firefox-bin';
-  } else {
+  } else if (process.platform === 'darwin') {
     firefoxBinaryPath = 'test_tools/FirefoxNightly.app/Contents/MacOS/firefox-bin';
   }
 }
@@ -16,7 +16,14 @@ if (!fs.existsSync(firefoxBinaryPath)) {
   throw new Error('Firefox binary doesn\'t exist at ' + firefoxBinaryPath + '. Use your installed Firefox binary by setting the FIREFOX environment');
 }
 
-var chromeBinaryPath = process.env.CHROME || 'test_tools/chrome-linux/chrome';
+var chromeBinaryPath = process.env.CHROME;
+if (!chromeBinaryPath) {
+  if (process.platform === 'linux') {
+    chromeBinaryPath = 'test_tools/chrome-linux/chrome';
+  } else if (process.platform === 'darwin') {
+    chromeBinaryPath = 'test_tools/chrome-mac/Chromium.app/Contents/MacOS/Chromium';
+  }
+}
 if (!fs.existsSync(chromeBinaryPath)) {
   throw new Error('Chrome binary doesn\'t exist at ' + chromeBinaryPath + '. Use your installed Chrome binary by setting the CHROME environment');
 }

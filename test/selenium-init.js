@@ -111,20 +111,34 @@ request(firefoxBaseURL + 'test_packages.json', function(error, response, body) {
 
 // Download Chrome Canary
 
+var chromePlatform, chromeZipPlatform;
+if (process.platform === 'linux') {
+  chromeZipPlatform = 'linux';
+  chromePlatform = 'Linux_';
+  if (process.arch === 'x86') {
+    throw new Error('TODO');
+  } else if (process.arch === 'x64') {
+    chromePlatform += 'x64';
+  }
+} else if (process.platform === 'darwin') {
+  chromeZipPlatform = 'mac';
+  chromePlatform = 'Mac';
+}
+
 var chromeVersionFile = path.join(destDir, 'chromeVersion');
 var chromeVersion = -Infinity;
 if (fs.existsSync(chromeVersionFile)) {
   chromeVersion = Number(fs.readFileSync(chromeVersionFile, 'utf8'));
 }
 
-wget(destDir, 'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Linux_x64%2FLAST_CHANGE?alt=media').then(function() {
-  var newVersion = Number(fs.readFileSync(path.join(destDir, 'Linux_x64%2FLAST_CHANGE?alt=media'), 'utf8'));
-  fs.renameSync(path.join(destDir, 'Linux_x64%2FLAST_CHANGE?alt=media'), chromeVersionFile);
+wget(destDir, 'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/' + chromePlatform + '%2FLAST_CHANGE?alt=media').then(function() {
+  var newVersion = Number(fs.readFileSync(path.join(destDir, chromePlatform + '%2FLAST_CHANGE?alt=media'), 'utf8'));
+  fs.renameSync(path.join(destDir, chromePlatform + '%2FLAST_CHANGE?alt=media'), chromeVersionFile);
   if (newVersion > chromeVersion) {
-    fse.removeSync('test_tools/chrome-linux');
-    wget(destDir, 'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Linux_x64%2F' + newVersion + '%2Fchrome-linux.zip?alt=media').then(function() {
-      unzip(destDir, 'test_tools/Linux_x64%2F' + newVersion + '%2Fchrome-linux.zip?alt=media').then(function() {
-        fs.unlink('test_tools/Linux_x64%2F' + newVersion + '%2Fchrome-linux.zip?alt=media');
+    fse.removeSync('test_tools/chrome-' + chromeZipPlatform);
+    wget(destDir, 'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/' + chromePlatform + '%2F' + newVersion + '%2Fchrome-' + chromeZipPlatform + '.zip?alt=media').then(function() {
+      unzip(destDir, 'test_tools/' + chromePlatform + '%2F' + newVersion + '%2Fchrome-' + chromeZipPlatform + '.zip?alt=media').then(function() {
+        fs.unlink('test_tools/' + chromePlatform + '%2F' + newVersion + '%2Fchrome-' + chromeZipPlatform + '.zip?alt=media');
       });
     });
   }
