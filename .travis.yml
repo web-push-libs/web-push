@@ -1,4 +1,7 @@
 language: node_js
+os:
+  - linux
+  - osx
 node_js:
   - "0.12"
 env:
@@ -8,7 +11,7 @@ before_script:
   - npm install mocha
 script:
   - node test/selenium-init.js
-  - sudo $(which node) test/selenium-chrome-init.js
+  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo $(which node) test/selenium-chrome-init.js; fi
   - npm test
 sudo: required
 cache:
