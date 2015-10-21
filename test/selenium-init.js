@@ -132,9 +132,21 @@ wget(destDir, 'https://www.googleapis.com/download/storage/v1/b/chromium-browser
 
 // Download ChromeDriver
 
+var chromeDriverPlatform;
+if (process.platform === 'linux') {
+  chromeDriverPlatform = 'linux';
+  if (process.arch === 'x86') {
+    chromeDriverPlatform += '32';
+  } else if (process.arch === 'x64') {
+    chromeDriverPlatform += '64';
+  }
+} else if (process.platform === 'darwin') {
+  chromeDriverPlatform = 'mac32';
+}
+
 wget(destDir, 'http://chromedriver.storage.googleapis.com/LATEST_RELEASE').then(function() {
   var version = fs.readFileSync(path.join(destDir, 'LATEST_RELEASE'), 'utf8');
-  wget(destDir, 'http://chromedriver.storage.googleapis.com/' + version + '/chromedriver_linux64.zip').then(function() {
-    unzip(destDir, 'test_tools/chromedriver_linux64.zip');
+  wget(destDir, 'http://chromedriver.storage.googleapis.com/' + version + '/chromedriver_' + chromeDriverPlatform + '.zip').then(function() {
+    unzip(destDir, 'test_tools/chromedriver_' + chromeDriverPlatform + '.zip');
   });
 });
