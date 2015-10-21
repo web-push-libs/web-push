@@ -27,6 +27,7 @@
     "http_ece": "^0.2.0"
   },
   "devDependencies": {
+    "dmg": "^0.1.0",
     "fs-extra": "^0.24.0",
     "request": "^2.64.0",
     "selenium-webdriver": "^2.47.0",
