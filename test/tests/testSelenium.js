@@ -178,51 +178,41 @@ suite('selenium', function() {
     noRestartTest('firefox', done);
   });
 
-  test('send/receive notification without payload with Chrome', function(done) {
-    if (process.env.TRAVIS_OS_NAME === 'osx') {
-      done();
-      return;
-    }
-
-    noRestartTest('chrome', done);
-  });
+  if (process.env.TRAVIS_OS_NAME !== 'osx') {
+    test('send/receive notification without payload with Chrome', function(done) {
+      noRestartTest('chrome', done);
+    });
+  }
 
   test('send/receive notification with payload with Firefox', function(done) {
     noRestartTest('firefox', done, 'marco');
   });
 
-  /*test('send/receive notification with payload with Chrome', function(done) {
-    if (process.env.TRAVIS_OS_NAME === 'osx') {
-      done();
-      return;
-    }
-
-    noRestartTest('chrome', done, 'marco');
-  });*/
+  /*
+  if (process.env.TRAVIS_OS_NAME !== 'osx') {
+    test('send/receive notification with payload with Chrome', function(done) {
+      noRestartTest('chrome', done, 'marco');
+    });
+  }*/
 
   /*test('send/receive notification without payload with TTL with Firefox (closing and restarting the browser)', function(done) {
     restartTest('firefox', done, undefined, 2);
   });*/
 
-  test('send/receive notification without payload with TTL with Chrome (closing and restarting the browser)', function(done) {
-    if (process.env.TRAVIS_OS_NAME === 'osx') {
-      done();
-      return;
-    }
-
-    restartTest('chrome', done, undefined, 2);
-  });
+  if (process.env.TRAVIS_OS_NAME !== 'osx') {
+    test('send/receive notification without payload with TTL with Chrome (closing and restarting the browser)', function(done) {
+      restartTest('chrome', done, undefined, 2);
+    });
+  }
 
   /*test('send/receive notification with payload with TTL with Firefox (closing and restarting the browser)', function(done) {
     restartTest('firefox', done, 'marco', 2);
   });*/
 
-  /*test('send/receive notification with payload with TTL with Chrome (closing and restarting the browser)', function(done) {
-    if (process.env.TRAVIS_OS_NAME === 'osx') {
-      done();
-      return;
-    }
-
-    restartTest('chrome', done, 'marco', 2);
-  });*/
+  /*
+  if (process.env.TRAVIS_OS_NAME !== 'osx') {
+    test('send/receive notification with payload with TTL with Chrome (closing and restarting the browser)', function(done) {
+      restartTest('chrome', done, 'marco', 2);
+    });
+  }*/
 });
