@@ -15,7 +15,7 @@ install:
   - npm install
   - npm install mocha
 before_script:
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then "sh -e /etc/init.d/xvfb start"; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sh -e /etc/init.d/xvfb start; fi
 script:
   - node test/selenium-init.js
   - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo $(which node) test/selenium-chrome-init.js; fi
