@@ -2,8 +2,9 @@ os:
   - linux
   - osx
 env:
-  - DISPLAY=:99.0
-  - NODE_VERSION="0.12"
+  global:
+    - DISPLAY=:99.0
+    - NODE_VERSION="0.12"
 before_install:
   - git clone https://github.com/creationix/nvm.git /tmp/.nvm
   - source /tmp/.nvm/nvm.sh
