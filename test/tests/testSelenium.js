@@ -4,14 +4,14 @@ var path = require('path');
 var fse = require('fs-extra');
 var temp = require('temp').track();
 
-var firefoxBinaryPath = 'test_tools/firefox/firefox-bin';
+var firefoxBinaryPath = process.env.FIREFOX || 'test_tools/firefox/firefox-bin';
 if (!fs.existsSync(firefoxBinaryPath)) {
-  throw new Error('Firefox binary doesn\'t exist at ' + firefoxBinaryPath);
+  throw new Error('Firefox binary doesn\'t exist at ' + firefoxBinaryPath + '. Use your installed Firefox binary by setting the FIREFOX environment');
 }
 
-var chromeBinaryPath = 'test_tools/chrome-linux/chrome';
+var chromeBinaryPath = process.env.CHROME || 'test_tools/chrome-linux/chrome';
 if (!fs.existsSync(chromeBinaryPath)) {
-  throw new Error('Chrome binary doesn\'t exist at ' + chromeBinaryPath);
+  throw new Error('Chrome binary doesn\'t exist at ' + chromeBinaryPath + '. Use your installed Chrome binary by setting the CHROME environment');
 }
 
 process.env.PATH = 'test_tools/:' + process.env.PATH;
