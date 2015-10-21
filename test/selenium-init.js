@@ -4,6 +4,7 @@ var path = require('path');
 var child_process = require('child_process');
 var request = require('request');
 var fse = require('fs-extra');
+var dmg = require('dmg');
 
 function spawnHelper(command, args) {
   return new Promise(function(resolve, reject) {
@@ -44,6 +45,14 @@ function unzip(dir, file) {
 
 var destDir = 'test_tools';
 
+if (process.platform !== 'linux' && process.platform !== 'darwin') {
+  throw new Error('Platform ' + process.platform + ' not supported.');
+}
+
+if (process.arch !== 'x86' && process.arch !== 'x64') {
+  throw new Error('Architecture ' + process.arch + ' not supported.');
+}
+
 // Download Firefox Nightly
 
 var firefoxVersionFile = path.join(destDir, 'firefoxVersion');
@@ -51,8 +60,21 @@ var firefoxVersion = -Infinity;
 if (fs.existsSync(firefoxVersionFile)) {
   firefoxVersion = Number(fs.readFileSync(firefoxVersionFile, 'utf8'));
 }
-var firefoxFileNameFmt = 'firefox-%d.0a1.en-US.linux-x86_64.tar.bz2';
+var firefoxFileNameFmt = 'firefox-%d.0a1.en-US.%s';
 var firefoxBaseURL = 'https://ftp.mozilla.org/pub/mozilla.org/firefox/nightly/latest-mozilla-central/';
+
+var firefoxPlatform;
+if (process.platform === 'linux') {
+  firefoxPlatform = 'linux-';
+  if (process.arch === 'x86') {
+    firefoxPlatform += 'i686';
+  } else if (process.arch === 'x64') {
+    firefoxPlatform += 'x86_64';
+  }
+  firefoxPlatform += '.tar.bz2'
+} else if (process.platform === 'darwin') {
+  firefoxPlatform = 'mac.dmg';
+}
 
 request(firefoxBaseURL + 'test_packages.json', function(error, response, body) {
   if (error) {
@@ -71,12 +93,19 @@ request(firefoxBaseURL + 'test_packages.json', function(error, response, body) {
     }
   }
 
-  var firefoxFileName = util.format(firefoxFileNameFmt, version);
+  var firefoxFileName = util.format(firefoxFileNameFmt, version, firefoxPlatform);
 
   var firefoxURL = firefoxBaseURL + firefoxFileName;
 
   wget(destDir, firefoxURL).then(function() {
-    untar(destDir, path.join(destDir, firefoxFileName));
+    if (process.platform === 'linux') {
+      untar(destDir, path.join(destDir, firefoxFileName));
+    } else if (process.platform === 'darwin') {
+      dmg.mount(path.join(destDir, firefoxFileName), function(err, extractedPath) {
+        fse.copySync(path.join(extractedPath, 'FirefoxNightly.app'), path.join(destDir, 'FirefoxNightly.app'));
+        dmg.unmount(extractedPath, function() {});
+      });
+    }
   });
 });
 

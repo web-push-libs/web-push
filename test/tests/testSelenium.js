@@ -4,7 +4,14 @@ var path = require('path');
 var fse = require('fs-extra');
 var temp = require('temp').track();
 
-var firefoxBinaryPath = process.env.FIREFOX || 'test_tools/firefox/firefox-bin';
+var firefoxBinaryPath = process.env.FIREFOX;
+if (!firefoxBinaryPath) {
+  if (process.platform === 'linux') {
+    firefoxBinaryPath = 'test_tools/firefox/firefox-bin';
+  } else {
+    firefoxBinaryPath = 'test_tools/FirefoxNightly.app/Contents/MacOS/firefox-bin';
+  }
+}
 if (!fs.existsSync(firefoxBinaryPath)) {
   throw new Error('Firefox binary doesn\'t exist at ' + firefoxBinaryPath + '. Use your installed Firefox binary by setting the FIREFOX environment');
 }
