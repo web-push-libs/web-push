@@ -179,6 +179,11 @@ suite('selenium', function() {
   });
 
   test('send/receive notification without payload with Chrome', function(done) {
+    if (process.env.TRAVIS_OS_NAME === 'osx') {
+      done();
+      return;
+    }
+
     noRestartTest('chrome', done);
   });
 
@@ -187,6 +192,11 @@ suite('selenium', function() {
   });
 
   /*test('send/receive notification with payload with Chrome', function(done) {
+    if (process.env.TRAVIS_OS_NAME === 'osx') {
+      done();
+      return;
+    }
+
     noRestartTest('chrome', done, 'marco');
   });*/
 
@@ -195,6 +205,11 @@ suite('selenium', function() {
   });*/
 
   test('send/receive notification without payload with TTL with Chrome (closing and restarting the browser)', function(done) {
+    if (process.env.TRAVIS_OS_NAME === 'osx') {
+      done();
+      return;
+    }
+
     restartTest('chrome', done, undefined, 2);
   });
 
@@ -203,6 +218,11 @@ suite('selenium', function() {
   });*/
 
   /*test('send/receive notification with payload with TTL with Chrome (closing and restarting the browser)', function(done) {
+    if (process.env.TRAVIS_OS_NAME === 'osx') {
+      done();
+      return;
+    }
+
     restartTest('chrome', done, 'marco', 2);
   });*/
 });
