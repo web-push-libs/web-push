@@ -9,17 +9,18 @@ env:
     - NODE_VERSION="0.12"
     - NODE_VERSION="4"
 before_install:
-  - git clone https://github.com/creationix/nvm.git /tmp/.nvm
-  - source /tmp/.nvm/nvm.sh
+  - git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`)
+  - source ~/.nvm/nvm.sh
   - nvm install $NODE_VERSION
-  - nvm use $NODE_VERSION
+  - export NODE=$(nvm which $NODE_VERSION)
+  - export NPM=${NODE%node}npm
 install:
-  - npm install
-  - npm install mocha
+  - $NPM install
+  - $NPM install mocha
 before_script:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sh -e /etc/init.d/xvfb start; fi
 script:
-  - node test/selenium-init.js
-  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo $(which node) test/selenium-chrome-init.js; fi
-  - npm test
+  - $NODE test/selenium-init.js
+  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo $NODE test/selenium-chrome-init.js; fi
+  - $NPM test
 sudo: required
