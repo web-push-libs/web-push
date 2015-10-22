@@ -45,6 +45,11 @@ function unzip(dir, file) {
 
 var destDir = 'test_tools';
 
+try {
+  fs.mkdirSync(destDir);
+} catch (e) {
+}
+
 if (process.platform !== 'linux' && process.platform !== 'darwin') {
   throw new Error('Platform ' + process.platform + ' not supported.');
 }
