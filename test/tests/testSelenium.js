@@ -4,6 +4,11 @@ var path = require('path');
 var fse = require('fs-extra');
 var temp = require('temp').track();
 
+if (!process.env.GCM_API_KEY) {
+  console.log('You need to set the GCM_API_KEY env variable to run these tests.');
+  return;
+}
+
 var firefoxBinaryPath = process.env.FIREFOX;
 if (!firefoxBinaryPath) {
   if (process.platform === 'linux') {
