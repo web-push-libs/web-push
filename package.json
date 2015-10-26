@@ -23,8 +23,9 @@
   },
   "homepage": "https://github.com/marco-c/web-push#readme",
   "dependencies": {
-    "urlsafe-base64": "^1.0.0",
-    "http_ece": "^0.2.0"
+    "colors": "^1.1.2",
+    "http_ece": "^0.2.0",
+    "urlsafe-base64": "^1.0.0"
   },
   "devDependencies": {
     "dmg": "^0.1.0",
