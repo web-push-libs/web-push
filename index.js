@@ -3,6 +3,7 @@ const crypto    = require('crypto');
 const ece       = require('http_ece');
 const url       = require('url');
 const https     = require('https');
+var colors      = require('colors');
 
 var gcmAPIKey = '';
 
@@ -62,11 +63,11 @@ function sendNotification(endpoint, TTL, userPublicKey, payload) {
     var gcmPayload;
     if (endpoint.indexOf('https://android.googleapis.com/gcm/send') === 0) {
       if (payload) {
-        throw new Error('Payload not supported with GCM');
+        throw new Error('Payload not supported with GCM'.bold.red);
       }
 
       if (!gcmAPIKey) {
-        console.warn('Attempt to send push notification to GCM endpoint, but no GCM key is defined');
+        console.warn('Attempt to send push notification to GCM endpoint, but no GCM key is defined'.bold.red);
       }
 
       var endpointSections = endpoint.split('/');

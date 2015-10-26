@@ -3,9 +3,10 @@ var fs = require('fs');
 var path = require('path');
 var fse = require('fs-extra');
 var temp = require('temp').track();
+var colors = require('colors');
 
 if (!process.env.GCM_API_KEY) {
-  console.log('You need to set the GCM_API_KEY env variable to run these tests.');
+  console.log('You need to set the GCM_API_KEY env variable to run these tests.'.bold.red);
   return;
 }
 
@@ -18,7 +19,7 @@ if (!firefoxBinaryPath) {
   }
 }
 if (!fs.existsSync(firefoxBinaryPath)) {
-  throw new Error('Firefox binary doesn\'t exist at ' + firefoxBinaryPath + '. Use your installed Firefox binary by setting the FIREFOX environment');
+  throw new Error('Firefox binary doesn\'t exist at ' + firefoxBinaryPath + '. Use your installed Firefox binary by setting the FIREFOX environment'.bold.red);
 }
 
 var chromeBinaryPath = process.env.CHROME;
@@ -30,7 +31,7 @@ if (!chromeBinaryPath) {
   }
 }
 if (!fs.existsSync(chromeBinaryPath)) {
-  throw new Error('Chrome binary doesn\'t exist at ' + chromeBinaryPath + '. Use your installed Chrome binary by setting the CHROME environment');
+  throw new Error('Chrome binary doesn\'t exist at ' + chromeBinaryPath + '. Use your installed Chrome binary by setting the CHROME environment'.bold.red);
 }
 
 process.env.PATH = 'test_tools/:' + process.env.PATH;
