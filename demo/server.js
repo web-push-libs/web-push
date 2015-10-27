@@ -2,8 +2,13 @@ var webPush = require('../index');
 var https   = require('https');
 var fs      = require('fs');
 var path    = require('path');
+var colors  = require('colors');
 
-webPush.setGCMAPIKey('AIzaSyAwmdX6KKd4hPfIcGU2SOfj9vuRDW6u-wo');
+if (!process.env.GCM_API_KEY) {
+  console.error('If you want Chrome to work, you need to set the GCM_API_KEY environment variable to your GCM API key.'.bold.red);
+} else {
+  webPush.setGCMAPIKey(process.env.GCM_API_KEY);
+}
 
 var pem = fs.readFileSync('demo/cert.pem');
 

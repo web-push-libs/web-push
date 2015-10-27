@@ -3,15 +3,35 @@ var fs = require('fs');
 var path = require('path');
 var fse = require('fs-extra');
 var temp = require('temp').track();
+var colors = require('colors');
 
-var firefoxBinaryPath = 'test_tools/firefox/firefox-bin';
-if (!fs.existsSync(firefoxBinaryPath)) {
-  throw new Error('Firefox binary doesn\'t exist at ' + firefoxBinaryPath);
+if (!process.env.GCM_API_KEY) {
+  console.log('You need to set the GCM_API_KEY env variable to run these tests.'.bold.red);
+  return;
 }
 
-var chromeBinaryPath = 'test_tools/chrome-linux/chrome';
+var firefoxBinaryPath = process.env.FIREFOX;
+if (!firefoxBinaryPath) {
+  if (process.platform === 'linux') {
+    firefoxBinaryPath = 'test_tools/firefox/firefox-bin';
+  } else if (process.platform === 'darwin') {
+    firefoxBinaryPath = 'test_tools/FirefoxNightly.app/Contents/MacOS/firefox-bin';
+  }
+}
+if (!fs.existsSync(firefoxBinaryPath)) {
+  throw new Error('Firefox binary doesn\'t exist at ' + firefoxBinaryPath + '. Use your installed Firefox binary by setting the FIREFOX environment'.bold.red);
+}
+
+var chromeBinaryPath = process.env.CHROME;
+if (!chromeBinaryPath) {
+  if (process.platform === 'linux') {
+    chromeBinaryPath = 'test_tools/chrome-linux/chrome';
+  } else if (process.platform === 'darwin') {
+    chromeBinaryPath = 'test_tools/chrome-mac/Chromium.app/Contents/MacOS/Chromium';
+  }
+}
 if (!fs.existsSync(chromeBinaryPath)) {
-  throw new Error('Chrome binary doesn\'t exist at ' + chromeBinaryPath);
+  throw new Error('Chrome binary doesn\'t exist at ' + chromeBinaryPath + '. Use your installed Chrome binary by setting the CHROME environment'.bold.red);
 }
 
 process.env.PATH = 'test_tools/:' + process.env.PATH;
@@ -168,31 +188,41 @@ suite('selenium', function() {
     noRestartTest('firefox', done);
   });
 
-  test('send/receive notification without payload with Chrome', function(done) {
-    noRestartTest('chrome', done);
-  });
+  if (process.env.TRAVIS_OS_NAME !== 'osx') {
+    test('send/receive notification without payload with Chrome', function(done) {
+      noRestartTest('chrome', done);
+    });
+  }
 
   test('send/receive notification with payload with Firefox', function(done) {
     noRestartTest('firefox', done, 'marco');
   });
 
-  /*test('send/receive notification with payload with Chrome', function(done) {
-    noRestartTest('chrome', done, 'marco');
-  });*/
+  /*
+  if (process.env.TRAVIS_OS_NAME !== 'osx') {
+    test('send/receive notification with payload with Chrome', function(done) {
+      noRestartTest('chrome', done, 'marco');
+    });
+  }*/
 
   test('send/receive notification without payload with TTL with Firefox (closing and restarting the browser)', function(done) {
     restartTest('firefox', done, undefined, 2);
   });
 
-  test('send/receive notification without payload with TTL with Chrome (closing and restarting the browser)', function(done) {
-    restartTest('chrome', done, undefined, 2);
-  });
+  if (process.env.TRAVIS_OS_NAME !== 'osx') {
+    test('send/receive notification without payload with TTL with Chrome (closing and restarting the browser)', function(done) {
+      restartTest('chrome', done, undefined, 2);
+    });
+  }
 
   test('send/receive notification with payload with TTL with Firefox (closing and restarting the browser)', function(done) {
     restartTest('firefox', done, 'marco', 2);
   });
 
-  /*test('send/receive notification with payload with TTL with Chrome (closing and restarting the browser)', function(done) {
-    restartTest('chrome', done, 'marco', 2);
-  });*/
+  /*
+  if (process.env.TRAVIS_OS_NAME !== 'osx') {
+    test('send/receive notification with payload with TTL with Chrome (closing and restarting the browser)', function(done) {
+      restartTest('chrome', done, 'marco', 2);
+    });
+  }*/
 });
