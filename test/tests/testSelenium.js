@@ -155,8 +155,6 @@ function restartTest(browser, done, pushPayload, pushTimeout) {
         // We need to wait a bit before copying these files because Firefox updates
         // some of them when shutting down.
         [ 'storage', 'prefs.js', 'serviceworker.txt' ].forEach(function(file) {
-          console.log('Copying: ' + path.join(driver.profilePath_, file));
-          console.log('To: ' + path.join(profilePath, file));
           fse.copySync(path.join(driver.profilePath_, file), path.join(profilePath, file));
         });
       } catch (e) {
