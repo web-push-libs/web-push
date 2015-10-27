@@ -69,8 +69,8 @@ function startBrowser() {
   var profile = new firefox.Profile(profilePath);
   profile.acceptUntrustedCerts();
   profile.setPreference('security.turn_off_all_security_so_that_viruses_can_take_over_this_computer', true);
-  profile.setPreference('dom.push.debug', true);
-  profile.setPreference('browser.dom.window.dump.enabled', true);
+  //profile.setPreference('dom.push.debug', true);
+  //profile.setPreference('browser.dom.window.dump.enabled', true);
 
   var firefoxBinary = new firefox.Binary(firefoxBinaryPath);
 

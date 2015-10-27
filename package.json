@@ -31,7 +31,7 @@
     "dmg": "^0.1.0",
     "fs-extra": "^0.24.0",
     "request": "^2.64.0",
-    "selenium-webdriver": "https://github.com/marco-c/my-selenium-webdriver-build/tarball/7c4877c15901e6d1fbb5cda05cc2e8d90380e97f",
+    "selenium-webdriver": "^2.47.0",
     "temp": "^0.8.3"
   }
 }
