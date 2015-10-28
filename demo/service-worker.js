@@ -4,14 +4,14 @@ var pushMessage;
 self.addEventListener('push', function(event) {
   pushMessage = event.data ? event.data.text() : 'no payload';
 
+  if (port) {
+    port.postMessage(pushMessage);
+  }
+
   event.waitUntil(self.registration.showNotification('Web Push Demo', {
     body: 'Notification!',
     tag: 'push',
   }));
-
-  if (port) {
-    port.postMessage(pushMessage);
-  }
 });
 
 self.onmessage = function(e) {

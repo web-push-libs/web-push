@@ -154,10 +154,12 @@ function restartTest(browser, done, pushPayload, pushTimeout) {
         // (dom.push.userAgentID) storing the User Agent ID.
         // We need to wait a bit before copying these files because Firefox updates
         // some of them when shutting down.
-        [ 'storage', 'prefs.js' ].forEach(function(file) {
+        [ 'storage', 'prefs.js', 'serviceworker.txt' ].forEach(function(file) {
           fse.copySync(path.join(driver.profilePath_, file), path.join(profilePath, file));
         });
-      } catch (e) {}
+      } catch (e) {
+        console.log('Error while copying: ' + e);
+      }
 
       if (server.notificationSent) {
         restart();
@@ -201,9 +203,9 @@ suite('selenium', function() {
     });
   }*/
 
-  /*test('send/receive notification without payload with TTL with Firefox (closing and restarting the browser)', function(done) {
+  test('send/receive notification without payload with TTL with Firefox (closing and restarting the browser)', function(done) {
     restartTest('firefox', done, undefined, 2);
-  });*/
+  });
 
   if (process.env.TRAVIS_OS_NAME !== 'osx') {
     test('send/receive notification without payload with TTL with Chrome (closing and restarting the browser)', function(done) {
@@ -211,9 +213,9 @@ suite('selenium', function() {
     });
   }
 
-  /*test('send/receive notification with payload with TTL with Firefox (closing and restarting the browser)', function(done) {
+  test('send/receive notification with payload with TTL with Firefox (closing and restarting the browser)', function(done) {
     restartTest('firefox', done, 'marco', 2);
-  });*/
+  });
 
   /*
   if (process.env.TRAVIS_OS_NAME !== 'osx') {
