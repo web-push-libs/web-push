@@ -4,8 +4,6 @@ var pushMessage;
 self.addEventListener('push', function(event) {
   pushMessage = event.data ? event.data.text() : 'no payload';
 
-  dump('Service Worker - Received: ' + pushMessage + '\n');
-
   if (port) {
     port.postMessage(pushMessage);
   }
@@ -17,8 +15,6 @@ self.addEventListener('push', function(event) {
 });
 
 self.onmessage = function(e) {
-  dump('Service Worker - Opened message channel\n');
-
   port = e.ports[0];
 
   if (pushMessage) {

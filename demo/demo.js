@@ -7,7 +7,6 @@ if ('serviceWorker' in navigator) {
 navigator.serviceWorker.ready.then(function(reg) {
   var channel = new MessageChannel();
   channel.port1.onmessage = function(e) {
-    dump('Page - Received: ' + e.data + '\n');
     window.document.title = e.data;
   }
   reg.active.postMessage('setup', [channel.port2]);
