@@ -34,3 +34,4 @@ Encrypts the payload according to the [Message Encryption for Web Push](https://
 ## Projects using web-push
 
 - TicTacToe with offline and Push support using Service Workers - https://github.com/marco-c/tictactoe
+- Push API MDN demo - https://github.com/chrisdavidmills/push-api-demo - https://developer.mozilla.org/en-US/docs/Web/API/Push_API/Using_the_Push_API
