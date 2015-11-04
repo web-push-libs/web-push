@@ -94,7 +94,8 @@ request(firefoxBaseURL + 'test_packages.json', function(error, response, body) {
   if (version > firefoxVersion) {
     fs.writeFileSync(firefoxVersionFile, version, 'utf8');
     if (firefoxVersion !== -Infinity) {
-      fs.unlinkSync(path.join(destDir, util.format(firefoxFileNameFmt, firefoxVersion)));
+      var firefoxOldFileName = util.format(firefoxFileNameFmt, firefoxVersion, firefoxPlatform);
+      fs.unlinkSync(path.join(destDir, firefoxOldFileName));
     }
   }
 
