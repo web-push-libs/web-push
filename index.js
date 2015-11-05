@@ -112,8 +112,41 @@ function sendNotification(endpoint, TTL, userPublicKey, payload) {
   });
 }
 
+function deleteSubscription(endpoint) {
+  return new Promise(function(resolve, reject) {
+    var urlParts = url.parse(endpoint);
+    var options = {
+      hostname: urlParts.hostname,
+      port: urlParts.port,
+      path: urlParts.pathname,
+      method: 'DELETE',
+      headers: {
+        'Content-Length': 0,
+      }
+    };
+
+    var pushRequest = https.request(options, function(pushResponse) {
+      console.log('statusCode: ', pushResponse.statusCode);
+      console.log('headers: ', pushResponse.headers);
+      resolve();
+      /*reject();
+      } else {
+        resolve();
+      }*/
+    });
+
+    pushRequest.end();
+
+    pushRequest.on('error', function(e) {
+      console.error(e);
+      reject(e);
+    });
+  });
+}
+
 module.exports = {
   encrypt: encrypt,
   sendNotification: sendNotification,
   setGCMAPIKey: setGCMAPIKey,
+  deleteSubscription: deleteSubscription,
 }

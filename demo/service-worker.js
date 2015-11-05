@@ -14,6 +14,11 @@ self.addEventListener('push', function(event) {
   }));
 });
 
+self.addEventListener('pushsubscriptionchange', function(event) {
+  console.log('PUSH SUBSCRIPTION CHANGE!')
+  console.log(event);
+});
+
 self.onmessage = function(e) {
   port = e.ports[0];
 

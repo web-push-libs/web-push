@@ -23,6 +23,8 @@ navigator.serviceWorker.ready.then(function(reg) {
 }).then(function(subscription) {
   var key = subscription.getKey ? subscription.getKey('p256dh') : '';
 
+  console.log('ENDPOINT: ' + subscription.endpoint);
+
   return fetch('https://127.0.0.1:50005', {
     method: 'post',
     headers: {
