@@ -176,4 +176,14 @@ suite('sendNotification', function() {
       }).then(done);
     }, undefined, 200, true);
   });
+
+  test('promise rejected if push serivice is GCM and you want to send a payload', function(done) {
+    webPush.setGCMAPIKey('my_gcm_key');
+
+    webPush.sendNotification('https://android.googleapis.com/gcm/send/someSubscriptionID', 5, urlBase64.encode(userPublicKey), 'hello').then(function() {
+      assert(false, 'sendNotification promise resolved');
+    }, function(err) {
+      assert(err, 'sendNotification promise rejected');
+    }).then(done);
+  });
 });

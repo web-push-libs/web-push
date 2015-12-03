@@ -63,7 +63,8 @@ function sendNotification(endpoint, TTL, userPublicKey, payload) {
     var gcmPayload;
     if (endpoint.indexOf('https://android.googleapis.com/gcm/send') === 0) {
       if (payload) {
-        throw new Error('Payload not supported with GCM'.bold.red);
+        reject(new Error('Payload not supported with GCM'.bold.red));
+        return;
       }
 
       if (!gcmAPIKey) {
