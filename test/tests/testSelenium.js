@@ -70,6 +70,7 @@ function startBrowser() {
   profile.acceptUntrustedCerts();
   profile.setPreference('security.turn_off_all_security_so_that_viruses_can_take_over_this_computer', true);
   profile.setPreference('extensions.checkCompatibility.nightly', false);
+  profile.setPreference('extensions.enabledScopes', 1);
   //profile.setPreference('dom.push.debug', true);
   //profile.setPreference('browser.dom.window.dump.enabled', true);
 
