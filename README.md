@@ -31,7 +31,12 @@ Encrypts the payload according to the [Message Encryption for Web Push](https://
 - *userPublicKey* is the public key of the browser;
 - *payload* is the message to attach to the notification.
 
+## Examples
+
+The [Service Worker Cookbook](https://serviceworke.rs/) is full of Web Push examples using the web-push library.
+
 ## Projects using web-push
 
+- [Mercurius](https://github.com/marco-c/mercurius) - A generic Web Push server. See also the blog post on the Mozilla Hacks blog: https://hacks.mozilla.org/2015/12/web-push-notifications-from-irssi/.
 - TicTacToe with offline and Push support using Service Workers - https://github.com/marco-c/tictactoe
 - Push API MDN demo - https://github.com/chrisdavidmills/push-api-demo - https://developer.mozilla.org/en-US/docs/Web/API/Push_API/Using_the_Push_API
