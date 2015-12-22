@@ -88,8 +88,15 @@ function sendNotification(endpoint, TTL, userPublicKey, payload) {
     }
 
     var expectedStatusCode = gcmPayload ? 200 : 201;
-    var pushRequest = https.request(options, function(pushResponse) {
-      reject('test');
+    var pushRequest = https.request(options, function(error, pushResponse, body) {
+      console.log('statusCode: ', pushResponse.statusCode);
+      console.log('headers: ', pushResponse.headers);
+        
+      if (error || pushResponse.statusCode !== expectedStatusCode) {
+        reject(error || body);
+      } else {
+        resolve(body);
+      }
     });
 
     if (typeof payload !== 'undefined') {
