@@ -92,7 +92,7 @@ function sendNotification(endpoint, TTL, userPublicKey, payload) {
       if (pushResponse.statusCode !== expectedStatusCode) {
         console.log('statusCode: ', pushResponse.statusCode);
         console.log('headers: ', pushResponse.headers);
-        reject(pushResponse);
+        reject(pushResponse.statusCode);
       } else {
         pushResponse.on('data', function(d) {
           resolve(d);
