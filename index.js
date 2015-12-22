@@ -95,7 +95,7 @@ function sendNotification(endpoint, TTL, userPublicKey, payload) {
       if (error || pushResponse.statusCode !== expectedStatusCode) {
         reject(error || body);
       } else {
-        reject(body);
+        resolve(body);
       }
     });
 
