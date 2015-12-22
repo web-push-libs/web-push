@@ -94,7 +94,9 @@ function sendNotification(endpoint, TTL, userPublicKey, payload) {
         console.log('headers: ', pushResponse.headers);
         reject(pushResponse);
       } else {
-        resolve(pushResponse);
+        pushResponse.on('data', function(d) {
+          resolve(d);
+        });
       }
     });
 
