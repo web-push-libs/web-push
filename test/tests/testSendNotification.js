@@ -18,7 +18,7 @@ suite('sendNotification', function() {
   var userPublicKey = userCurve.generateKeys();
   var userPrivateKey = userCurve.getPrivateKey();
 
-  function startServer(message, listening, TTL, statusCode, isGCM) {
+  function startServer(message, TTL, statusCode, isGCM) {
     var pem = fs.readFileSync('demo/cert.pem');
 
     var options = {
@@ -76,11 +76,14 @@ suite('sendNotification', function() {
       });
     }).listen(50005);
 
-    server.on('listening', listening);
+    return new Promise(function(resolve, reject) {
+      server.on('listening', resolve);
+    });
   }
 
   test('send/receive string', function(done) {
-    startServer('hello', function() {
+    startServer('hello', 0)
+    .then(function() {
       webPush.sendNotification('https://127.0.0.1:50005', 0, urlBase64.encode(userPublicKey), 'hello')
       .then(function() {
         assert(true, 'sendNotification promise resolved');
@@ -88,11 +91,12 @@ suite('sendNotification', function() {
         assert(false, 'sendNotification promise rejected')
       })
       .then(done);
-    }, 0);
+    });
   });
 
   test('send/receive buffer', function(done) {
-    startServer('hello', function() {
+    startServer('hello', 0)
+    .then(function() {
       webPush.sendNotification('https://127.0.0.1:50005', 0, urlBase64.encode(userPublicKey), new Buffer('hello'))
       .then(function() {
         assert(true, 'sendNotification promise resolved');
@@ -100,11 +104,12 @@ suite('sendNotification', function() {
         assert(false, 'sendNotification promise rejected')
       })
       .then(done);
-    }, 0);
+    });
   });
 
   test('send/receive empty message', function(done) {
-    startServer('', function() {
+    startServer('', 0)
+    .then(function() {
       webPush.sendNotification('https://127.0.0.1:50005', 0, urlBase64.encode(userPublicKey), '')
       .then(function() {
         assert(true, 'sendNotification promise resolved');
@@ -112,11 +117,12 @@ suite('sendNotification', function() {
         assert(false, 'sendNotification promise rejected')
       })
       .then(done);
-    }, 0);
+    });
   });
 
   test('send/receive without message', function(done) {
-    startServer(undefined, function() {
+    startServer()
+    .then(function() {
       webPush.sendNotification('https://127.0.0.1:50005')
       .then(function() {
         assert(true, 'sendNotification promise resolved');
@@ -128,7 +134,8 @@ suite('sendNotification', function() {
   });
 
   test('send/receive without message with TTL', function(done) {
-    startServer(undefined, function() {
+    startServer(undefined, 5)
+    .then(function() {
       webPush.sendNotification('https://127.0.0.1:50005', 5)
       .then(function() {
         assert(true, 'sendNotification promise resolved');
@@ -136,11 +143,12 @@ suite('sendNotification', function() {
         assert(false, 'sendNotification promise rejected');
       })
       .then(done);
-    }, 5);
+    });
   });
 
   test('send/receive string with TTL', function(done) {
-    startServer('hello', function() {
+    startServer('hello', 5)
+    .then(function() {
       webPush.sendNotification('https://127.0.0.1:50005', 5, urlBase64.encode(userPublicKey), 'hello')
       .then(function() {
         assert(true, 'sendNotification promise resolved');
@@ -148,7 +156,7 @@ suite('sendNotification', function() {
         assert(false, 'sendNotification promise rejected');
       })
       .then(done);
-    }, 5);
+    });
   });
 
   test('promise rejected when it can\'t connect to the server', function() {
@@ -161,7 +169,8 @@ suite('sendNotification', function() {
   });
 
   test('promise rejected when the response status code is unexpected', function(done) {
-    startServer(undefined, function() {
+    startServer(undefined, undefined, 404)
+    .then(function() {
       webPush.sendNotification('https://127.0.0.1:50005')
       .then(function() {
         assert(false, 'sendNotification promise resolved');
@@ -169,7 +178,7 @@ suite('sendNotification', function() {
         assert(true, 'sendNotification promise rejected');
       })
       .then(done);
-    }, undefined, 404);
+    });
   });
 
   test('send/receive GCM', function(done) {
@@ -183,7 +192,8 @@ suite('sendNotification', function() {
 
     webPush.setGCMAPIKey('my_gcm_key');
 
-    startServer(undefined, function() {
+    startServer(undefined, undefined, 200, true)
+    .then(function() {
       webPush.sendNotification('https://android.googleapis.com/gcm/send/someSubscriptionID')
       .then(function() {
         assert(true, 'sendNotification promise resolved');
@@ -191,7 +201,7 @@ suite('sendNotification', function() {
         assert(false, 'sendNotification promise rejected');
       })
       .then(done);
-    }, undefined, 200, true);
+    });
   });
 
   test('promise rejected if push serivice is GCM and you want to send a payload', function() {
