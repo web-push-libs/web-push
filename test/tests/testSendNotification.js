@@ -81,81 +81,75 @@ suite('sendNotification', function() {
     });
   }
 
-  test('send/receive string', function(done) {
-    startServer('hello', 0)
+  test('send/receive string', function() {
+    return startServer('hello', 0)
     .then(function() {
-      webPush.sendNotification('https://127.0.0.1:50005', 0, urlBase64.encode(userPublicKey), 'hello')
-      .then(function() {
-        assert(true, 'sendNotification promise resolved');
-      }, function() {
-        assert(false, 'sendNotification promise rejected')
-      })
-      .then(done);
+      return webPush.sendNotification('https://127.0.0.1:50005', 0, urlBase64.encode(userPublicKey), 'hello');
+    })
+    .then(function() {
+      assert(true, 'sendNotification promise resolved');
+    }, function() {
+      assert(false, 'sendNotification promise rejected');
     });
   });
 
-  test('send/receive buffer', function(done) {
-    startServer('hello', 0)
+  test('send/receive buffer', function() {
+    return startServer('hello', 0)
     .then(function() {
-      webPush.sendNotification('https://127.0.0.1:50005', 0, urlBase64.encode(userPublicKey), new Buffer('hello'))
-      .then(function() {
-        assert(true, 'sendNotification promise resolved');
-      }, function() {
-        assert(false, 'sendNotification promise rejected')
-      })
-      .then(done);
+      return webPush.sendNotification('https://127.0.0.1:50005', 0, urlBase64.encode(userPublicKey), new Buffer('hello'));
+    })
+    .then(function() {
+      assert(true, 'sendNotification promise resolved');
+    }, function() {
+      assert(false, 'sendNotification promise rejected');
     });
   });
 
-  test('send/receive empty message', function(done) {
-    startServer('', 0)
+  test('send/receive empty message', function() {
+    return startServer('', 0)
     .then(function() {
-      webPush.sendNotification('https://127.0.0.1:50005', 0, urlBase64.encode(userPublicKey), '')
-      .then(function() {
-        assert(true, 'sendNotification promise resolved');
-      }, function() {
-        assert(false, 'sendNotification promise rejected')
-      })
-      .then(done);
+      return webPush.sendNotification('https://127.0.0.1:50005', 0, urlBase64.encode(userPublicKey), '');
+    })
+    .then(function() {
+      assert(true, 'sendNotification promise resolved');
+    }, function() {
+      assert(false, 'sendNotification promise rejected');
     });
   });
 
-  test('send/receive without message', function(done) {
-    startServer()
+  test('send/receive without message', function() {
+    return startServer()
     .then(function() {
-      webPush.sendNotification('https://127.0.0.1:50005')
-      .then(function() {
-        assert(true, 'sendNotification promise resolved');
-      }, function() {
-        assert(false, 'sendNotification promise rejected');
-      })
-      .then(done);
+      return webPush.sendNotification('https://127.0.0.1:50005');
+    })
+    .then(function() {
+      assert(true, 'sendNotification promise resolved');
+    }, function() {
+      assert(false, 'sendNotification promise rejected');
     });
   });
 
-  test('send/receive without message with TTL', function(done) {
-    startServer(undefined, 5)
+  test('send/receive without message with TTL', function() {
+    return startServer(undefined, 5)
     .then(function() {
-      webPush.sendNotification('https://127.0.0.1:50005', 5)
-      .then(function() {
-        assert(true, 'sendNotification promise resolved');
-      }, function() {
-        assert(false, 'sendNotification promise rejected');
-      })
-      .then(done);
+      return webPush.sendNotification('https://127.0.0.1:50005', 5);
+    })
+    .then(function() {
+      assert(true, 'sendNotification promise resolved');
+    }, function() {
+      assert(false, 'sendNotification promise rejected');
     });
   });
 
-  test('send/receive string with TTL', function(done) {
-    startServer('hello', 5)
+  test('send/receive string with TTL', function() {
+    return startServer('hello', 5)
     .then(function() {
-      webPush.sendNotification('https://127.0.0.1:50005', 5, urlBase64.encode(userPublicKey), 'hello')
-      .then(function() {
-        assert(true, 'sendNotification promise resolved');
-      }, function() {
-        assert(false, 'sendNotification promise rejected');
-      })
-      .then(done);
+      return webPush.sendNotification('https://127.0.0.1:50005', 5, urlBase64.encode(userPublicKey), 'hello');
+    })
+    .then(function() {
+      assert(true, 'sendNotification promise resolved');
+    }, function() {
+      assert(false, 'sendNotification promise rejected');
     });
   });
 
@@ -168,20 +162,19 @@ suite('sendNotification', function() {
     });
   });
 
-  test('promise rejected when the response status code is unexpected', function(done) {
-    startServer(undefined, undefined, 404)
+  test('promise rejected when the response status code is unexpected', function() {
+    return startServer(undefined, undefined, 404)
     .then(function() {
-      webPush.sendNotification('https://127.0.0.1:50005')
-      .then(function() {
-        assert(false, 'sendNotification promise resolved');
-      }, function() {
-        assert(true, 'sendNotification promise rejected');
-      })
-      .then(done);
+      return webPush.sendNotification('https://127.0.0.1:50005');
+    })
+    .then(function() {
+      assert(false, 'sendNotification promise resolved');
+    }, function() {
+      assert(true, 'sendNotification promise rejected');
     });
   });
 
-  test('send/receive GCM', function(done) {
+  test('send/receive GCM', function() {
     var httpsrequest = https.request;
     https.request = function(options, listener) {
       options.hostname = '127.0.0.1';
@@ -192,15 +185,14 @@ suite('sendNotification', function() {
 
     webPush.setGCMAPIKey('my_gcm_key');
 
-    startServer(undefined, undefined, 200, true)
+    return startServer(undefined, undefined, 200, true)
     .then(function() {
-      webPush.sendNotification('https://android.googleapis.com/gcm/send/someSubscriptionID')
-      .then(function() {
-        assert(true, 'sendNotification promise resolved');
-      }, function() {
-        assert(false, 'sendNotification promise rejected');
-      })
-      .then(done);
+      return webPush.sendNotification('https://android.googleapis.com/gcm/send/someSubscriptionID');
+    })
+    .then(function() {
+      assert(true, 'sendNotification promise resolved');
+    }, function() {
+      assert(false, 'sendNotification promise rejected');
     });
   });
 
