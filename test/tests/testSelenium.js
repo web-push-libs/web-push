@@ -117,63 +117,64 @@ function startBrowser() {
   return driver;
 }
 
-function checkEnd(driver, done, pushPayload) {
-  driver.wait(until.titleIs(pushPayload ? pushPayload : 'no payload'), 60000).then(function() {
-    done();
-  });
+function checkEnd(driver, pushPayload) {
+  return driver.wait(until.titleIs(pushPayload ? pushPayload : 'no payload'), 60000);
 }
 
-function noRestartTest(browser, done, pushPayload, pushTimeout) {
+function noRestartTest(browser, pushPayload, pushTimeout) {
   process.env.SELENIUM_BROWSER = browser;
 
   startServer(pushPayload, pushTimeout);
 
   driver = startBrowser();
 
-  checkEnd(driver, done, pushPayload);
+  return checkEnd(driver, pushPayload)
 }
 
-function restartTest(browser, done, pushPayload, pushTimeout) {
-  process.env.SELENIUM_BROWSER = browser;
+function restartTest(browser, pushPayload, pushTimeout) {
+  return new Promise(function(resolve, reject) {
+    process.env.SELENIUM_BROWSER = browser;
 
-  startServer(pushPayload, pushTimeout);
+    startServer(pushPayload, pushTimeout);
 
-  driver = startBrowser();
-
-  function restart() {
-    console.log('Browser - Restart');
     driver = startBrowser();
-    checkEnd(driver, done, pushPayload);
-  }
 
-  driver.close().then(function() {
-    console.log('Browser - Closed');
+    function restart() {
+      console.log('Browser - Restart');
+      driver = startBrowser();
+      checkEnd(driver, pushPayload)
+      .then(resolve);
+    }
 
-    pageLoaded = false;
+    driver.close().then(function() {
+      console.log('Browser - Closed');
 
-    setTimeout(function() {
-      try {
-        // In Firefox, we need to copy the storage directory (because the PushDB is
-        // stored in an IndexedDB) and the prefs.js file, which contains a preference
-        // (dom.push.userAgentID) storing the User Agent ID.
-        // We need to wait a bit before copying these files because Firefox updates
-        // some of them when shutting down.
-        [ 'storage', 'prefs.js', 'serviceworker.txt' ].forEach(function(file) {
-          fse.copySync(path.join(driver.profilePath_, file), path.join(profilePath, file));
-        });
-      } catch (e) {
-        console.log('Error while copying: ' + e);
-      }
+      pageLoaded = false;
 
-      if (server.notificationSent) {
-        restart();
-      } else {
-        server.onNotificationSent = function() {
-          server.onNotificationSent = null;
+      setTimeout(function() {
+        try {
+          // In Firefox, we need to copy the storage directory (because the PushDB is
+          // stored in an IndexedDB) and the prefs.js file, which contains a preference
+          // (dom.push.userAgentID) storing the User Agent ID.
+          // We need to wait a bit before copying these files because Firefox updates
+          // some of them when shutting down.
+          [ 'storage', 'prefs.js', 'serviceworker.txt' ].forEach(function(file) {
+            fse.copySync(path.join(driver.profilePath_, file), path.join(profilePath, file));
+          });
+        } catch (e) {
+          console.log('Error while copying: ' + e);
+        }
+
+        if (server.notificationSent) {
           restart();
-        };
-      }
-    }, 1000);
+        } else {
+          server.onNotificationSent = function() {
+            server.onNotificationSent = null;
+            restart();
+          };
+        }
+      }, 1000);
+    });
   });
 }
 
@@ -181,50 +182,51 @@ suite('selenium', function() {
   this.timeout(0);
 
   teardown(function(done) {
-    driver.quit().then(function() {
+    driver.quit()
+    .then(function() {
       server.close(done);
     });
   });
 
-  test('send/receive notification without payload with Firefox', function(done) {
-    noRestartTest('firefox', done);
+  test('send/receive notification without payload with Firefox', function() {
+    return noRestartTest('firefox');
   });
 
   if (process.env.TRAVIS_OS_NAME !== 'osx') {
-    test('send/receive notification without payload with Chrome', function(done) {
-      noRestartTest('chrome', done);
+    test('send/receive notification without payload with Chrome', function() {
+      return noRestartTest('chrome');
     });
   }
 
-  test('send/receive notification with payload with Firefox', function(done) {
-    noRestartTest('firefox', done, 'marco');
+  test('send/receive notification with payload with Firefox', function() {
+    return noRestartTest('firefox', 'marco');
   });
 
   /*
   if (process.env.TRAVIS_OS_NAME !== 'osx') {
-    test('send/receive notification with payload with Chrome', function(done) {
-      noRestartTest('chrome', done, 'marco');
+    test('send/receive notification with payload with Chrome', function() {
+      return noRestartTest('chrome', 'marco');
     });
   }*/
 
-  test('send/receive notification without payload with TTL with Firefox (closing and restarting the browser)', function(done) {
-    restartTest('firefox', done, undefined, 2);
+  test('send/receive notification without payload with TTL with Firefox (closing and restarting the browser)', function() {
+    return restartTest('firefox', undefined, 2);
   });
 
   if (process.env.TRAVIS_OS_NAME !== 'osx') {
-    test('send/receive notification without payload with TTL with Chrome (closing and restarting the browser)', function(done) {
-      restartTest('chrome', done, undefined, 2);
+    test('send/receive notification without payload with TTL with Chrome (closing and restarting the browser)', function() {
+      return restartTest('chrome', undefined, 2);
     });
   }
 
-  test('send/receive notification with payload with TTL with Firefox (closing and restarting the browser)', function(done) {
-    restartTest('firefox', done, 'marco', 2);
+  test('send/receive notification with payload with TTL with Firefox (closing and restarting the browser)', function() {
+    return restartTest('firefox', 'marco', 2);
   });
 
   /*
   if (process.env.TRAVIS_OS_NAME !== 'osx') {
-    test('send/receive notification with payload with TTL with Chrome (closing and restarting the browser)', function(done) {
-      restartTest('chrome', done, 'marco', 2);
+    test('send/receive notification with payload with TTL with Chrome (closing and restarting the browser)', function() {
+      return restartTest('chrome', 'marco', 2);
     });
   }*/
 });
