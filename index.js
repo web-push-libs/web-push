@@ -127,4 +127,5 @@ module.exports = {
   encrypt: encrypt,
   sendNotification: sendNotification,
   setGCMAPIKey: setGCMAPIKey,
+  WebPushError: WebPushError,
 }
