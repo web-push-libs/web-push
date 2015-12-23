@@ -170,6 +170,8 @@ suite('sendNotification', function() {
     .then(function() {
       assert(false, 'sendNotification promise resolved');
     }, function() {
+      assert(err instanceof webPush.WebPushError, 'err is a WebPushError');
+      assert(err.statusCode, 404);
       assert(true, 'sendNotification promise rejected');
     });
   });
