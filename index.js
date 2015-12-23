@@ -3,7 +3,17 @@ const crypto    = require('crypto');
 const ece       = require('http_ece');
 const url       = require('url');
 const https     = require('https');
-var colors      = require('colors');
+const colors    = require('colors');
+
+function WebPushError(message, statusCode) {
+  Error.captureStackTrace(this, this.constructor);
+
+  this.name = this.constructor.name;
+  this.message = message;
+  this.statusCode = statusCode;
+}
+
+require('util').inherits(WebPushError, Error);
 
 var gcmAPIKey = '';
 
@@ -63,7 +73,7 @@ function sendNotification(endpoint, TTL, userPublicKey, payload) {
     var gcmPayload;
     if (endpoint.indexOf('https://android.googleapis.com/gcm/send') === 0) {
       if (payload) {
-        reject(new Error('Payload not supported with GCM'.bold.red));
+        reject(new WebPushError('Payload not supported with GCM'));
         return;
       }
 
