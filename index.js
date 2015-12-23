@@ -5,12 +5,13 @@ const url       = require('url');
 const https     = require('https');
 const colors    = require('colors');
 
-function WebPushError(message, statusCode) {
+function WebPushError(message, statusCode, headers) {
   Error.captureStackTrace(this, this.constructor);
 
   this.name = this.constructor.name;
   this.message = message;
   this.statusCode = statusCode;
+  this.headers = headers;
 }
 
 require('util').inherits(WebPushError, Error);
@@ -102,7 +103,7 @@ function sendNotification(endpoint, TTL, userPublicKey, payload) {
       if (pushResponse.statusCode !== expectedStatusCode) {
         console.log('statusCode: ', pushResponse.statusCode);
         console.log('headers: ', pushResponse.headers);
-        reject(new WebPushError('Received unexpected response code', pushResponse.statusCode));
+        reject(new WebPushError('Received unexpected response code', pushResponse.statusCode, pushResponse.headers));
       } else {
         var body = "";
         pushResponse.on('data', function(chunk) {

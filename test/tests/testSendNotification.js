@@ -172,6 +172,7 @@ suite('sendNotification', function() {
     }, function(err) {
       assert(err instanceof webPush.WebPushError, 'err is a WebPushError');
       assert(err.statusCode, 404);
+      assert(err.headers != null, 'response headers are defined');
       assert(true, 'sendNotification promise rejected');
     });
   });
