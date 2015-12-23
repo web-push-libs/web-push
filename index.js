@@ -102,7 +102,7 @@ function sendNotification(endpoint, TTL, userPublicKey, payload) {
       if (pushResponse.statusCode !== expectedStatusCode) {
         console.log('statusCode: ', pushResponse.statusCode);
         console.log('headers: ', pushResponse.headers);
-        reject(pushResponse.statusCode);
+        reject(new WebPushError('Received unexpected response code', pushResponse.statusCode));
       } else {
         var body = "";
         pushResponse.on('data', function(chunk) {
@@ -133,4 +133,4 @@ module.exports = {
   encrypt: encrypt,
   sendNotification: sendNotification,
   setGCMAPIKey: setGCMAPIKey,
-}
+};
