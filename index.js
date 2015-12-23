@@ -3,7 +3,7 @@ const crypto    = require('crypto');
 const ece       = require('http_ece');
 const url       = require('url');
 const https     = require('https');
-var colors      = require('colors');
+const colors    = require('colors');
 
 function WebPushError(message, statusCode) {
   Error.captureStackTrace(this, this.constructor);
