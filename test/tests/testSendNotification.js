@@ -183,6 +183,7 @@ suite('sendNotification', function() {
     webPush.sendNotification('https://android.googleapis.com/gcm/send/someSubscriptionID', 5, urlBase64.encode(userPublicKey), 'hello').then(function() {
       assert(false, 'sendNotification promise resolved');
     }, function(err) {
+      assert(err instanceof webPush.WebPushError, 'err is a WebPushError');
       assert(err, 'sendNotification promise rejected');
     }).then(done);
   });
