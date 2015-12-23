@@ -103,7 +103,8 @@ request(firefoxBaseURL + 'test_packages.json', function(error, response, body) {
 
   var firefoxURL = firefoxBaseURL + firefoxFileName;
 
-  wget(destDir, firefoxURL).then(function() {
+  wget(destDir, firefoxURL)
+  .then(function() {
     if (process.platform === 'linux') {
       untar(destDir, path.join(destDir, firefoxFileName));
     } else if (process.platform === 'darwin') {
@@ -137,13 +138,16 @@ if (fs.existsSync(chromeVersionFile)) {
   chromeVersion = Number(fs.readFileSync(chromeVersionFile, 'utf8'));
 }
 
-wget(destDir, 'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/' + chromePlatform + '%2FLAST_CHANGE?alt=media').then(function() {
+wget(destDir, 'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/' + chromePlatform + '%2FLAST_CHANGE?alt=media')
+.then(function() {
   var newVersion = Number(fs.readFileSync(path.join(destDir, chromePlatform + '%2FLAST_CHANGE?alt=media'), 'utf8'));
   fs.renameSync(path.join(destDir, chromePlatform + '%2FLAST_CHANGE?alt=media'), chromeVersionFile);
   if (newVersion > chromeVersion) {
     fse.removeSync('test_tools/chrome-' + chromeZipPlatform);
-    wget(destDir, 'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/' + chromePlatform + '%2F' + newVersion + '%2Fchrome-' + chromeZipPlatform + '.zip?alt=media').then(function() {
-      unzip(destDir, 'test_tools/' + chromePlatform + '%2F' + newVersion + '%2Fchrome-' + chromeZipPlatform + '.zip?alt=media').then(function() {
+    wget(destDir, 'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/' + chromePlatform + '%2F' + newVersion + '%2Fchrome-' + chromeZipPlatform + '.zip?alt=media')
+    .then(function() {
+      unzip(destDir, 'test_tools/' + chromePlatform + '%2F' + newVersion + '%2Fchrome-' + chromeZipPlatform + '.zip?alt=media')
+      .then(function() {
         fs.unlink('test_tools/' + chromePlatform + '%2F' + newVersion + '%2Fchrome-' + chromeZipPlatform + '.zip?alt=media');
       });
     });
@@ -164,9 +168,11 @@ if (process.platform === 'linux') {
   chromeDriverPlatform = 'mac32';
 }
 
-wget(destDir, 'http://chromedriver.storage.googleapis.com/LATEST_RELEASE').then(function() {
+wget(destDir, 'http://chromedriver.storage.googleapis.com/LATEST_RELEASE')
+.then(function() {
   var version = fs.readFileSync(path.join(destDir, 'LATEST_RELEASE'), 'utf8');
-  wget(destDir, 'http://chromedriver.storage.googleapis.com/' + version + '/chromedriver_' + chromeDriverPlatform + '.zip').then(function() {
+  wget(destDir, 'http://chromedriver.storage.googleapis.com/' + version + '/chromedriver_' + chromeDriverPlatform + '.zip')
+  .then(function() {
     unzip(destDir, 'test_tools/chromedriver_' + chromeDriverPlatform + '.zip');
   });
 });

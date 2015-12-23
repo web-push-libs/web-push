@@ -64,7 +64,8 @@ function createServer(pushPayload, pushTimeout) {
             promise = webPush.sendNotification(obj.endpoint, pushTimeout ? 200 : undefined, obj.key, pushPayload);
           }
 
-          promise.then(function() {
+          promise
+          .then(function() {
             console.log('Push Application Server - Notification sent to ' + obj.endpoint);
 
             server.notificationSent = true;

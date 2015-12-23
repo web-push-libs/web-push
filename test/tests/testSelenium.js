@@ -146,7 +146,8 @@ function restartTest(browser, pushPayload, pushTimeout) {
       .then(resolve);
     }
 
-    driver.close().then(function() {
+    driver.close()
+    .then(function() {
       console.log('Browser - Closed');
 
       pageLoaded = false;
