@@ -13,6 +13,14 @@ suite('sendNotification', function() {
     assert(webPush.sendNotification);
   });
 
+  var closePromise;
+
+  afterEach(function() {
+    if (closePromise) {
+      return closePromise;
+    }
+  });
+
   var userCurve = crypto.createECDH('prime256v1');
 
   var userPublicKey = userCurve.generateKeys();
@@ -75,6 +83,10 @@ suite('sendNotification', function() {
         server.close();
       });
     }).listen(50005);
+
+    closePromise = new Promise(function(resolve, reject) {
+      server.on('close', resolve);
+    });
 
     return new Promise(function(resolve, reject) {
       server.on('listening', resolve);
