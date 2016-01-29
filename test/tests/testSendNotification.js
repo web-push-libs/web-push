@@ -136,8 +136,8 @@ suite('sendNotification', function() {
     })
     .then(function() {
       assert(true, 'sendNotification promise resolved');
-    }, function() {
-      assert(false, 'sendNotification promise rejected');
+    }, function(e) {
+      assert(false, 'sendNotification promise rejected with ' + e);
     });
   });
 
