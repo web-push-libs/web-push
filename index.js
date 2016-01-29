@@ -61,7 +61,7 @@ function sendNotification(endpoint, TTL, userPublicKey, payload) {
 
     var encrypted;
     if (typeof payload !== 'undefined') {
-      encrypted = encrypt(urlBase64.decode(userPublicKey), payload);
+      encrypted = encrypt(urlBase64.decode(userPublicKey), new Buffer(payload));
       options.headers = {
         'Content-Length': encrypted.cipherText.length,
         'Content-Type': 'application/octet-stream',

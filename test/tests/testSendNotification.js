@@ -105,6 +105,18 @@ suite('sendNotification', function() {
     });
   });
 
+  test('send/receive unicode character', function() {
+    return startServer('😁', 0)
+    .then(function() {
+      return webPush.sendNotification('https://127.0.0.1:50005', 0, urlBase64.encode(userPublicKey), '😁');
+    })
+    .then(function() {
+      assert(true, 'sendNotification promise resolved');
+    }, function() {
+      assert(false, 'sendNotification promise rejected');
+    });
+  });
+
   test('send/receive empty message', function() {
     return startServer('', 0)
     .then(function() {
