@@ -170,7 +170,7 @@ if (process.platform === 'linux') {
 
 wget(destDir, 'http://chromedriver.storage.googleapis.com/LATEST_RELEASE')
 .then(function() {
-  var version = fs.readFileSync(path.join(destDir, 'LATEST_RELEASE'), 'utf8');
+  var version = fs.readFileSync(path.join(destDir, 'LATEST_RELEASE'), 'utf8').replace('\n', '');
   wget(destDir, 'http://chromedriver.storage.googleapis.com/' + version + '/chromedriver_' + chromeDriverPlatform + '.zip')
   .then(function() {
     unzip(destDir, 'test_tools/chromedriver_' + chromeDriverPlatform + '.zip');
