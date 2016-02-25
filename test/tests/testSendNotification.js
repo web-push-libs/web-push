@@ -130,20 +130,20 @@ suite('sendNotification', function() {
     });
   });
 
-  test('send/receive empty message', function() {
-    // This test fails on Node.js v0.12.
-    var expectedFailure = semver.satisfies(process.version, '0.12');
-
-    return startServer('', 0)
-    .then(function() {
-      return webPush.sendNotification('https://127.0.0.1:50005', 0, urlBase64.encode(userPublicKey), '');
-    })
-    .then(function() {
-      assert(!expectedFailure, 'sendNotification promise resolved');
-    }, function(e) {
-      assert(expectedFailure, 'sendNotification promise rejected with ' + e);
+  // This test fails on Node.js v0.12.
+  if (!semver.satisfies(process.version, '0.12')) {
+    test('send/receive empty message', function() {
+      return startServer('', 0)
+      .then(function() {
+        return webPush.sendNotification('https://127.0.0.1:50005', 0, urlBase64.encode(userPublicKey), '');
+      })
+      .then(function() {
+        assert(true, 'sendNotification promise resolved');
+      }, function(e) {
+        assert(false, 'sendNotification promise rejected with ' + e);
+      });
     });
-  });
+  }
 
   test('send/receive without message', function() {
     return startServer()
