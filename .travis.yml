@@ -8,6 +8,7 @@ env:
   matrix:
     - NODE_VERSION="0.12"
     - NODE_VERSION="4"
+    - NODE_VERSION="stable"
 before_install:
   - rm -rf ~/.nvm
   - git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`)
