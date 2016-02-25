@@ -33,6 +33,7 @@
     "istanbul": "^0.4.0",
     "request": "^2.67.0",
     "selenium-webdriver": "^2.48.2",
+    "semver": "^5.1.0",
     "temp": "^0.8.3"
   }
 }
