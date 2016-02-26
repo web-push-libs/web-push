@@ -112,7 +112,7 @@ function sendNotification(endpoint, TTL, userPublicKey, payload) {
           body += chunk;
         });
         pushResponse.on('end', function() {
-          resolve(body);
+          resolve(JSON.parse(body));
         });
       }
     });
