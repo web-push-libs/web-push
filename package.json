@@ -29,10 +29,11 @@
   },
   "devDependencies": {
     "dmg": "^0.1.0",
-    "fs-extra": "^0.26.2",
-    "istanbul": "^0.4.0",
-    "request": "^2.67.0",
-    "selenium-webdriver": "^2.48.2",
+    "fs-extra": "^0.26.5",
+    "istanbul": "^0.4.2",
+    "request": "^2.69.0",
+    "selenium-webdriver": "^2.52.0",
+    "semver": "^5.1.0",
     "temp": "^0.8.3"
   }
 }
