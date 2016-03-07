@@ -118,17 +118,18 @@ function startBrowser() {
       Services.perms.addFromPrincipal(principal, 'desktop-notification', Services.perms.ALLOW_ACTION);
     }
   });
-  /*
-  This currently doesn't work in Firefox Nightly.
+
+  // This currently doesn't work in Firefox Nightly.
+
   driver.get('https://127.0.0.1:50005');
-  */
-  driver.executeScript(function() {
+
+  /*driver.executeScript(function() {
     window.location = 'https://127.0.0.1:50005';
   });
   driver.wait(function() {
     console.log('WAIT pageLoaded: ' + pageLoaded);
     return pageLoaded;
-  });
+  });*/
 
   return driver;
 }
