@@ -22,6 +22,8 @@ if (!fs.existsSync(firefoxBinaryPath)) {
   throw new Error('Firefox binary doesn\'t exist at ' + firefoxBinaryPath + '. Use your installed Firefox binary by setting the FIREFOX environment'.bold.red);
 }
 
+console.log('USING FIREFOX: ' + firefoxBinaryPath);
+
 var chromeBinaryPath = process.env.CHROME;
 if (!chromeBinaryPath) {
   if (process.platform === 'linux') {
@@ -33,6 +35,8 @@ if (!chromeBinaryPath) {
 if (!fs.existsSync(chromeBinaryPath)) {
   throw new Error('Chrome binary doesn\'t exist at ' + chromeBinaryPath + '. Use your installed Chrome binary by setting the CHROME environment'.bold.red);
 }
+
+console.log('USING CHROME: ' + chromeBinaryPath);
 
 process.env.PATH = process.env.PATH + ':test_tools/';
 
