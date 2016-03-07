@@ -40,7 +40,7 @@ if (!fs.existsSync(chromeBinaryPath)) {
   throw new Error('Chrome binary doesn\'t exist at ' + chromeBinaryPath + '. Use your installed Chrome binary by setting the CHROME environment'.bold.red);
 }
 
-process.env.PATH = 'test_tools/:' + process.env.PATH;
+process.env.PATH = process.env.PATH + ':test_tools/';
 
 var pageLoaded = false;
 var clientRegistered = 0;
