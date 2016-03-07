@@ -197,7 +197,7 @@ function restartTest(browser, pushPayload, pushTimeout) {
 }
 
 suite('selenium', function() {
-  this.timeout(0);
+  this.timeout(60000);
 
   teardown(function(done) {
     driver.quit()
