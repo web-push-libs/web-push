@@ -55,9 +55,13 @@ var server;
 function startServer(pushPayload, pushTimeout) {
   server = createServer(pushPayload, pushTimeout ? pushTimeout : 0);
 
+  console.log('startServer');
+
   pageLoaded = false;
   clientRegistered = 0;
   server.onClientRegistered = function() {
+    console.log('server.onClientRegistered');
+
     pageLoaded = true;
     clientRegistered++;
     return clientRegistered > 1;
@@ -102,6 +106,7 @@ function startBrowser() {
   var driver = builder.build();
 
   driver.wait(function() {
+    console.log('WAIT server.listening: ' + server.listening);
     return server.listening;
   });
   driver.executeScript(function() {
@@ -121,6 +126,7 @@ function startBrowser() {
     window.location = 'https://127.0.0.1:50005';
   });
   driver.wait(function() {
+    console.log('WAIT pageLoaded: ' + pageLoaded);
     return pageLoaded;
   });
 
