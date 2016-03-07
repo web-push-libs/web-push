@@ -1,21 +1,24 @@
 # web-push
 > Web Push library for Node.js
 
-Supports Firefox 43+ and Chromium/Chrome 42+.
+Supports Firefox 44+ and Chromium/Chrome 42+.
 Notification with payloads are currently only supported in Firefox (see https://code.google.com/p/chromium/issues/detail?id=486040 for the status in Chromium).
 
 [![NPM](https://nodei.co/npm/web-push.svg?downloads=true)](https://www.npmjs.com/package/web-push)
 
-[![Build Status](https://travis-ci.org/marco-c/web-push.svg)](https://travis-ci.org/marco-c/web-push)
+[![Build Status](https://travis-ci.org/marco-c/web-push.svg?branch=master)](https://travis-ci.org/marco-c/web-push)
 [![dependencies](https://david-dm.org/marco-c/web-push.svg)](https://david-dm.org/marco-c/web-push)
 [![devdependencies](https://david-dm.org/marco-c/web-push/dev-status.svg)](https://david-dm.org/marco-c/web-push#info=devDependencies)
 
-## sendNotification(endpoint, userPublicKey, payload)
+## sendNotification(endpoint, TTL, userPublicKey, payload)
 
 Send a Push notification to an endpoint. *userPublicKey* and *payload* can be undefined, if you want to send a notification without a message.
 - *endpoint* is the endpoint URL;
+- *TTL* is a value in seconds that describes how long a push message is retained by the push service (by default, four weeks);
 - *userPublicKey* is the public key of the browser;
 - *payload* is the message to attach to the notification.
+
+The function returns a Promise, resolved when the request to the push service is successful.
 
 ## setGCMAPIKey(apiKey)
 
@@ -28,6 +31,12 @@ Encrypts the payload according to the [Message Encryption for Web Push](https://
 - *userPublicKey* is the public key of the browser;
 - *payload* is the message to attach to the notification.
 
+## Examples
+
+The [Service Worker Cookbook](https://serviceworke.rs/) is full of Web Push examples using the web-push library.
+
 ## Projects using web-push
 
+- [Mercurius](https://github.com/marco-c/mercurius) - A generic Web Push server. See also the blog post on the Mozilla Hacks blog: https://hacks.mozilla.org/2015/12/web-push-notifications-from-irssi/.
 - TicTacToe with offline and Push support using Service Workers - https://github.com/marco-c/tictactoe
+- Push API MDN demo - https://github.com/chrisdavidmills/push-api-demo - https://developer.mozilla.org/en-US/docs/Web/API/Push_API/Using_the_Push_API
