@@ -4,6 +4,12 @@ var path = require('path');
 var fse = require('fs-extra');
 var temp = require('temp').track();
 var colors = require('colors');
+var semver = require('semver');
+
+if (semver.satisfies(process.version, '0.12')) {
+  console.log('selenium-webdriver is incompatible with Node.js v0.12');
+  return;
+}
 
 if (!process.env.GCM_API_KEY) {
   console.log('You need to set the GCM_API_KEY env variable to run these tests.'.bold.red);
@@ -34,7 +40,7 @@ if (!fs.existsSync(chromeBinaryPath)) {
   throw new Error('Chrome binary doesn\'t exist at ' + chromeBinaryPath + '. Use your installed Chrome binary by setting the CHROME environment'.bold.red);
 }
 
-process.env.PATH = 'test_tools/:' + process.env.PATH;
+process.env.PATH = process.env.PATH + ':test_tools/';
 
 var pageLoaded = false;
 var clientRegistered = 0;
