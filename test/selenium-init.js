@@ -5,6 +5,7 @@ var child_process = require('child_process');
 var request = require('request');
 var fse = require('fs-extra');
 var dmg = require('dmg');
+var GitHubAPI = require('github');
 
 function spawnHelper(command, args) {
   return new Promise(function(resolve, reject) {
@@ -114,6 +115,44 @@ request(firefoxBaseURL + 'test_packages.json', function(error, response, body) {
       });
     }
   });
+});
+
+// Download wires
+
+var wiresPlatform;
+if (process.platform === 'linux') {
+  wiresPlatform = 'linux';
+  if (process.arch === 'x86') {
+    throw new Error('NOT SUPPORTED');
+  } else if (process.arch === 'x64') {
+    wiresPlatform += '64';
+  }
+} else if (process.platform === 'darwin') {
+  wiresPlatform = 'OSX';
+}
+
+new GitHubAPI({
+  version: '3.0.0'
+}).releases.listReleases({
+  owner: 'jgraham',
+  repo: 'wires',
+}, function(err, res) {
+  for (var i = 0; i < res[0].assets.length; i++) {
+    var asset = res[0].assets[i];
+    if (asset.name.indexOf(wiresPlatform) != -1) {
+      wget(destDir, asset.browser_download_url).then(function() {
+        gunzip(path.join(destDir, asset.name)).then(function() {
+          if (process.platform === 'darwin') {
+            fs.unlinkSync(path.join(destDir, 'wires'))
+            fs.renameSync(path.join(destDir, asset.name.replace('.gz', '')), path.join(destDir, 'wires'));
+          }
+          fs.chmod(path.join(destDir, 'wires'), 0744);
+        });
+      });
+
+      return;
+    }
+  }
 });
 
 // Download Chrome Canary

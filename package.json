@@ -28,11 +28,12 @@
     "urlsafe-base64": "^1.0.0"
   },
   "devDependencies": {
+    "github": "^0.2.4",
     "dmg": "^0.1.0",
     "fs-extra": "^0.26.2",
     "istanbul": "^0.4.0",
     "request": "^2.67.0",
-    "selenium-webdriver": "^2.48.2",
+    "selenium-webdriver": "^2.52.0",
     "temp": "^0.8.3"
   }
 }
