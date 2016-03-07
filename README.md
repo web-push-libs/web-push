@@ -14,7 +14,7 @@ Notification with payloads are currently only supported in Firefox (see https://
 
 Send a Push notification to an endpoint. *userPublicKey* and *payload* can be undefined, if you want to send a notification without a message.
 - *endpoint* is the endpoint URL;
-- *TTL* is a value in seconds that describes how long a push message is retained by the push service;
+- *TTL* is a value in seconds that describes how long a push message is retained by the push service (by default, four weeks);
 - *userPublicKey* is the public key of the browser;
 - *payload* is the message to attach to the notification.
 

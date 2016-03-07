@@ -96,6 +96,8 @@ function sendNotification(endpoint, TTL, userPublicKey, payload) {
 
     if (typeof TTL !== 'undefined') {
       options.headers['TTL'] = TTL;
+    } else {
+      options.headers['TTL'] = 2419200; // Default TTL is four weeks.
     }
 
     var expectedStatusCode = gcmPayload ? 200 : 201;
