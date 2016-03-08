@@ -24,7 +24,7 @@ install:
 before_script:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sh -e /etc/init.d/xvfb start; fi
 script:
-  #- $NODE test/selenium-init.js
+  - $NODE test/selenium-init.js
   - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo $NODE test/selenium-chrome-init.js; fi
   - $NPM test
 sudo: required

@@ -60,7 +60,7 @@ if (process.arch !== 'x86' && process.arch !== 'x64') {
 
 // Download Firefox Nightly
 
-var firefoxVersionFile = path.join(destDir, 'firefoxVersion');
+/*var firefoxVersionFile = path.join(destDir, 'firefoxVersion');
 var firefoxVersion = -Infinity;
 if (fs.existsSync(firefoxVersionFile)) {
   firefoxVersion = Number(fs.readFileSync(firefoxVersionFile, 'utf8'));
@@ -114,11 +114,11 @@ request(firefoxBaseURL + 'test_packages.json', function(error, response, body) {
       });
     }
   });
-});
+});*/
 
 // Download Chrome Canary
 
-var chromePlatform, chromeZipPlatform;
+/*var chromePlatform, chromeZipPlatform;
 if (process.platform === 'linux') {
   chromeZipPlatform = 'linux';
   chromePlatform = 'Linux_';
@@ -152,7 +152,7 @@ wget(destDir, 'https://www.googleapis.com/download/storage/v1/b/chromium-browser
       });
     });
   }
-});
+});*/
 
 // Download ChromeDriver
 
