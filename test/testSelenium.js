@@ -8,11 +8,6 @@ var semver = require('semver');
 var childProcess = require('child_process');
 var seleniumInit = require('./selenium-init');
 
-if (semver.satisfies(process.version, '0.12')) {
-  console.log('selenium-webdriver is incompatible with Node.js v0.12');
-  return;
-}
-
 if (!process.env.GCM_API_KEY) {
   console.log('You need to set the GCM_API_KEY env variable to run the tests with Chromium.'.bold.red);
 }
@@ -170,6 +165,11 @@ function restartTest(browser, pushPayload, pushTimeout) {
 }
 
 suite('selenium', function() {
+  if (semver.satisfies(process.version, '0.12')) {
+    console.log('selenium-webdriver is incompatible with Node.js v0.12');
+    return;
+  }
+
   this.timeout(180000);
 
   suiteSetup(function() {
