@@ -10,10 +10,6 @@ env:
     - NODE_VERSION="4" FIREFOX="" CHROME=""
     - NODE_VERSION="0.12" FIREFOX="$(which firefox)" CHROME="$(which chromium-browser)"
     - NODE_VERSION="4" FIREFOX="$(which firefox)" CHROME="$(which chromium-browser)"
-addons:
-  apt:
-    packages:
-      - chromium-browser
 before_install:
   - rm -rf ~/.nvm
   - git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`)
