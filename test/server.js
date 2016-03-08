@@ -10,7 +10,7 @@ if (!process.env.GCM_API_KEY) {
   webPush.setGCMAPIKey(process.env.GCM_API_KEY);
 }
 
-var pem = fs.readFileSync('demo/cert.pem');
+var pem = fs.readFileSync('test/cert.pem');
 
 var options = {
   key: pem,
@@ -24,13 +24,13 @@ function createServer(pushPayload, pushTimeout) {
         req.url = '/index.html';
       }
 
-      if (!fs.existsSync('demo' + req.url)) {
+      if (!fs.existsSync('test' + req.url)) {
         res.writeHead(404);
         res.end(data);
         return;
       }
 
-      var data = fs.readFileSync('demo' + req.url);
+      var data = fs.readFileSync('test' + req.url);
 
       res.writeHead(200, {
         'Content-Length': data.length,
