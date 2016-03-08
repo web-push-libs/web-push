@@ -26,7 +26,7 @@ if (!firefoxBinaryPath || firefoxBinaryPath === 'nightly') {
   }
 } else if (firefoxBinaryPath === 'stable') {
   // TODO: Download Firefox release.
-  firefoxBinaryPath = childProcess.execSync('which firefox');
+  firefoxBinaryPath = childProcess.execSync('which firefox').toString().replace('\n', '');
 }
 
 console.log('USING FIREFOX: ' + firefoxBinaryPath);
@@ -66,7 +66,7 @@ process.env.PATH = process.env.PATH + ':test_tools/';
 var pageLoaded = false;
 var clientRegistered = 0;
 
-var createServer = require('../../demo/server');
+var createServer = require('../demo/server');
 
 var server;
 function startServer(pushPayload, pushTimeout) {

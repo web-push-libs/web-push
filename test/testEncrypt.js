@@ -1,6 +1,6 @@
 var assert    = require('assert');
 var crypto    = require('crypto');
-var webPush   = require('../../index');
+var webPush   = require('../index');
 var ece       = require('http_ece');
 var urlBase64 = require('urlsafe-base64');
 
