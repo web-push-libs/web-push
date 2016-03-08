@@ -192,9 +192,10 @@ suite('selenium', function() {
       firefoxBinaryPath = childProcess.execSync('which firefox').toString().replace('\n', '');
     }
 
-    console.log('USING FIREFOX: ' + firefoxBinaryPath);
-    console.log('System Firefox: ' + childProcess.execSync('which firefox'));
-    console.log('Version: ' + childProcess.execSync(firefoxBinaryPath + ' -v'));
+    try {
+      console.log('Using Firefox: ' + firefoxBinaryPath);
+      console.log('Version: ' + childProcess.execSync(firefoxBinaryPath + ' --version'));
+    } catch (e) {}
 
     chromeBinaryPath = process.env.CHROME;
     if (!chromeBinaryPath || chromeBinaryPath === 'nightly') {
@@ -213,8 +214,7 @@ suite('selenium', function() {
     promises.push(seleniumInit.downloadChromeDriver());
 
     try {
-      console.log('USING CHROMIUM: ' + chromeBinaryPath);
-      console.log('System Chromium: ' + childProcess.execSync('which chromium-browser'));
+      console.log('Using Chromium: ' + chromeBinaryPath);
       console.log('Version: ' + childProcess.execSync(chromeBinaryPath + ' --version'));
     } catch (e) {}
 
@@ -231,13 +231,10 @@ suite('selenium', function() {
   });
 
   teardown(function(done) {
-    console.log('teardown1');
     driver.quit()
     .catch(function() {})
     .then(function() {
-      console.log('teardown2');
       server.close(function() {
-        console.log('teardown3');
         done();
       });
     });
