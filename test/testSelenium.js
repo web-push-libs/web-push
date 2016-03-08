@@ -14,8 +14,7 @@ if (semver.satisfies(process.version, '0.12')) {
 }
 
 if (!process.env.GCM_API_KEY) {
-  console.log('You need to set the GCM_API_KEY env variable to run these tests.'.bold.red);
-  return;
+  console.log('You need to set the GCM_API_KEY env variable to run the tests with Chromium.'.bold.red);
 }
 
 var firefoxBinaryPath, chromeBinaryPath;
@@ -202,26 +201,28 @@ suite('selenium', function() {
       console.log('Version: ' + childProcess.execSync(firefoxBinaryPath + ' --version'));
     } catch (e) {}
 
-    chromeBinaryPath = process.env.CHROME;
-    if (!chromeBinaryPath || chromeBinaryPath === 'nightly') {
-      if (process.platform === 'linux') {
-        chromeBinaryPath = 'test_tools/chrome-linux/chrome';
-      } else if (process.platform === 'darwin') {
-        chromeBinaryPath = 'test_tools/chrome-mac/Chromium.app/Contents/MacOS/Chromium';
+    if (process.env.GCM_API_KEY) {
+      chromeBinaryPath = process.env.CHROME;
+      if (!chromeBinaryPath || chromeBinaryPath === 'nightly') {
+        if (process.platform === 'linux') {
+          chromeBinaryPath = 'test_tools/chrome-linux/chrome';
+        } else if (process.platform === 'darwin') {
+          chromeBinaryPath = 'test_tools/chrome-mac/Chromium.app/Contents/MacOS/Chromium';
+        }
+
+        promises.push(seleniumInit.downloadChromiumNightly());
+      } else if (chromeBinaryPath === 'stable') {
+        // TODO: Download Chromium release.
+        chromeBinaryPath = childProcess.execSync('which chromium-browser').toString().replace('\n', '');
       }
 
-      promises.push(seleniumInit.downloadChromiumNightly());
-    } else if (chromeBinaryPath === 'stable') {
-      // TODO: Download Chromium release.
-      chromeBinaryPath = childProcess.execSync('which chromium-browser').toString().replace('\n', '');
+      promises.push(seleniumInit.downloadChromeDriver());
+
+      try {
+        console.log('Using Chromium: ' + chromeBinaryPath);
+        console.log('Version: ' + childProcess.execSync(chromeBinaryPath + ' --version'));
+      } catch (e) {}
     }
-
-    promises.push(seleniumInit.downloadChromeDriver());
-
-    try {
-      console.log('Using Chromium: ' + chromeBinaryPath);
-      console.log('Version: ' + childProcess.execSync(chromeBinaryPath + ' --version'));
-    } catch (e) {}
 
     return Promise.all(promises)
     .then(function() {
@@ -229,7 +230,7 @@ suite('selenium', function() {
         throw new Error('Firefox binary doesn\'t exist at ' + firefoxBinaryPath + '. Use your installed Firefox binary by setting the FIREFOX environment'.bold.red);
       }
 
-      if (!fs.existsSync(chromeBinaryPath)) {
+      if (process.env.GCM_API_KEY && !fs.existsSync(chromeBinaryPath)) {
         throw new Error('Chrome binary doesn\'t exist at ' + chromeBinaryPath + '. Use your installed Chrome binary by setting the CHROME environment'.bold.red);
       }
     });
@@ -249,7 +250,7 @@ suite('selenium', function() {
     return noRestartTest('firefox');
   });
 
-  if (process.env.TRAVIS_OS_NAME !== 'osx') {
+  if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
     test('send/receive notification without payload with Chrome', function() {
       return noRestartTest('chrome');
     });
@@ -260,7 +261,7 @@ suite('selenium', function() {
   });
 
   /*
-  if (process.env.TRAVIS_OS_NAME !== 'osx') {
+  if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
     test('send/receive notification with payload with Chrome', function() {
       return noRestartTest('chrome', 'marco');
     });
@@ -270,7 +271,7 @@ suite('selenium', function() {
     return restartTest('firefox', undefined, 2);
   });
 
-  if (process.env.TRAVIS_OS_NAME !== 'osx') {
+  if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
     test('send/receive notification without payload with TTL with Chrome (closing and restarting the browser)', function() {
       return restartTest('chrome', undefined, 2);
     });
@@ -281,7 +282,7 @@ suite('selenium', function() {
   });
 
   /*
-  if (process.env.TRAVIS_OS_NAME !== 'osx') {
+  if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
     test('send/receive notification with payload with TTL with Chrome (closing and restarting the browser)', function() {
       return restartTest('chrome', 'marco', 2);
     });
