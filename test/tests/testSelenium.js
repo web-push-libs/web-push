@@ -144,6 +144,7 @@ function startBrowser() {
     return pageLoaded;
   });*/
   driver.wait(function() {
+    console.log('WAIT clientRegistered: ' + server.clientRegistered);
     return server.clientRegistered;
   });
 
