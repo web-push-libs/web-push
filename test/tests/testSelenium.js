@@ -18,12 +18,15 @@ if (!process.env.GCM_API_KEY) {
 }
 
 var firefoxBinaryPath = process.env.FIREFOX;
-if (!firefoxBinaryPath) {
+if (!firefoxBinaryPath || firefoxBinaryPath === 'nightly') {
   if (process.platform === 'linux') {
     firefoxBinaryPath = 'test_tools/firefox/firefox-bin';
   } else if (process.platform === 'darwin') {
     firefoxBinaryPath = 'test_tools/FirefoxNightly.app/Contents/MacOS/firefox-bin';
   }
+} else if (firefoxBinaryPath === 'stable') {
+  // TODO: Download Firefox release.
+  firefoxBinaryPath = childProcess.execSync('which firefox');
 }
 
 console.log('USING FIREFOX: ' + firefoxBinaryPath);
@@ -31,7 +34,7 @@ console.log('System Firefox: ' + childProcess.execSync('which firefox'));
 console.log('Version: ' + childProcess.execSync('firefox -v'));
 
 var chromeBinaryPath = process.env.CHROME;
-if (!chromeBinaryPath) {
+if (!chromeBinaryPath || chromeBinaryPath === 'nightly') {
   if (process.platform === 'linux') {
     chromeBinaryPath = 'test_tools/chrome-linux/chrome';
   } else if (process.platform === 'darwin') {
