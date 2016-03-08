@@ -28,6 +28,7 @@ if (!firefoxBinaryPath) {
 
 console.log('USING FIREFOX: ' + firefoxBinaryPath);
 console.log('System Firefox: ' + childProcess.execSync('which firefox'));
+console.log('Version: ' + childProcess.execSync('firefox -v'));
 
 var chromeBinaryPath = process.env.CHROME;
 if (!chromeBinaryPath) {
