@@ -120,7 +120,15 @@ function downloadFirefoxNightly() {
         fs.writeFileSync(firefoxVersionFile, version, 'utf8');
         if (firefoxVersion !== -Infinity) {
           var firefoxOldFileName = util.format(firefoxFileNameFmt, firefoxVersion, firefoxPlatform);
-          fs.unlinkSync(path.join(destDir, firefoxOldFileName));
+          try {
+            fs.unlinkSync(path.join(destDir, firefoxOldFileName));
+          } catch (ex) {
+            // Only ignore the error if it's a 'file not found' error.
+            if (!ex.code || ex.code !== 'ENOENT') {
+              reject(ex);
+              return;
+            }
+          }
         }
       }
 
