@@ -210,7 +210,7 @@ function restartTest(browser, pushPayload, pushTimeout) {
 }
 
 suite('selenium', function() {
-  this.timeout(60000);
+  this.timeout(180000);
 
   teardown(function(done) {
     server.close(function() {
