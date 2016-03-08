@@ -8,10 +8,11 @@ env:
     - DISPLAY=$(if [[ $TRAVIS_OS_NAME == "linux" ]]; then echo ':99.0'; fi)
     - MOZ_XVFB=$(if [[ $TRAVIS_OS_NAME == "linux" ]]; then echo 1; fi)
   matrix:
-    #- NODE_VERSION="0.12" FIREFOX="nightly" CHROME="nightly"
+    #- NODE_VERSION="0.12"
     #- NODE_VERSION="4" FIREFOX="nightly" CHROME="nightly"
-    - NODE_VERSION="0.12" FIREFOX="stable" CHROME="stable"
-    - NODE_VERSION="4" FIREFOX="stable" CHROME="stable"
+    #- NODE_VERSION="4" FIREFOX="stable" CHROME="stable"
+    - NODE_VERSION="0.12"
+    - NODE_VERSION="4" FIREFOX="stable" CHROME="nightly"
 before_install:
   - rm -rf ~/.nvm
   - git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`)
