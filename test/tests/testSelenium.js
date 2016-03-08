@@ -200,9 +200,10 @@ suite('selenium', function() {
   this.timeout(60000);
 
   teardown(function(done) {
-    driver.quit()
-    .then(function() {
-      server.close(done);
+    server.close(function() {
+      driver.quit()
+      .catch(function() {})
+      .then(done);
     });
   });
 
