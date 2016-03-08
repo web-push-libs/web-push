@@ -201,26 +201,28 @@ suite('selenium', function() {
       console.log('Version: ' + childProcess.execSync(firefoxBinaryPath + ' --version'));
     } catch (e) {}
 
-    chromeBinaryPath = process.env.CHROME;
-    if (!chromeBinaryPath || chromeBinaryPath === 'nightly') {
-      if (process.platform === 'linux') {
-        chromeBinaryPath = 'test_tools/chrome-linux/chrome';
-      } else if (process.platform === 'darwin') {
-        chromeBinaryPath = 'test_tools/chrome-mac/Chromium.app/Contents/MacOS/Chromium';
+    if (process.env.GCM_API_KEY) {
+      chromeBinaryPath = process.env.CHROME;
+      if (!chromeBinaryPath || chromeBinaryPath === 'nightly') {
+        if (process.platform === 'linux') {
+          chromeBinaryPath = 'test_tools/chrome-linux/chrome';
+        } else if (process.platform === 'darwin') {
+          chromeBinaryPath = 'test_tools/chrome-mac/Chromium.app/Contents/MacOS/Chromium';
+        }
+
+        promises.push(seleniumInit.downloadChromiumNightly());
+      } else if (chromeBinaryPath === 'stable') {
+        // TODO: Download Chromium release.
+        chromeBinaryPath = childProcess.execSync('which chromium-browser').toString().replace('\n', '');
       }
 
-      promises.push(seleniumInit.downloadChromiumNightly());
-    } else if (chromeBinaryPath === 'stable') {
-      // TODO: Download Chromium release.
-      chromeBinaryPath = childProcess.execSync('which chromium-browser').toString().replace('\n', '');
+      promises.push(seleniumInit.downloadChromeDriver());
+
+      try {
+        console.log('Using Chromium: ' + chromeBinaryPath);
+        console.log('Version: ' + childProcess.execSync(chromeBinaryPath + ' --version'));
+      } catch (e) {}
     }
-
-    promises.push(seleniumInit.downloadChromeDriver());
-
-    try {
-      console.log('Using Chromium: ' + chromeBinaryPath);
-      console.log('Version: ' + childProcess.execSync(chromeBinaryPath + ' --version'));
-    } catch (e) {}
 
     return Promise.all(promises)
     .then(function() {
@@ -228,7 +230,7 @@ suite('selenium', function() {
         throw new Error('Firefox binary doesn\'t exist at ' + firefoxBinaryPath + '. Use your installed Firefox binary by setting the FIREFOX environment'.bold.red);
       }
 
-      if (!fs.existsSync(chromeBinaryPath)) {
+      if (process.env.GCM_API_KEY && !fs.existsSync(chromeBinaryPath)) {
         throw new Error('Chrome binary doesn\'t exist at ' + chromeBinaryPath + '. Use your installed Chrome binary by setting the CHROME environment'.bold.red);
       }
     });
