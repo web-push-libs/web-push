@@ -89,18 +89,18 @@ function startBrowser() {
       Services.perms.addFromPrincipal(principal, 'desktop-notification', Services.perms.ALLOW_ACTION);
     }
   });
-
-  // This currently doesn't work in Firefox Nightly.
-
   driver.get('https://127.0.0.1:50005');
 
-  /*driver.executeScript(function() {
+  /* XXX: This hack was needed to support Firefox Nightly, but now
+          Firefox won't even stard with the standard Selenium WebDriver.
+  driver.executeScript(function() {
     window.location = 'https://127.0.0.1:50005';
   });
   driver.wait(function() {
-    console.log('WAIT pageLoaded: ' + pageLoaded);
     return pageLoaded;
-  });*/
+  });
+  */
+
   driver.wait(function() {
     return server.clientRegistered;
   });
