@@ -5,6 +5,7 @@ var fse = require('fs-extra');
 var temp = require('temp').track();
 var colors = require('colors');
 var semver = require('semver');
+var childProcess = require('child_process');
 
 if (semver.satisfies(process.version, '0.12')) {
   console.log('selenium-webdriver is incompatible with Node.js v0.12');
@@ -24,11 +25,9 @@ if (!firefoxBinaryPath) {
     firefoxBinaryPath = 'test_tools/FirefoxNightly.app/Contents/MacOS/firefox-bin';
   }
 }
-if (!fs.existsSync(firefoxBinaryPath)) {
-  throw new Error('Firefox binary doesn\'t exist at ' + firefoxBinaryPath + '. Use your installed Firefox binary by setting the FIREFOX environment'.bold.red);
-}
 
 console.log('USING FIREFOX: ' + firefoxBinaryPath);
+console.log('System Firefox: ' + childProcess.execSync('which firefox'));
 
 var chromeBinaryPath = process.env.CHROME;
 if (!chromeBinaryPath) {
@@ -37,12 +36,26 @@ if (!chromeBinaryPath) {
   } else if (process.platform === 'darwin') {
     chromeBinaryPath = 'test_tools/chrome-mac/Chromium.app/Contents/MacOS/Chromium';
   }
+} else if (chromeBinaryPath === 'stable') {
+  if (process.platform === 'linux') {
+    chromeBinaryPath = 'test_tools/stable/chrome-linux/chrome';
+  } else if (process.platform === 'darwin') {
+    chromeBinaryPath = 'test_tools/stable/chrome-mac/Chromium.app/Contents/MacOS/Chromium';
+  }
 }
+
+try {
+  console.log('USING CHROMIUM: ' + chromeBinaryPath);
+  console.log('System Chromium: ' + childProcess.execSync('which chromium-browser'));
+} catch (e) {}
+
+if (!fs.existsSync(firefoxBinaryPath)) {
+  throw new Error('Firefox binary doesn\'t exist at ' + firefoxBinaryPath + '. Use your installed Firefox binary by setting the FIREFOX environment'.bold.red);
+}
+
 if (!fs.existsSync(chromeBinaryPath)) {
   throw new Error('Chrome binary doesn\'t exist at ' + chromeBinaryPath + '. Use your installed Chrome binary by setting the CHROME environment'.bold.red);
 }
-
-console.log('USING CHROME: ' + chromeBinaryPath);
 
 process.env.PATH = process.env.PATH + ':test_tools/';
 

@@ -44,9 +44,15 @@ function unzip(dir, file) {
 }
 
 var destDir = 'test_tools';
+var stableDestDir = 'test_tools/stable';
 
 try {
   fs.mkdirSync(destDir);
+} catch (e) {
+}
+
+try {
+  fs.mkdirSync(stableDestDir);
 } catch (e) {
 }
 
@@ -118,7 +124,7 @@ request(firefoxBaseURL + 'test_packages.json', function(error, response, body) {
 
 // Download Chrome Canary
 
-/*var chromePlatform, chromeZipPlatform;
+var chromePlatform, chromeZipPlatform;
 if (process.platform === 'linux') {
   chromeZipPlatform = 'linux';
   chromePlatform = 'Linux_';
@@ -132,7 +138,7 @@ if (process.platform === 'linux') {
   chromePlatform = 'Mac';
 }
 
-var chromeVersionFile = path.join(destDir, 'chromeVersion');
+/*var chromeVersionFile = path.join(destDir, 'chromeVersion');
 var chromeVersion = -Infinity;
 if (fs.existsSync(chromeVersionFile)) {
   chromeVersion = Number(fs.readFileSync(chromeVersionFile, 'utf8'));
@@ -153,6 +159,13 @@ wget(destDir, 'https://www.googleapis.com/download/storage/v1/b/chromium-browser
     });
   }
 });*/
+
+// Download Chromium release
+
+wget(stableDestDir, 'https://download-chromium.appspot.com/dl/' + chromePlatform)
+.then(function() {
+  unzip(stableDestDir, path.join(stableDestDir, chromePlatform));
+});
 
 // Download ChromeDriver
 
