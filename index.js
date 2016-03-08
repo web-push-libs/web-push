@@ -37,6 +37,7 @@ function encrypt(userPublicKey, payload) {
   var cipherText = ece.encrypt(payload, {
     keyid: 'webpushKey',
     salt: urlBase64.encode(salt),
+    padSize: 1, // use the aesgcm128 encoding until aesgcm is well supported
   });
 
   return {
