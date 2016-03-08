@@ -40,3 +40,21 @@ The [Service Worker Cookbook](https://serviceworke.rs/) is full of Web Push exam
 - [Mercurius](https://github.com/marco-c/mercurius) - A generic Web Push server. See also the blog post on the Mozilla Hacks blog: https://hacks.mozilla.org/2015/12/web-push-notifications-from-irssi/.
 - TicTacToe with offline and Push support using Service Workers - https://github.com/marco-c/tictactoe
 - Push API MDN demo - https://github.com/chrisdavidmills/push-api-demo - https://developer.mozilla.org/en-US/docs/Web/API/Push_API/Using_the_Push_API
+
+## Running tests
+
+Selenium tests require Firefox or Chromium/Chrome. You can either use your installed versions or let the tests download the browsers for you.
+
+```
+FIREFOX="stable" CHROME="nightly" npm test
+```
+
+Possible values for FIREFOX and CHROME are:
+- "stable", the test will automatically download the stable version;
+- "nightly", the test will automatically download the nightly/canary version;
+- path to the Firefox/Chromium binary, the test will use it instead of automatically download the browser for you.
+
+In order to make the tests run in Chromium/Chrome, you also need a GCM API key and you need to define a GCM_API_KEY environment variable:
+```
+GCM_API_KEY=your_API_key FIREFOX="stable" CHROME="nightly" npm test
+```
