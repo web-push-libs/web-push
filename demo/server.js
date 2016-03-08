@@ -50,6 +50,7 @@ function createServer(pushPayload, pushTimeout) {
 
         console.log('Push Application Server - Register: ' + obj.endpoint);
 
+        server.clientRegistered = true;
         if (server.onClientRegistered && server.onClientRegistered()) {
           return;
         }
@@ -87,6 +88,7 @@ function createServer(pushPayload, pushTimeout) {
   }).listen(50005);
 
   server.notificationSent = false;
+  server.clientRegistered = false;
 
   server.listening = false;
   server.on('listening', function() {

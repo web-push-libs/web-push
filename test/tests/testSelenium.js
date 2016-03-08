@@ -143,6 +143,9 @@ function startBrowser() {
     console.log('WAIT pageLoaded: ' + pageLoaded);
     return pageLoaded;
   });*/
+  driver.wait(function() {
+    return server.clientRegistered;
+  });
 
   return driver;
 }
@@ -213,10 +216,15 @@ suite('selenium', function() {
   this.timeout(180000);
 
   teardown(function(done) {
-    server.close(function() {
-      driver.quit()
-      .catch(function() {})
-      .then(done);
+    console.log('teardown1');
+    driver.quit()
+    .catch(function() {})
+    .then(function() {
+      console.log('teardown2');
+      server.close(function() {
+        console.log('teardown3');
+        done();
+      });
     });
   });
 
