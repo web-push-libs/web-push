@@ -4,6 +4,7 @@
   "description": "Web Push library for Node.js",
   "main": "index.js",
   "scripts": {
+    "lint": "./node_modules/.bin/eslint index.js test/",
     "test": "node --harmony node_modules/.bin/istanbul cover node_modules/.bin/_mocha -- --ui tdd test/test*"
   },
   "repository": {
