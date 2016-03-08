@@ -66,61 +66,67 @@ if (process.arch !== 'x86' && process.arch !== 'x64') {
 
 // Download Firefox Nightly
 
-/*var firefoxVersionFile = path.join(destDir, 'firefoxVersion');
-var firefoxVersion = -Infinity;
-if (fs.existsSync(firefoxVersionFile)) {
-  firefoxVersion = Number(fs.readFileSync(firefoxVersionFile, 'utf8'));
-}
-var firefoxFileNameFmt = 'firefox-%d.0a1.en-US.%s';
-var firefoxBaseURL = 'https://ftp.mozilla.org/pub/mozilla.org/firefox/nightly/latest-mozilla-central/';
-
-var firefoxPlatform;
-if (process.platform === 'linux') {
-  firefoxPlatform = 'linux-';
-  if (process.arch === 'x86') {
-    firefoxPlatform += 'i686';
-  } else if (process.arch === 'x64') {
-    firefoxPlatform += 'x86_64';
-  }
-  firefoxPlatform += '.tar.bz2'
-} else if (process.platform === 'darwin') {
-  firefoxPlatform = 'mac.dmg';
-}
-
-request(firefoxBaseURL + 'test_packages.json', function(error, response, body) {
-  if (error) {
-    console.error(error);
-    return;
-  }
-
-  var obj = JSON.parse(body);
-
-  var version = Number(obj.mochitest[0].substr(8, 2));
-
-  if (version > firefoxVersion) {
-    fs.writeFileSync(firefoxVersionFile, version, 'utf8');
-    if (firefoxVersion !== -Infinity) {
-      var firefoxOldFileName = util.format(firefoxFileNameFmt, firefoxVersion, firefoxPlatform);
-      fs.unlinkSync(path.join(destDir, firefoxOldFileName));
+function downloadFirefoxNightly() {
+  return new Promise(function(resolve, reject) {
+    var firefoxVersionFile = path.join(destDir, 'firefoxVersion');
+    var firefoxVersion = -Infinity;
+    if (fs.existsSync(firefoxVersionFile)) {
+      firefoxVersion = Number(fs.readFileSync(firefoxVersionFile, 'utf8'));
     }
-  }
+    var firefoxFileNameFmt = 'firefox-%d.0a1.en-US.%s';
+    var firefoxBaseURL = 'https://ftp.mozilla.org/pub/mozilla.org/firefox/nightly/latest-mozilla-central/';
 
-  var firefoxFileName = util.format(firefoxFileNameFmt, version, firefoxPlatform);
-
-  var firefoxURL = firefoxBaseURL + firefoxFileName;
-
-  wget(destDir, firefoxURL)
-  .then(function() {
+    var firefoxPlatform;
     if (process.platform === 'linux') {
-      untar(destDir, path.join(destDir, firefoxFileName));
+      firefoxPlatform = 'linux-';
+      if (process.arch === 'x86') {
+        firefoxPlatform += 'i686';
+      } else if (process.arch === 'x64') {
+        firefoxPlatform += 'x86_64';
+      }
+      firefoxPlatform += '.tar.bz2'
     } else if (process.platform === 'darwin') {
-      dmg.mount(path.join(destDir, firefoxFileName), function(err, extractedPath) {
-        fse.copySync(path.join(extractedPath, 'FirefoxNightly.app'), path.join(destDir, 'FirefoxNightly.app'));
-        dmg.unmount(extractedPath, function() {});
-      });
+      firefoxPlatform = 'mac.dmg';
     }
+
+    request(firefoxBaseURL + 'test_packages.json', function(error, response, body) {
+      if (error) {
+        console.error(error);
+        reject(error);
+        return;
+      }
+
+      var obj = JSON.parse(body);
+
+      var version = Number(obj.mochitest[0].substr(8, 2));
+
+      if (version > firefoxVersion) {
+        fs.writeFileSync(firefoxVersionFile, version, 'utf8');
+        if (firefoxVersion !== -Infinity) {
+          var firefoxOldFileName = util.format(firefoxFileNameFmt, firefoxVersion, firefoxPlatform);
+          fs.unlinkSync(path.join(destDir, firefoxOldFileName));
+        }
+      }
+
+      var firefoxFileName = util.format(firefoxFileNameFmt, version, firefoxPlatform);
+
+      var firefoxURL = firefoxBaseURL + firefoxFileName;
+
+      wget(destDir, firefoxURL)
+      .then(function() {
+        if (process.platform === 'linux') {
+          untar(destDir, path.join(destDir, firefoxFileName))
+          .then(resolve);
+        } else if (process.platform === 'darwin') {
+          dmg.mount(path.join(destDir, firefoxFileName), function(err, extractedPath) {
+            fse.copySync(path.join(extractedPath, 'FirefoxNightly.app'), path.join(destDir, 'FirefoxNightly.app'));
+            dmg.unmount(extractedPath, resolve);
+          });
+        }
+      });
+    });
   });
-});*/
+}
 
 // Download Chrome Canary
 
@@ -138,54 +144,58 @@ if (process.platform === 'linux') {
   chromePlatform = 'Mac';
 }
 
-/*var chromeVersionFile = path.join(destDir, 'chromeVersion');
-var chromeVersion = -Infinity;
-if (fs.existsSync(chromeVersionFile)) {
-  chromeVersion = Number(fs.readFileSync(chromeVersionFile, 'utf8'));
-}
-
-wget(destDir, 'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/' + chromePlatform + '%2FLAST_CHANGE?alt=media')
-.then(function() {
-  var newVersion = Number(fs.readFileSync(path.join(destDir, chromePlatform + '%2FLAST_CHANGE?alt=media'), 'utf8'));
-  fs.renameSync(path.join(destDir, chromePlatform + '%2FLAST_CHANGE?alt=media'), chromeVersionFile);
-  if (newVersion > chromeVersion) {
-    fse.removeSync('test_tools/chrome-' + chromeZipPlatform);
-    wget(destDir, 'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/' + chromePlatform + '%2F' + newVersion + '%2Fchrome-' + chromeZipPlatform + '.zip?alt=media')
-    .then(function() {
-      unzip(destDir, 'test_tools/' + chromePlatform + '%2F' + newVersion + '%2Fchrome-' + chromeZipPlatform + '.zip?alt=media')
-      .then(function() {
-        fs.unlink('test_tools/' + chromePlatform + '%2F' + newVersion + '%2Fchrome-' + chromeZipPlatform + '.zip?alt=media');
-      });
-    });
+function downloadChromiumNightly() {
+  var chromeVersionFile = path.join(destDir, 'chromeVersion');
+  var chromeVersion = -Infinity;
+  if (fs.existsSync(chromeVersionFile)) {
+    chromeVersion = Number(fs.readFileSync(chromeVersionFile, 'utf8'));
   }
-});*/
 
-// Download Chromium release
-
-wget(stableDestDir, 'https://download-chromium.appspot.com/dl/' + chromePlatform)
-.then(function() {
-  unzip(stableDestDir, path.join(stableDestDir, chromePlatform));
-});
+  return wget(destDir, 'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/' + chromePlatform + '%2FLAST_CHANGE?alt=media')
+  .then(function() {
+    var newVersion = Number(fs.readFileSync(path.join(destDir, chromePlatform + '%2FLAST_CHANGE?alt=media'), 'utf8'));
+    fs.renameSync(path.join(destDir, chromePlatform + '%2FLAST_CHANGE?alt=media'), chromeVersionFile);
+    if (newVersion > chromeVersion) {
+      fse.removeSync('test_tools/chrome-' + chromeZipPlatform);
+      return wget(destDir, 'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/' + chromePlatform + '%2F' + newVersion + '%2Fchrome-' + chromeZipPlatform + '.zip?alt=media')
+      .then(function() {
+        return unzip(destDir, 'test_tools/' + chromePlatform + '%2F' + newVersion + '%2Fchrome-' + chromeZipPlatform + '.zip?alt=media')
+        .then(function() {
+          fs.unlinkSync('test_tools/' + chromePlatform + '%2F' + newVersion + '%2Fchrome-' + chromeZipPlatform + '.zip?alt=media');
+        });
+      });
+    }
+  });
+}
 
 // Download ChromeDriver
 
-var chromeDriverPlatform;
-if (process.platform === 'linux') {
-  chromeDriverPlatform = 'linux';
-  if (process.arch === 'x86') {
-    chromeDriverPlatform += '32';
-  } else if (process.arch === 'x64') {
-    chromeDriverPlatform += '64';
+function downloadChromeDriver() {
+  var chromeDriverPlatform;
+  if (process.platform === 'linux') {
+    chromeDriverPlatform = 'linux';
+    if (process.arch === 'x86') {
+      chromeDriverPlatform += '32';
+    } else if (process.arch === 'x64') {
+      chromeDriverPlatform += '64';
+    }
+  } else if (process.platform === 'darwin') {
+    chromeDriverPlatform = 'mac32';
   }
-} else if (process.platform === 'darwin') {
-  chromeDriverPlatform = 'mac32';
+
+  return wget(destDir, 'http://chromedriver.storage.googleapis.com/LATEST_RELEASE')
+  .then(function() {
+    var version = fs.readFileSync(path.join(destDir, 'LATEST_RELEASE'), 'utf8').replace('\n', '');
+    return wget(destDir, 'http://chromedriver.storage.googleapis.com/' + version + '/chromedriver_' + chromeDriverPlatform + '.zip')
+    .then(function() {
+      return unzip(destDir, 'test_tools/chromedriver_' + chromeDriverPlatform + '.zip');
+    });
+  });
 }
 
-wget(destDir, 'http://chromedriver.storage.googleapis.com/LATEST_RELEASE')
-.then(function() {
-  var version = fs.readFileSync(path.join(destDir, 'LATEST_RELEASE'), 'utf8').replace('\n', '');
-  wget(destDir, 'http://chromedriver.storage.googleapis.com/' + version + '/chromedriver_' + chromeDriverPlatform + '.zip')
-  .then(function() {
-    unzip(destDir, 'test_tools/chromedriver_' + chromeDriverPlatform + '.zip');
-  });
-});
+module.exports = {
+  downloadFirefoxNightly: downloadFirefoxNightly,
+  downloadChromiumNightly: downloadChromiumNightly,
+  downloadChromiumStable: downloadChromiumStable,
+  downloadChromeDriver: downloadChromeDriver,
+};

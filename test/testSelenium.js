@@ -6,6 +6,7 @@ var temp = require('temp').track();
 var colors = require('colors');
 var semver = require('semver');
 var childProcess = require('child_process');
+var seleniumInit = require('./selenium-init');
 
 if (semver.satisfies(process.version, '0.12')) {
   console.log('selenium-webdriver is incompatible with Node.js v0.12');
@@ -17,49 +18,7 @@ if (!process.env.GCM_API_KEY) {
   return;
 }
 
-var firefoxBinaryPath = process.env.FIREFOX;
-if (!firefoxBinaryPath || firefoxBinaryPath === 'nightly') {
-  if (process.platform === 'linux') {
-    firefoxBinaryPath = 'test_tools/firefox/firefox-bin';
-  } else if (process.platform === 'darwin') {
-    firefoxBinaryPath = 'test_tools/FirefoxNightly.app/Contents/MacOS/firefox-bin';
-  }
-} else if (firefoxBinaryPath === 'stable') {
-  // TODO: Download Firefox release.
-  firefoxBinaryPath = childProcess.execSync('which firefox').toString().replace('\n', '');
-}
-
-console.log('USING FIREFOX: ' + firefoxBinaryPath);
-console.log('System Firefox: ' + childProcess.execSync('which firefox'));
-console.log('Version: ' + childProcess.execSync('firefox -v'));
-
-var chromeBinaryPath = process.env.CHROME;
-if (!chromeBinaryPath || chromeBinaryPath === 'nightly') {
-  if (process.platform === 'linux') {
-    chromeBinaryPath = 'test_tools/chrome-linux/chrome';
-  } else if (process.platform === 'darwin') {
-    chromeBinaryPath = 'test_tools/chrome-mac/Chromium.app/Contents/MacOS/Chromium';
-  }
-} else if (chromeBinaryPath === 'stable') {
-  if (process.platform === 'linux') {
-    chromeBinaryPath = 'test_tools/stable/chrome-linux/chrome';
-  } else if (process.platform === 'darwin') {
-    chromeBinaryPath = 'test_tools/stable/chrome-mac/Chromium.app/Contents/MacOS/Chromium';
-  }
-}
-
-try {
-  console.log('USING CHROMIUM: ' + chromeBinaryPath);
-  console.log('System Chromium: ' + childProcess.execSync('which chromium-browser'));
-} catch (e) {}
-
-if (!fs.existsSync(firefoxBinaryPath)) {
-  throw new Error('Firefox binary doesn\'t exist at ' + firefoxBinaryPath + '. Use your installed Firefox binary by setting the FIREFOX environment'.bold.red);
-}
-
-if (!fs.existsSync(chromeBinaryPath)) {
-  throw new Error('Chrome binary doesn\'t exist at ' + chromeBinaryPath + '. Use your installed Chrome binary by setting the CHROME environment'.bold.red);
-}
+var firefoxBinaryPath, chromeBinaryPath;
 
 process.env.PATH = process.env.PATH + ':test_tools/';
 
@@ -219,6 +178,68 @@ function restartTest(browser, pushPayload, pushTimeout) {
 
 suite('selenium', function() {
   this.timeout(180000);
+
+  suiteSetup(function() {
+    this.timeout(0);
+
+    var promises = [];
+
+    firefoxBinaryPath = process.env.FIREFOX;
+    if (!firefoxBinaryPath || firefoxBinaryPath === 'nightly') {
+      if (process.platform === 'linux') {
+        firefoxBinaryPath = 'test_tools/firefox/firefox-bin';
+      } else if (process.platform === 'darwin') {
+        firefoxBinaryPath = 'test_tools/FirefoxNightly.app/Contents/MacOS/firefox-bin';
+      }
+
+      promises.push(seleniumInit.downloadFirefoxNightly());
+    } else if (firefoxBinaryPath === 'stable') {
+      // TODO: Download Firefox release.
+      firefoxBinaryPath = childProcess.execSync('which firefox').toString().replace('\n', '');
+    }
+
+    console.log('USING FIREFOX: ' + firefoxBinaryPath);
+    console.log('System Firefox: ' + childProcess.execSync('which firefox'));
+    console.log('Version: ' + childProcess.execSync('firefox -v'));
+
+    chromeBinaryPath = process.env.CHROME;
+    if (!chromeBinaryPath || chromeBinaryPath === 'nightly') {
+      if (process.platform === 'linux') {
+        chromeBinaryPath = 'test_tools/chrome-linux/chrome';
+      } else if (process.platform === 'darwin') {
+        chromeBinaryPath = 'test_tools/chrome-mac/Chromium.app/Contents/MacOS/Chromium';
+      }
+
+      promises.push(seleniumInit.downloadChromiumNightly());
+    } else if (chromeBinaryPath === 'stable') {
+      if (process.platform === 'linux') {
+        chromeBinaryPath = 'test_tools/stable/chrome-linux/chrome';
+      } else if (process.platform === 'darwin') {
+        chromeBinaryPath = 'test_tools/stable/chrome-mac/Chromium.app/Contents/MacOS/Chromium';
+      }
+
+      // TODO: Download Chromium release.
+      chromeBinaryPath = childProcess.execSync('which chromium-browser').toString().replace('\n', '');
+    }
+
+    promises.push(seleniumInit.downloadChromeDriver());
+
+    try {
+      console.log('USING CHROMIUM: ' + chromeBinaryPath);
+      console.log('System Chromium: ' + childProcess.execSync('which chromium-browser'));
+    } catch (e) {}
+
+    return Promise.all(promises)
+    .then(function() {
+      if (!fs.existsSync(firefoxBinaryPath)) {
+        throw new Error('Firefox binary doesn\'t exist at ' + firefoxBinaryPath + '. Use your installed Firefox binary by setting the FIREFOX environment'.bold.red);
+      }
+
+      if (!fs.existsSync(chromeBinaryPath)) {
+        throw new Error('Chrome binary doesn\'t exist at ' + chromeBinaryPath + '. Use your installed Chrome binary by setting the CHROME environment'.bold.red);
+      }
+    });
+  });
 
   teardown(function(done) {
     console.log('teardown1');
