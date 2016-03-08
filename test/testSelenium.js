@@ -200,7 +200,7 @@ suite('selenium', function() {
 
     console.log('USING FIREFOX: ' + firefoxBinaryPath);
     console.log('System Firefox: ' + childProcess.execSync('which firefox'));
-    console.log('Version: ' + childProcess.execSync('firefox -v'));
+    console.log('Version: ' + childProcess.execSync(firefoxBinaryPath + ' -v'));
 
     chromeBinaryPath = process.env.CHROME;
     if (!chromeBinaryPath || chromeBinaryPath === 'nightly') {
@@ -221,6 +221,7 @@ suite('selenium', function() {
     try {
       console.log('USING CHROMIUM: ' + chromeBinaryPath);
       console.log('System Chromium: ' + childProcess.execSync('which chromium-browser'));
+      console.log('Version: ' + childProcess.execSync(chromeBinaryPath + ' --version'));
     } catch (e) {}
 
     return Promise.all(promises)
