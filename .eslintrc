@@ -1,0 +1,8 @@
+{
+  "parserOptions": {
+    "sourceType": "module"
+  },
+  "rules": {
+    "prefer-const": 2
+  }
+}
