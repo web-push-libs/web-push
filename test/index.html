@@ -1,3 +1,11 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Web Push Demo</title>
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+<script type="text/javascript">
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('service-worker.js')
   .then(function(registration) {
@@ -39,3 +47,6 @@ navigator.serviceWorker.ready
     }),
   });
 });
+</script>
+</body>
+</html>

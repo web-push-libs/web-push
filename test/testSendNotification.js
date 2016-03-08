@@ -28,7 +28,7 @@ suite('sendNotification', function() {
   var userPrivateKey = userCurve.getPrivateKey();
 
   function startServer(message, TTL, statusCode, isGCM) {
-    var pem = fs.readFileSync('demo/cert.pem');
+    var pem = fs.readFileSync('test/cert.pem');
 
     var options = {
       key: pem,
