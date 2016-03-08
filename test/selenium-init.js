@@ -44,15 +44,9 @@ function unzip(dir, file) {
 }
 
 var destDir = 'test_tools';
-var stableDestDir = 'test_tools/stable';
 
 try {
   fs.mkdirSync(destDir);
-} catch (e) {
-}
-
-try {
-  fs.mkdirSync(stableDestDir);
 } catch (e) {
 }
 
@@ -196,6 +190,5 @@ function downloadChromeDriver() {
 module.exports = {
   downloadFirefoxNightly: downloadFirefoxNightly,
   downloadChromiumNightly: downloadChromiumNightly,
-  downloadChromiumStable: downloadChromiumStable,
   downloadChromeDriver: downloadChromeDriver,
 };

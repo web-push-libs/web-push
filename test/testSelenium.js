@@ -212,12 +212,6 @@ suite('selenium', function() {
 
       promises.push(seleniumInit.downloadChromiumNightly());
     } else if (chromeBinaryPath === 'stable') {
-      if (process.platform === 'linux') {
-        chromeBinaryPath = 'test_tools/stable/chrome-linux/chrome';
-      } else if (process.platform === 'darwin') {
-        chromeBinaryPath = 'test_tools/stable/chrome-mac/Chromium.app/Contents/MacOS/Chromium';
-      }
-
       // TODO: Download Chromium release.
       chromeBinaryPath = childProcess.execSync('which chromium-browser').toString().replace('\n', '');
     }
