@@ -11,6 +11,7 @@ env:
     #- NODE_VERSION="4" FIREFOX="stable" CHROME="stable"
     - NODE_VERSION="0.12"
     - NODE_VERSION="4" FIREFOX="stable" CHROME="nightly"
+    - NODE_VERSION="stable" FIREFOX="stable" CHROME="nightly"
 before_install:
   - rm -rf ~/.nvm
   - git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`)
