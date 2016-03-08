@@ -1,6 +1,6 @@
 var assert    = require('assert');
 var crypto    = require('crypto');
-var webPush   = require('../../index');
+var webPush   = require('../index');
 var ece       = require('http_ece');
 var urlBase64 = require('urlsafe-base64');
 
@@ -23,7 +23,8 @@ suite('encrypt', function() {
 
     return ece.decrypt(encrypted.cipherText, {
       keyid: 'webpushKey',
-      salt: urlBase64.encode(encrypted.salt)
+      salt: urlBase64.encode(encrypted.salt),
+      padSize: 1,
     });
   }
 

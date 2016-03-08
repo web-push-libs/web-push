@@ -4,7 +4,7 @@
   "description": "Web Push library for Node.js",
   "main": "index.js",
   "scripts": {
-    "test": "node --harmony node_modules/.bin/istanbul cover _mocha -- --ui tdd test/tests/"
+    "test": "node --harmony node_modules/.bin/istanbul cover node_modules/.bin/_mocha -- --ui tdd test/test*"
   },
   "repository": {
     "type": "git",
@@ -31,6 +31,7 @@
     "dmg": "^0.1.0",
     "fs-extra": "^0.26.5",
     "istanbul": "^0.4.2",
+    "mocha": "^2.4.5",
     "request": "^2.69.0",
     "selenium-webdriver": "^2.52.0",
     "semver": "^5.1.0",

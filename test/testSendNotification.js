@@ -2,7 +2,7 @@ var assert    = require('assert');
 var crypto    = require('crypto');
 var https     = require('https');
 var fs        = require('fs');
-var webPush   = require('../../index');
+var webPush   = require('../index');
 var ece       = require('http_ece');
 var urlBase64 = require('urlsafe-base64');
 var semver    = require('semver');
@@ -65,6 +65,7 @@ suite('sendNotification', function() {
           var decrypted = ece.decrypt(body, {
             keyid: 'webpushKey',
             salt: salt,
+            padSize: 1,
           });
 
           assert(decrypted.equals(new Buffer(message)), "Cipher text correctly decoded");
