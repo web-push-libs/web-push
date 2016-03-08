@@ -5,6 +5,8 @@ var fse = require('fs-extra');
 var temp = require('temp').track();
 var colors = require('colors');
 var semver = require('semver');
+var childProcess = require('child_process');
+var seleniumInit = require('./selenium-init');
 
 if (semver.satisfies(process.version, '0.12')) {
   console.log('selenium-webdriver is incompatible with Node.js v0.12');
@@ -16,36 +18,14 @@ if (!process.env.GCM_API_KEY) {
   return;
 }
 
-var firefoxBinaryPath = process.env.FIREFOX;
-if (!firefoxBinaryPath) {
-  if (process.platform === 'linux') {
-    firefoxBinaryPath = 'test_tools/firefox/firefox-bin';
-  } else if (process.platform === 'darwin') {
-    firefoxBinaryPath = 'test_tools/FirefoxNightly.app/Contents/MacOS/firefox-bin';
-  }
-}
-if (!fs.existsSync(firefoxBinaryPath)) {
-  throw new Error('Firefox binary doesn\'t exist at ' + firefoxBinaryPath + '. Use your installed Firefox binary by setting the FIREFOX environment'.bold.red);
-}
-
-var chromeBinaryPath = process.env.CHROME;
-if (!chromeBinaryPath) {
-  if (process.platform === 'linux') {
-    chromeBinaryPath = 'test_tools/chrome-linux/chrome';
-  } else if (process.platform === 'darwin') {
-    chromeBinaryPath = 'test_tools/chrome-mac/Chromium.app/Contents/MacOS/Chromium';
-  }
-}
-if (!fs.existsSync(chromeBinaryPath)) {
-  throw new Error('Chrome binary doesn\'t exist at ' + chromeBinaryPath + '. Use your installed Chrome binary by setting the CHROME environment'.bold.red);
-}
+var firefoxBinaryPath, chromeBinaryPath;
 
 process.env.PATH = process.env.PATH + ':test_tools/';
 
 var pageLoaded = false;
 var clientRegistered = 0;
 
-var createServer = require('../../demo/server');
+var createServer = require('../demo/server');
 
 var server;
 function startServer(pushPayload, pushTimeout) {
@@ -109,15 +89,20 @@ function startBrowser() {
       Services.perms.addFromPrincipal(principal, 'desktop-notification', Services.perms.ALLOW_ACTION);
     }
   });
-  /*
-  This currently doesn't work in Firefox Nightly.
   driver.get('https://127.0.0.1:50005');
-  */
+
+  /* XXX: This hack was needed to support Firefox Nightly, but now
+          Firefox won't even stard with the standard Selenium WebDriver.
   driver.executeScript(function() {
     window.location = 'https://127.0.0.1:50005';
   });
   driver.wait(function() {
     return pageLoaded;
+  });
+  */
+
+  driver.wait(function() {
+    return server.clientRegistered;
   });
 
   return driver;
@@ -186,13 +171,72 @@ function restartTest(browser, pushPayload, pushTimeout) {
 }
 
 suite('selenium', function() {
-  this.timeout(0);
+  this.timeout(180000);
+
+  suiteSetup(function() {
+    this.timeout(0);
+
+    var promises = [];
+
+    firefoxBinaryPath = process.env.FIREFOX;
+    if (!firefoxBinaryPath || firefoxBinaryPath === 'nightly') {
+      if (process.platform === 'linux') {
+        firefoxBinaryPath = 'test_tools/firefox/firefox-bin';
+      } else if (process.platform === 'darwin') {
+        firefoxBinaryPath = 'test_tools/FirefoxNightly.app/Contents/MacOS/firefox-bin';
+      }
+
+      promises.push(seleniumInit.downloadFirefoxNightly());
+    } else if (firefoxBinaryPath === 'stable') {
+      // TODO: Download Firefox release.
+      firefoxBinaryPath = childProcess.execSync('which firefox').toString().replace('\n', '');
+    }
+
+    try {
+      console.log('Using Firefox: ' + firefoxBinaryPath);
+      console.log('Version: ' + childProcess.execSync(firefoxBinaryPath + ' --version'));
+    } catch (e) {}
+
+    chromeBinaryPath = process.env.CHROME;
+    if (!chromeBinaryPath || chromeBinaryPath === 'nightly') {
+      if (process.platform === 'linux') {
+        chromeBinaryPath = 'test_tools/chrome-linux/chrome';
+      } else if (process.platform === 'darwin') {
+        chromeBinaryPath = 'test_tools/chrome-mac/Chromium.app/Contents/MacOS/Chromium';
+      }
+
+      promises.push(seleniumInit.downloadChromiumNightly());
+    } else if (chromeBinaryPath === 'stable') {
+      // TODO: Download Chromium release.
+      chromeBinaryPath = childProcess.execSync('which chromium-browser').toString().replace('\n', '');
+    }
+
+    promises.push(seleniumInit.downloadChromeDriver());
+
+    try {
+      console.log('Using Chromium: ' + chromeBinaryPath);
+      console.log('Version: ' + childProcess.execSync(chromeBinaryPath + ' --version'));
+    } catch (e) {}
+
+    return Promise.all(promises)
+    .then(function() {
+      if (!fs.existsSync(firefoxBinaryPath)) {
+        throw new Error('Firefox binary doesn\'t exist at ' + firefoxBinaryPath + '. Use your installed Firefox binary by setting the FIREFOX environment'.bold.red);
+      }
+
+      if (!fs.existsSync(chromeBinaryPath)) {
+        throw new Error('Chrome binary doesn\'t exist at ' + chromeBinaryPath + '. Use your installed Chrome binary by setting the CHROME environment'.bold.red);
+      }
+    });
+  });
 
   teardown(function(done) {
-    server.close(function() {
-      driver.quit()
-      .catch(function() {})
-      .then(done);
+    driver.quit()
+    .catch(function() {})
+    .then(function() {
+      server.close(function() {
+        done();
+      });
     });
   });
 
