@@ -44,9 +44,15 @@ function unzip(dir, file) {
 }
 
 var destDir = 'test_tools';
+var stableDestDir = 'test_tools/stable'
 
 try {
   fs.mkdirSync(destDir);
+} catch (e) {
+}
+
+try {
+  fs.mkdirSync(stableDestDir);
 } catch (e) {
 }
 
@@ -56,6 +62,29 @@ if (process.platform !== 'linux' && process.platform !== 'darwin') {
 
 if (process.arch !== 'x86' && process.arch !== 'x64') {
   throw new Error('Architecture ' + process.arch + ' not supported.');
+}
+
+function getFirefoxVersions() {
+  function majorVersion(version) {
+    return parseInt(version.substr(0, version.indexOf('.')), 10);
+  }
+
+  return new Promise(function(resolve, reject) {
+    request('https://svn.mozilla.org/libs/product-details/json/firefox_versions.json', function(error, response, body) {
+      if (error) {
+        console.error(error);
+        reject(error);
+        return;
+      }
+
+      var obj = JSON.parse(body);
+
+      resolve({
+        release: majorVersion(obj.LATEST_FIREFOX_VERSION),
+        nightly: majorVersion(obj.FIREFOX_AURORA) + 1,
+      });
+    });
+  });
 }
 
 // Download Firefox Nightly
@@ -83,22 +112,23 @@ function downloadFirefoxNightly() {
       firefoxPlatform = 'mac.dmg';
     }
 
-    request(firefoxBaseURL + 'test_packages.json', function(error, response, body) {
-      if (error) {
-        console.error(error);
-        reject(error);
-        return;
-      }
-
-      var obj = JSON.parse(body);
-
-      var version = Number(obj.mochitest[0].substr(8, 2));
+    getFirefoxVersions()
+    .then(function(versions) {
+      var version = versions.nightly;
 
       if (version > firefoxVersion) {
         fs.writeFileSync(firefoxVersionFile, version, 'utf8');
         if (firefoxVersion !== -Infinity) {
           var firefoxOldFileName = util.format(firefoxFileNameFmt, firefoxVersion, firefoxPlatform);
-          fs.unlinkSync(path.join(destDir, firefoxOldFileName));
+          try {
+            fs.unlinkSync(path.join(destDir, firefoxOldFileName));
+          } catch (ex) {
+            // Only ignore the error if it's a 'file not found' error.
+            if (!ex.code || ex.code !== 'ENOENT') {
+              reject(ex);
+              return;
+            }
+          }
         }
       }
 
@@ -118,6 +148,44 @@ function downloadFirefoxNightly() {
           });
         }
       });
+    });
+  });
+}
+
+// Download Firefox Release
+
+function downloadFirefoxRelease() {
+  return new Promise(function(resolve, reject) {
+    var firefoxPlatform;
+    if (process.platform === 'linux') {
+      firefoxPlatform = 'linux';
+      if (process.arch === 'x64') {
+        firefoxPlatform += '64';
+      }
+    } else if (process.platform === 'darwin') {
+      firefoxPlatform = 'osx';
+    }
+
+    function getFile() {
+      var files = fs.readdirSync(stableDestDir);
+      return files.find(function(file) {
+        return file.indexOf('index.html?') === 0;
+      });
+    }
+
+    var fileName = 'index.html?product=firefox-latest&lang=en-US&os=' + firefoxPlatform;
+
+    wget(stableDestDir, 'https://download.mozilla.org/?product=firefox-latest&lang=en-US&os=' + firefoxPlatform)
+    .then(function() {
+      if (process.platform === 'linux') {
+        untar(stableDestDir, path.join(stableDestDir, fileName))
+        .then(resolve);
+      } else if (process.platform === 'darwin') {
+        dmg.mount(path.join(stableDestDir, fileName), function(err, extractedPath) {
+          fse.copySync(path.join(extractedPath, 'Firefox.app'), path.join(stableDestDir, 'Firefox.app'));
+          dmg.unmount(extractedPath, resolve);
+        });
+      }
     });
   });
 }
@@ -189,6 +257,7 @@ function downloadChromeDriver() {
 
 module.exports = {
   downloadFirefoxNightly: downloadFirefoxNightly,
+  downloadFirefoxRelease: downloadFirefoxRelease,
   downloadChromiumNightly: downloadChromiumNightly,
   downloadChromeDriver: downloadChromeDriver,
 };

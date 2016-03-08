@@ -188,8 +188,13 @@ suite('selenium', function() {
 
       promises.push(seleniumInit.downloadFirefoxNightly());
     } else if (firefoxBinaryPath === 'stable') {
-      // TODO: Download Firefox release.
-      firefoxBinaryPath = childProcess.execSync('which firefox').toString().replace('\n', '');
+      if (process.platform === 'linux') {
+        firefoxBinaryPath = 'test_tools/stable/firefox/firefox-bin';
+      } else if (process.platform === 'darwin') {
+        firefoxBinaryPath = 'test_tools/stable/Firefox.app/Contents/MacOS/firefox-bin';
+      }
+
+      promises.push(seleniumInit.downloadFirefoxRelease());
     }
 
     try {

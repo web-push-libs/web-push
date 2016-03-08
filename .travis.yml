@@ -1,8 +1,6 @@
 os:
   - linux
   - osx
-addons:
-  firefox: "latest"
 env:
   global:
     - DISPLAY=$(if [[ $TRAVIS_OS_NAME == "linux" ]]; then echo ':99.0'; fi)
