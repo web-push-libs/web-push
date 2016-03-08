@@ -65,6 +65,7 @@ suite('sendNotification', function() {
           var decrypted = ece.decrypt(body, {
             keyid: 'webpushKey',
             salt: salt,
+            padSize: 1,
           });
 
           assert(decrypted.equals(new Buffer(message)), "Cipher text correctly decoded");
