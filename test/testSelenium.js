@@ -14,8 +14,7 @@ if (semver.satisfies(process.version, '0.12')) {
 }
 
 if (!process.env.GCM_API_KEY) {
-  console.log('You need to set the GCM_API_KEY env variable to run these tests.'.bold.red);
-  return;
+  console.log('You need to set the GCM_API_KEY env variable to run the tests with Chromium.'.bold.red);
 }
 
 var firefoxBinaryPath, chromeBinaryPath;
@@ -249,7 +248,7 @@ suite('selenium', function() {
     return noRestartTest('firefox');
   });
 
-  if (process.env.TRAVIS_OS_NAME !== 'osx') {
+  if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
     test('send/receive notification without payload with Chrome', function() {
       return noRestartTest('chrome');
     });
@@ -260,7 +259,7 @@ suite('selenium', function() {
   });
 
   /*
-  if (process.env.TRAVIS_OS_NAME !== 'osx') {
+  if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
     test('send/receive notification with payload with Chrome', function() {
       return noRestartTest('chrome', 'marco');
     });
@@ -270,7 +269,7 @@ suite('selenium', function() {
     return restartTest('firefox', undefined, 2);
   });
 
-  if (process.env.TRAVIS_OS_NAME !== 'osx') {
+  if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
     test('send/receive notification without payload with TTL with Chrome (closing and restarting the browser)', function() {
       return restartTest('chrome', undefined, 2);
     });
@@ -281,7 +280,7 @@ suite('selenium', function() {
   });
 
   /*
-  if (process.env.TRAVIS_OS_NAME !== 'osx') {
+  if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
     test('send/receive notification with payload with TTL with Chrome (closing and restarting the browser)', function() {
       return restartTest('chrome', 'marco', 2);
     });
