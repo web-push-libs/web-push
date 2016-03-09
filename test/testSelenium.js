@@ -12,158 +12,6 @@ if (!process.env.GCM_API_KEY) {
   console.log('You need to set the GCM_API_KEY env variable to run the tests with Chromium.'.bold.red);
 }
 
-var firefoxBinaryPath, chromeBinaryPath;
-
-process.env.PATH = process.env.PATH + ':test_tools/';
-
-var pageLoaded = false;
-var clientRegistered = 0;
-
-var createServer = require('./server');
-
-var server;
-function startServer(pushPayload, pushTimeout) {
-  server = createServer(pushPayload, pushTimeout ? pushTimeout : 0);
-
-  pageLoaded = false;
-  clientRegistered = 0;
-  server.onClientRegistered = function() {
-    pageLoaded = true;
-    clientRegistered++;
-    return clientRegistered > 1;
-  }
-}
-
-var webdriver = require('selenium-webdriver'),
-    By = require('selenium-webdriver').By,
-    until = require('selenium-webdriver').until;
-
-var firefox = require('selenium-webdriver/firefox');
-var chrome = require('selenium-webdriver/chrome');
-
-var profilePath = temp.mkdirSync('marco');
-
-var driver;
-
-function startBrowser() {
-  var profile = new firefox.Profile(profilePath);
-  profile.acceptUntrustedCerts();
-  profile.setPreference('security.turn_off_all_security_so_that_viruses_can_take_over_this_computer', true);
-  profile.setPreference('extensions.checkCompatibility.nightly', false);
-  // Only allow installation of third-party addons from the user's profile dir (needed to block the third-party
-  // installation prompt for the Ubuntu Modifications addon on Ubuntu).
-  profile.setPreference('extensions.enabledScopes', 1);
-  //profile.setPreference('dom.push.debug', true);
-  //profile.setPreference('browser.dom.window.dump.enabled', true);
-
-  var firefoxBinary = new firefox.Binary(firefoxBinaryPath);
-
-  var firefoxOptions = new firefox.Options().setProfile(profile).setBinary(firefoxBinary);
-
-  var chromeOptions = new chrome.Options()
-    .setChromeBinaryPath(chromeBinaryPath)
-    .addArguments('--no-sandbox')
-    .addArguments('user-data-dir=' + profilePath);
-
-  var builder = new webdriver.Builder()
-    .forBrowser('firefox')
-    .setFirefoxOptions(firefoxOptions)
-    .setChromeOptions(chromeOptions);
-  var driver = builder.build();
-
-  driver.wait(function() {
-    return server.listening;
-  });
-  driver.executeScript(function() {
-    if (typeof netscape !== 'undefined') {
-      netscape.security.PrivilegeManager.enablePrivilege('UniversalXPConnect');
-      Components.utils.import('resource://gre/modules/Services.jsm');
-      var uri = Services.io.newURI('https://127.0.0.1:50005', null, null);
-      var principal = Services.scriptSecurityManager.getNoAppCodebasePrincipal(uri);
-      Services.perms.addFromPrincipal(principal, 'desktop-notification', Services.perms.ALLOW_ACTION);
-    }
-  });
-  driver.get('https://127.0.0.1:50005');
-
-  /* XXX: This hack was needed to support Firefox Nightly, but now
-          Firefox won't even stard with the standard Selenium WebDriver.
-  driver.executeScript(function() {
-    window.location = 'https://127.0.0.1:50005';
-  });
-  driver.wait(function() {
-    return pageLoaded;
-  });
-  */
-
-  driver.wait(function() {
-    return server.clientRegistered;
-  });
-
-  return driver;
-}
-
-function checkEnd(driver, pushPayload) {
-  return driver.wait(until.titleIs(pushPayload ? pushPayload : 'no payload'), 60000);
-}
-
-function noRestartTest(browser, pushPayload, pushTimeout) {
-  process.env.SELENIUM_BROWSER = browser;
-
-  startServer(pushPayload, pushTimeout);
-
-  driver = startBrowser();
-
-  return checkEnd(driver, pushPayload)
-}
-
-function restartTest(browser, pushPayload, pushTimeout) {
-  return new Promise(function(resolve, reject) {
-    process.env.SELENIUM_BROWSER = browser;
-
-    startServer(pushPayload, pushTimeout);
-
-    driver = startBrowser();
-
-    function restart() {
-      console.log('Browser - Restart');
-      driver = startBrowser();
-      checkEnd(driver, pushPayload)
-      .then(resolve);
-    }
-
-    driver.close()
-    .then(function() {
-      console.log('Browser - Closed');
-
-      pageLoaded = false;
-
-      setTimeout(function() {
-        try {
-          // In Firefox, we need to copy the storage directory (because the PushDB is
-          // stored in an IndexedDB) and the prefs.js file, which contains a preference
-          // (dom.push.userAgentID) storing the User Agent ID.
-          // We need to wait a bit before copying these files because Firefox updates
-          // some of them when shutting down.
-          [ 'storage', 'prefs.js', 'serviceworker.txt' ].forEach(function(file) {
-            fse.copySync(path.join(driver.profilePath_, file), path.join(profilePath, file));
-          });
-        } catch (e) {
-          console.log('Error while copying: ' + e);
-        }
-
-        if (server.notificationSent) {
-          restart();
-        } else {
-          server.onNotificationSent = function() {
-            server.onNotificationSent = null;
-            restart();
-          };
-        }
-      }, 1000);
-    });
-  });
-}
-
 suite('selenium', function() {
   if (semver.satisfies(process.version, '0.12')) {
     console.log('selenium-webdriver is incompatible with Node.js v0.12');
@@ -171,6 +19,158 @@ suite('selenium', function() {
   }
 
   this.timeout(180000);
+
+  var firefoxBinaryPath, chromeBinaryPath;
+
+  process.env.PATH = process.env.PATH + ':test_tools/';
+
+  var pageLoaded = false;
+  var clientRegistered = 0;
+
+  var createServer = require('./server');
+
+  var server;
+  function startServer(pushPayload, pushTimeout) {
+    server = createServer(pushPayload, pushTimeout ? pushTimeout : 0);
+
+    pageLoaded = false;
+    clientRegistered = 0;
+    server.onClientRegistered = function() {
+      pageLoaded = true;
+      clientRegistered++;
+      return clientRegistered > 1;
+    }
+  }
+
+  var webdriver = require('selenium-webdriver'),
+      By = require('selenium-webdriver').By,
+      until = require('selenium-webdriver').until;
+
+  var firefox = require('selenium-webdriver/firefox');
+  var chrome = require('selenium-webdriver/chrome');
+
+  var profilePath = temp.mkdirSync('marco');
+
+  var driver;
+
+  function startBrowser() {
+    var profile = new firefox.Profile(profilePath);
+    profile.acceptUntrustedCerts();
+    profile.setPreference('security.turn_off_all_security_so_that_viruses_can_take_over_this_computer', true);
+    profile.setPreference('extensions.checkCompatibility.nightly', false);
+    // Only allow installation of third-party addons from the user's profile dir (needed to block the third-party
+    // installation prompt for the Ubuntu Modifications addon on Ubuntu).
+    profile.setPreference('extensions.enabledScopes', 1);
+    //profile.setPreference('dom.push.debug', true);
+    //profile.setPreference('browser.dom.window.dump.enabled', true);
+
+    var firefoxBinary = new firefox.Binary(firefoxBinaryPath);
+
+    var firefoxOptions = new firefox.Options().setProfile(profile).setBinary(firefoxBinary);
+
+    var chromeOptions = new chrome.Options()
+      .setChromeBinaryPath(chromeBinaryPath)
+      .addArguments('--no-sandbox')
+      .addArguments('user-data-dir=' + profilePath);
+
+    var builder = new webdriver.Builder()
+      .forBrowser('firefox')
+      .setFirefoxOptions(firefoxOptions)
+      .setChromeOptions(chromeOptions);
+    var driver = builder.build();
+
+    driver.wait(function() {
+      return server.listening;
+    });
+    driver.executeScript(function() {
+      if (typeof netscape !== 'undefined') {
+        netscape.security.PrivilegeManager.enablePrivilege('UniversalXPConnect');
+        Components.utils.import('resource://gre/modules/Services.jsm');
+        var uri = Services.io.newURI('https://127.0.0.1:50005', null, null);
+        var principal = Services.scriptSecurityManager.getNoAppCodebasePrincipal(uri);
+        Services.perms.addFromPrincipal(principal, 'desktop-notification', Services.perms.ALLOW_ACTION);
+      }
+    });
+    driver.get('https://127.0.0.1:50005');
+
+    /* XXX: This hack was needed to support Firefox Nightly, but now
+            Firefox won't even stard with the standard Selenium WebDriver.
+    driver.executeScript(function() {
+      window.location = 'https://127.0.0.1:50005';
+    });
+    driver.wait(function() {
+      return pageLoaded;
+    });
+    */
+
+    driver.wait(function() {
+      return server.clientRegistered;
+    });
+
+    return driver;
+  }
+
+  function checkEnd(driver, pushPayload) {
+    return driver.wait(until.titleIs(pushPayload ? pushPayload : 'no payload'), 60000);
+  }
+
+  function noRestartTest(browser, pushPayload, pushTimeout) {
+    process.env.SELENIUM_BROWSER = browser;
+
+    startServer(pushPayload, pushTimeout);
+
+    driver = startBrowser();
+
+    return checkEnd(driver, pushPayload)
+  }
+
+  function restartTest(browser, pushPayload, pushTimeout) {
+    return new Promise(function(resolve, reject) {
+      process.env.SELENIUM_BROWSER = browser;
+
+      startServer(pushPayload, pushTimeout);
+
+      driver = startBrowser();
+
+      function restart() {
+        console.log('Browser - Restart');
+        driver = startBrowser();
+        checkEnd(driver, pushPayload)
+        .then(resolve);
+      }
+
+      driver.close()
+      .then(function() {
+        console.log('Browser - Closed');
+
+        pageLoaded = false;
+
+        setTimeout(function() {
+          try {
+            // In Firefox, we need to copy the storage directory (because the PushDB is
+            // stored in an IndexedDB) and the prefs.js file, which contains a preference
+            // (dom.push.userAgentID) storing the User Agent ID.
+            // We need to wait a bit before copying these files because Firefox updates
+            // some of them when shutting down.
+            [ 'storage', 'prefs.js', 'serviceworker.txt' ].forEach(function(file) {
+              fse.copySync(path.join(driver.profilePath_, file), path.join(profilePath, file));
+            });
+          } catch (e) {
+            console.log('Error while copying: ' + e);
+          }
+
+          if (server.notificationSent) {
+            restart();
+          } else {
+            server.onNotificationSent = function() {
+              server.onNotificationSent = null;
+              restart();
+            };
+          }
+        }, 1000);
+      });
+    });
+  }
 
   suiteSetup(function() {
     this.timeout(0);
