@@ -23,7 +23,7 @@ install:
   - $NPM install
   - $NPM install mocha
 before_script:
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sh -e /etc/init.d/xvfb start; fi
+  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sh -e /etc/init.d/xvfb start; fi
 script:
   - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo $NODE test/selenium-chrome-init.js; fi
   - $NPM test
