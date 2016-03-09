@@ -19,6 +19,10 @@ Send a Push notification to an endpoint. *userPublicKey* and *payload* can be un
 - *payload* is the message to attach to the notification.
 
 The function returns a Promise, resolved when the request to the push service is successful.
+On success, the promise is resolved to the body of the response from the push service.
+On failure, the promise is rejected with a `WebPushError`, which extends an `Error` with the following properties:
+- *statusCode*, the status code of the response from the push service;
+- *headers*, the headers of the response from the push service.
 
 ## setGCMAPIKey(apiKey)
 
