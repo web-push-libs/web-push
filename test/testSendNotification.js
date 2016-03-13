@@ -89,8 +89,13 @@ suite('sendNotification', function() {
     });
 
     portfinder.getPort(function(err, port) {
-      serverPort = port;
-      server.listen(port);
+      if (err) {
+        serverPort = 50005;
+      } else {
+        serverPort = port;
+      }
+
+      server.listen(serverPort);
     });
 
     closePromise = new Promise(function(resolve, reject) {
