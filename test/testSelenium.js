@@ -95,7 +95,7 @@ suite('selenium', function() {
     driver.get('https://127.0.0.1:' + server.port);
 
     /* XXX: This hack was needed to support Firefox Nightly, but now
-            Firefox won't even stard with the standard Selenium WebDriver.
+            Firefox won't even start with the standard Selenium WebDriver.
     driver.executeScript(function() {
       window.location = 'https://127.0.0.1:' + server.port;
     });
