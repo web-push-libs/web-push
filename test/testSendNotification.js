@@ -1,11 +1,12 @@
-var assert    = require('assert');
-var crypto    = require('crypto');
-var https     = require('https');
-var fs        = require('fs');
-var webPush   = require('../index');
-var ece       = require('http_ece');
-var urlBase64 = require('urlsafe-base64');
-var semver    = require('semver');
+var assert     = require('assert');
+var crypto     = require('crypto');
+var https      = require('https');
+var fs         = require('fs');
+var webPush    = require('../index');
+var ece        = require('http_ece');
+var urlBase64  = require('urlsafe-base64');
+var semver     = require('semver');
+var portfinder = require('portfinder');
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
@@ -15,6 +16,7 @@ suite('sendNotification', function() {
   });
 
   var closePromise;
+  var serverPort;
 
   afterEach(function() {
     if (closePromise) {
@@ -84,7 +86,12 @@ suite('sendNotification', function() {
 
         server.close();
       });
-    }).listen(50005);
+    });
+
+    portfinder.getPort(function(err, port) {
+      serverPort = port;
+      server.listen(port);
+    });
 
     closePromise = new Promise(function(resolve, reject) {
       server.on('close', resolve);
@@ -98,7 +105,7 @@ suite('sendNotification', function() {
   test('send/receive string', function() {
     return startServer('hello', 0)
     .then(function() {
-      return webPush.sendNotification('https://127.0.0.1:50005', 0, urlBase64.encode(userPublicKey), 'hello');
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort, 0, urlBase64.encode(userPublicKey), 'hello');
     })
     .then(function() {
       assert(true, 'sendNotification promise resolved');
@@ -110,7 +117,7 @@ suite('sendNotification', function() {
   test('send/receive buffer', function() {
     return startServer('hello', 0)
     .then(function() {
-      return webPush.sendNotification('https://127.0.0.1:50005', 0, urlBase64.encode(userPublicKey), new Buffer('hello'));
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort, 0, urlBase64.encode(userPublicKey), new Buffer('hello'));
     })
     .then(function() {
       assert(true, 'sendNotification promise resolved');
@@ -122,7 +129,7 @@ suite('sendNotification', function() {
   test('send/receive unicode character', function() {
     return startServer('😁', 0)
     .then(function() {
-      return webPush.sendNotification('https://127.0.0.1:50005', 0, urlBase64.encode(userPublicKey), '😁');
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort, 0, urlBase64.encode(userPublicKey), '😁');
     })
     .then(function() {
       assert(true, 'sendNotification promise resolved');
@@ -136,7 +143,7 @@ suite('sendNotification', function() {
     test('send/receive empty message', function() {
       return startServer('', 0)
       .then(function() {
-        return webPush.sendNotification('https://127.0.0.1:50005', 0, urlBase64.encode(userPublicKey), '');
+        return webPush.sendNotification('https://127.0.0.1:' + serverPort, 0, urlBase64.encode(userPublicKey), '');
       })
       .then(function() {
         assert(true, 'sendNotification promise resolved');
@@ -149,7 +156,7 @@ suite('sendNotification', function() {
   test('send/receive without message', function() {
     return startServer()
     .then(function() {
-      return webPush.sendNotification('https://127.0.0.1:50005');
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort);
     })
     .then(function() {
       assert(true, 'sendNotification promise resolved');
@@ -161,7 +168,7 @@ suite('sendNotification', function() {
   test('send/receive without message with TTL', function() {
     return startServer(undefined, 5)
     .then(function() {
-      return webPush.sendNotification('https://127.0.0.1:50005', 5);
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort, 5);
     })
     .then(function() {
       assert(true, 'sendNotification promise resolved');
@@ -173,7 +180,7 @@ suite('sendNotification', function() {
   test('send/receive string with TTL', function() {
     return startServer('hello', 5)
     .then(function() {
-      return webPush.sendNotification('https://127.0.0.1:50005', 5, urlBase64.encode(userPublicKey), 'hello');
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort, 5, urlBase64.encode(userPublicKey), 'hello');
     })
     .then(function() {
       assert(true, 'sendNotification promise resolved');
@@ -183,7 +190,7 @@ suite('sendNotification', function() {
   });
 
   test('promise rejected when it can\'t connect to the server', function() {
-    return webPush.sendNotification('https://127.0.0.1:50005')
+    return webPush.sendNotification('https://127.0.0.1:' + serverPort)
     .then(function() {
       assert(false, 'sendNotification promise resolved');
     }, function() {
@@ -194,7 +201,7 @@ suite('sendNotification', function() {
   test('promise rejected when the response status code is unexpected', function() {
     return startServer(undefined, undefined, 404)
     .then(function() {
-      return webPush.sendNotification('https://127.0.0.1:50005');
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort);
     })
     .then(function() {
       assert(false, 'sendNotification promise resolved');
@@ -210,7 +217,7 @@ suite('sendNotification', function() {
     var httpsrequest = https.request;
     https.request = function(options, listener) {
       options.hostname = '127.0.0.1';
-      options.port = '50005';
+      options.port = serverPort;
       options.path = '/';
       return httpsrequest.call(https, options, listener);
     }
