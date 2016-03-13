@@ -1,8 +1,9 @@
-var webPush = require('../index');
-var https   = require('https');
-var fs      = require('fs');
-var path    = require('path');
-var colors  = require('colors');
+var webPush    = require('../index');
+var https      = require('https');
+var fs         = require('fs');
+var path       = require('path');
+var colors     = require('colors');
+var portfinder = require('portfinder');
 
 if (!process.env.GCM_API_KEY) {
   console.error('If you want Chrome to work, you need to set the GCM_API_KEY environment variable to your GCM API key.'.bold.red);
@@ -85,17 +86,25 @@ function createServer(pushPayload, pushTimeout) {
 
       res.end('ok');
     }
-  }).listen(50005);
+  });
+
+  portfinder.getPort(function(err, port) {
+    server.port = port;
+    server.listen(port);
+  });
 
   server.notificationSent = false;
   server.clientRegistered = false;
 
-  server.listening = false;
-  server.on('listening', function() {
-    server.listening = true;
-  });
 
-  return server;
+
+  return new Promise(function(resolve, reject) {
+    server.listening = false;
+    server.on('listening', function() {
+      server.listening = true;
+      resolve(server);
+    });
+  });
 }
 
 module.exports = createServer;

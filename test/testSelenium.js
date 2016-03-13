@@ -31,15 +31,18 @@ suite('selenium', function() {
 
   var server;
   function startServer(pushPayload, pushTimeout) {
-    server = createServer(pushPayload, pushTimeout ? pushTimeout : 0);
+    return createServer(pushPayload, pushTimeout ? pushTimeout : 0)
+    .then(function(newServer) {
+      server = newServer;
 
-    pageLoaded = false;
-    clientRegistered = 0;
-    server.onClientRegistered = function() {
-      pageLoaded = true;
-      clientRegistered++;
-      return clientRegistered > 1;
-    }
+      pageLoaded = false;
+      clientRegistered = 0;
+      server.onClientRegistered = function() {
+        pageLoaded = true;
+        clientRegistered++;
+        return clientRegistered > 1;
+      }
+    });
   }
 
   var webdriver = require('selenium-webdriver'),
@@ -82,26 +85,32 @@ suite('selenium', function() {
     driver.wait(function() {
       return server.listening;
     });
-    driver.executeScript(function() {
+    driver.executeScript(function(port) {
       if (typeof netscape !== 'undefined') {
         netscape.security.PrivilegeManager.enablePrivilege('UniversalXPConnect');
         Components.utils.import('resource://gre/modules/Services.jsm');
-        var uri = Services.io.newURI('https://127.0.0.1:50005', null, null);
+        var uri = Services.io.newURI('https://127.0.0.1:' + port, null, null);
         var principal = Services.scriptSecurityManager.getNoAppCodebasePrincipal(uri);
         Services.perms.addFromPrincipal(principal, 'desktop-notification', Services.perms.ALLOW_ACTION);
       }
-    });
-    driver.get('https://127.0.0.1:50005');
+    }, server.port);
+
+    driver.get('https://127.0.0.1:' + server.port);
 
     /* XXX: This hack was needed to support Firefox Nightly, but now
             Firefox won't even stard with the standard Selenium WebDriver.
     driver.executeScript(function() {
-      window.location = 'https://127.0.0.1:50005';
+      window.location = 'https://127.0.0.1:' + server.port;
     });
     driver.wait(function() {
       return pageLoaded;
     });
     */
+
+    driver.executeScript(function(port) {
+      serverAddress = 'https://127.0.0.1:' + port;
+      go();
+    }, server.port);
 
     driver.wait(function() {
       return server.clientRegistered;
@@ -117,57 +126,58 @@ suite('selenium', function() {
   function noRestartTest(browser, pushPayload, pushTimeout) {
     process.env.SELENIUM_BROWSER = browser;
 
-    startServer(pushPayload, pushTimeout);
-
-    driver = startBrowser();
-
-    return checkEnd(driver, pushPayload)
+    return startServer(pushPayload, pushTimeout)
+    .then(function() {
+      driver = startBrowser();
+      return checkEnd(driver, pushPayload)
+    });
   }
 
   function restartTest(browser, pushPayload, pushTimeout) {
     return new Promise(function(resolve, reject) {
       process.env.SELENIUM_BROWSER = browser;
 
-      startServer(pushPayload, pushTimeout);
-
-      driver = startBrowser();
-
-      function restart() {
-        console.log('Browser - Restart');
-        driver = startBrowser();
-        checkEnd(driver, pushPayload)
-        .then(resolve);
-      }
-
-      driver.close()
+      return startServer(pushPayload, pushTimeout)
       .then(function() {
-        console.log('Browser - Closed');
+        driver = startBrowser();
 
-        pageLoaded = false;
+        function restart() {
+          console.log('Browser - Restart');
+          driver = startBrowser();
+          checkEnd(driver, pushPayload)
+          .then(resolve);
+        }
 
-        setTimeout(function() {
-          try {
-            // In Firefox, we need to copy the storage directory (because the PushDB is
-            // stored in an IndexedDB) and the prefs.js file, which contains a preference
-            // (dom.push.userAgentID) storing the User Agent ID.
-            // We need to wait a bit before copying these files because Firefox updates
-            // some of them when shutting down.
-            [ 'storage', 'prefs.js', 'serviceworker.txt' ].forEach(function(file) {
-              fse.copySync(path.join(driver.profilePath_, file), path.join(profilePath, file));
-            });
-          } catch (e) {
-            console.log('Error while copying: ' + e);
-          }
+        driver.close()
+        .then(function() {
+          console.log('Browser - Closed');
 
-          if (server.notificationSent) {
-            restart();
-          } else {
-            server.onNotificationSent = function() {
-              server.onNotificationSent = null;
+          pageLoaded = false;
+
+          setTimeout(function() {
+            try {
+              // In Firefox, we need to copy the storage directory (because the PushDB is
+              // stored in an IndexedDB) and the prefs.js file, which contains a preference
+              // (dom.push.userAgentID) storing the User Agent ID.
+              // We need to wait a bit before copying these files because Firefox updates
+              // some of them when shutting down.
+              [ 'storage', 'prefs.js', 'serviceworker.txt' ].forEach(function(file) {
+                fse.copySync(path.join(driver.profilePath_, file), path.join(profilePath, file));
+              });
+            } catch (e) {
+              console.log('Error while copying: ' + e);
+            }
+
+            if (server.notificationSent) {
               restart();
-            };
-          }
-        }, 1000);
+            } else {
+              server.onNotificationSent = function() {
+                server.onNotificationSent = null;
+                restart();
+              };
+            }
+          }, 1000);
+        });
       });
     });
   }
