@@ -89,8 +89,12 @@ function createServer(pushPayload, pushTimeout) {
   });
 
   portfinder.getPort(function(err, port) {
-    server.port = port;
-    server.listen(port);
+    if (err) {
+      server.port = 50005;
+    } else {
+      server.port = port;
+    }
+    server.listen(server.port);
   });
 
   server.notificationSent = false;
