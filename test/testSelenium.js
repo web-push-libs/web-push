@@ -82,9 +82,6 @@ suite('selenium', function() {
       .setChromeOptions(chromeOptions);
     var driver = builder.build();
 
-    driver.wait(function() {
-      return server.listening;
-    });
     driver.executeScript(function(port) {
       if (typeof netscape !== 'undefined') {
         netscape.security.PrivilegeManager.enablePrivilege('UniversalXPConnect');

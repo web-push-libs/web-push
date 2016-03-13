@@ -96,12 +96,8 @@ function createServer(pushPayload, pushTimeout) {
   server.notificationSent = false;
   server.clientRegistered = false;
 
-
-
   return new Promise(function(resolve, reject) {
-    server.listening = false;
     server.on('listening', function() {
-      server.listening = true;
       resolve(server);
     });
   });
