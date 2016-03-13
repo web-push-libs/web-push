@@ -109,10 +109,6 @@ suite('selenium', function() {
       go();
     }, server.port);
 
-    driver.wait(function() {
-      return server.clientRegistered;
-    });
-
     return driver;
   }
 
@@ -144,6 +140,11 @@ suite('selenium', function() {
           checkEnd(driver, pushPayload)
           .then(resolve);
         }
+
+        // Wait client to be registered before closing the browser.
+        driver.wait(function() {
+          return server.clientRegistered;
+        });
 
         driver.close()
         .then(function() {
