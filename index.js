@@ -125,7 +125,7 @@ function sendNotification(endpoint, TTL, userPublicKey, payload, vapid) {
       options.headers['Authorization'] = 'Bearer ' + jwt;
       var key = 'p256ecdsa=' + urlBase64.encode(vapid.publicKey);
       if (options.headers['Crypto-Key']) {
-        options.headers['Crypto-Key'] += ';' + key;
+        options.headers['Crypto-Key'] += ',' + key;
       } else {
         options.headers['Crypto-Key'] = key;
       }
