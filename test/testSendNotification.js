@@ -82,7 +82,7 @@ suite('sendNotification', function() {
 
         res.writeHead(statusCode ? statusCode : 201);
 
-        res.end('ok');
+        res.end(statusCode !== 404 ? 'ok' : 'not found');
 
         server.close();
       });
@@ -112,8 +112,9 @@ suite('sendNotification', function() {
     .then(function() {
       return webPush.sendNotification('https://127.0.0.1:' + serverPort, 0, urlBase64.encode(userPublicKey), 'hello');
     })
-    .then(function() {
+    .then(function(body) {
       assert(true, 'sendNotification promise resolved');
+      assert.equal(body, 'ok');
     }, function() {
       assert(false, 'sendNotification promise rejected');
     });
@@ -211,10 +212,11 @@ suite('sendNotification', function() {
     .then(function() {
       assert(false, 'sendNotification promise resolved');
     }, function(err) {
+      assert(err, 'sendNotification promise rejected');
       assert(err instanceof webPush.WebPushError, 'err is a WebPushError');
-      assert(err.statusCode, 404);
+      assert.equal(err.statusCode, 404);
+      assert.equal(err.body, 'not found');
       assert(err.headers != null, 'response headers are defined');
-      assert(true, 'sendNotification promise rejected');
     });
   });
 
@@ -247,8 +249,8 @@ suite('sendNotification', function() {
     .then(function() {
       assert(false, 'sendNotification promise resolved');
     }, function(err) {
-      assert(err instanceof webPush.WebPushError, 'err is a WebPushError');
       assert(err, 'sendNotification promise rejected');
+      assert(err instanceof webPush.WebPushError, 'err is a WebPushError');
     });
   });
 });
