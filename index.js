@@ -7,13 +7,14 @@ const colors    = require('colors');
 const asn1      = require('asn1.js');
 const jws       = require('jws');
 
-function WebPushError(message, statusCode, headers) {
+function WebPushError(message, statusCode, headers, body) {
   Error.captureStackTrace(this, this.constructor);
 
   this.name = this.constructor.name;
   this.message = message;
   this.statusCode = statusCode;
   this.headers = headers;
+  this.body = body;
 }
 
 require('util').inherits(WebPushError, Error);
@@ -156,19 +157,19 @@ function sendNotification(endpoint, TTL, userPublicKey, payload, vapid) {
 
     var expectedStatusCode = gcmPayload ? 200 : 201;
     var pushRequest = https.request(options, function(pushResponse) {
-      if (pushResponse.statusCode !== expectedStatusCode) {
-        console.log('statusCode: ', pushResponse.statusCode);
-        console.log('headers: ', pushResponse.headers);
-        reject(new WebPushError('Received unexpected response code', pushResponse.statusCode, pushResponse.headers));
-      } else {
-        var body = "";
-        pushResponse.on('data', function(chunk) {
-          body += chunk;
-        });
-        pushResponse.on('end', function() {
+      var body = "";
+
+      pushResponse.on('data', function(chunk) {
+        body += chunk;
+      });
+
+      pushResponse.on('end', function() {
+        if (pushResponse.statusCode !== expectedStatusCode) {
+          reject(new WebPushError('Received unexpected response code', pushResponse.statusCode, pushResponse.headers, body));
+        } else {
           resolve(body);
-        });
-      }
+        }
+      });
     });
 
     if (typeof payload !== 'undefined') {
