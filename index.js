@@ -26,6 +26,16 @@ function toPEM(key) {
   });
 }
 
+function createVAPIDKeys() {
+  var curve = crypto.createECDH('prime256v1');
+  curve.generateKeys();
+
+  return {
+    publicKey: curve.getPublicKey(),
+    privateKey: curve.getPrivateKey(),
+  };
+}
+
 function WebPushError(message, statusCode, headers, body) {
   Error.captureStackTrace(this, this.constructor);
 
@@ -106,17 +116,14 @@ function sendNotification(endpoint, TTL, userPublicKey, payload, vapid) {
         sub: vapid.subject,
       };
 
-      var curve = crypto.createECDH('prime256v1');
-      var publicKey = curve.generateKeys();
-
       var jwt = jws.sign({
         header: header,
         payload: jwtPayload,
-        privateKey: toPEM(curve.getPrivateKey()),
+        privateKey: toPEM(vapid.privateKey),
       });
 
       options.headers['Authorization'] = 'Bearer ' + jwt;
-      var key = 'p256ecdsa=' + urlBase64.encode(publicKey);
+      var key = 'p256ecdsa=' + urlBase64.encode(vapid.publicKey);
       if (options.headers['Crypto-Key']) {
         options.headers['Crypto-Key'] += ';' + key;
       } else {
@@ -192,4 +199,5 @@ module.exports = {
   sendNotification: sendNotification,
   setGCMAPIKey: setGCMAPIKey,
   WebPushError: WebPushError,
+  createVAPIDKeys: createVAPIDKeys,
 };
