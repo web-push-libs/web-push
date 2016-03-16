@@ -112,8 +112,6 @@ function sendNotification(endpoint, TTL, userPublicKey, payload) {
 
       pushResponse.on('end', function() {
         if (pushResponse.statusCode !== expectedStatusCode) {
-          console.log('statusCode: ', pushResponse.statusCode);
-          console.log('headers: ', pushResponse.headers);
           reject(new WebPushError('Received unexpected response code', pushResponse.statusCode, pushResponse.headers, body));
         } else {
           resolve(body);
