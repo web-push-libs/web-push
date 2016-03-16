@@ -82,7 +82,7 @@ suite('sendNotification', function() {
 
         res.writeHead(statusCode ? statusCode : 201);
 
-        res.end('ok');
+        res.end(statusCode !== 404 ? 'ok' : 'not found');
 
         server.close();
       });
@@ -213,6 +213,7 @@ suite('sendNotification', function() {
     }, function(err) {
       assert(err instanceof webPush.WebPushError, 'err is a WebPushError');
       assert(err.statusCode, 404);
+      assert.equal(err.body, 'not found');
       assert(err.headers != null, 'response headers are defined');
       assert(true, 'sendNotification promise rejected');
     });
