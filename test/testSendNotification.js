@@ -56,11 +56,15 @@ suite('sendNotification', function() {
         if (typeof message !== 'undefined') {
           assert(body.length > 0);
           assert.equal(req.headers['content-type'], 'application/octet-stream', 'Content-Type header correct');
-          assert.equal(req.headers['encryption-key'].indexOf('keyid=p256dh;dh='), 0, 'Encryption-Key header correct');
+          var keys = req.headers['crypto-key'].split(',');
+          var payloadKey = keys.find(function(key) {
+            return key.indexOf('keyid=p256dh;dh=') === 0;
+          });
+          assert(payloadKey, 'Crypto-Key header correct');
           assert.equal(req.headers['encryption'].indexOf('keyid=p256dh;salt='), 0, 'Encryption header correct');
           assert.equal(req.headers['content-encoding'], 'aesgcm128', 'Content-Encoding header correct');
 
-          var appServerPublicKey = urlBase64.decode(req.headers['encryption-key'].substring('keyid=p256dh;dh='.length));
+          var appServerPublicKey = urlBase64.decode(payloadKey.substring('keyid=p256dh;dh='.length));
           var salt = req.headers['encryption'].substring('keyid=p256dh;salt='.length);
 
           var sharedSecret = userCurve.computeSecret(appServerPublicKey);
@@ -77,8 +81,13 @@ suite('sendNotification', function() {
         }
 
         if (vapid) {
-          assert.equal(req.headers['crypto-key'].indexOf('p256ecdsa='), 0, 'Crypto-Key header correct');
-          var appServerVapidPublicKey = urlBase64.decode(req.headers['crypto-key'].substring('p256ecdsa='.length));
+          var keys = req.headers['crypto-key'].split(',');
+          var vapidKey = keys.find(function(key) {
+            return key.indexOf('p256ecdsa=') === 0;
+          });
+
+          assert.equal(vapidKey.indexOf('p256ecdsa='), 0, 'Crypto-Key header correct');
+          var appServerVapidPublicKey = urlBase64.decode(vapidKey.substring('p256ecdsa='.length));
 
           assert(appServerVapidPublicKey.equals(vapidKeys.publicKey));
 
@@ -279,6 +288,24 @@ suite('sendNotification', function() {
     return startServer(undefined, undefined, undefined, undefined, true)
     .then(function() {
       return webPush.sendNotification('https://127.0.0.1:' + serverPort, 0, undefined, undefined, {
+        audience: 'https://www.mozilla.org/',
+        subject: 'mailto:mozilla@example.org',
+        privateKey: vapidKeys.privateKey,
+        publicKey: vapidKeys.publicKey,
+      });
+    })
+    .then(function(body) {
+      assert(true, 'sendNotification promise resolved');
+      assert.equal(body, 'ok');
+    }, function() {
+      assert(false, 'sendNotification promise rejected');
+    });
+  });
+
+  test('send notification with message with vapid', function() {
+    return startServer('hello', 0, undefined, undefined, true)
+    .then(function() {
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort, 0, urlBase64.encode(userPublicKey), 'hello', {
         audience: 'https://www.mozilla.org/',
         subject: 'mailto:mozilla@example.org',
         privateKey: vapidKeys.privateKey,
