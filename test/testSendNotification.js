@@ -211,11 +211,11 @@ suite('sendNotification', function() {
     .then(function() {
       assert(false, 'sendNotification promise resolved');
     }, function(err) {
+      assert(err, 'sendNotification promise rejected');
       assert(err instanceof webPush.WebPushError, 'err is a WebPushError');
       assert.equal(err.statusCode, 404);
       assert.equal(err.body, 'not found');
       assert(err.headers != null, 'response headers are defined');
-      assert(true, 'sendNotification promise rejected');
     });
   });
 
@@ -248,8 +248,8 @@ suite('sendNotification', function() {
     .then(function() {
       assert(false, 'sendNotification promise resolved');
     }, function(err) {
-      assert(err instanceof webPush.WebPushError, 'err is a WebPushError');
       assert(err, 'sendNotification promise rejected');
+      assert(err instanceof webPush.WebPushError, 'err is a WebPushError');
     });
   });
 });
