@@ -212,7 +212,7 @@ suite('sendNotification', function() {
       assert(false, 'sendNotification promise resolved');
     }, function(err) {
       assert(err instanceof webPush.WebPushError, 'err is a WebPushError');
-      assert(err.statusCode, 404);
+      assert.equal(err.statusCode, 404);
       assert.equal(err.body, 'not found');
       assert(err.headers != null, 'response headers are defined');
       assert(true, 'sendNotification promise rejected');
