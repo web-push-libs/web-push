@@ -98,7 +98,7 @@ function sendNotification(endpoint, TTL, userPublicKey, payload, vapid) {
       options.headers = {
         'Content-Length': encrypted.cipherText.length,
         'Content-Type': 'application/octet-stream',
-        'Encryption-Key': 'keyid=p256dh;dh=' + urlBase64.encode(encrypted.localPublicKey),
+        'Crypto-Key': 'keyid=p256dh;dh=' + urlBase64.encode(encrypted.localPublicKey),
         'Encryption': 'keyid=p256dh;salt=' + urlBase64.encode(encrypted.salt),
         'Content-Encoding': 'aesgcm128',
       };
