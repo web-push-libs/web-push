@@ -140,6 +140,11 @@ function sendNotification(endpoint, TTL, userPublicKey, payload, vapid) {
         return;
       }
 
+      if (vapid) {
+        reject(new WebPushError('VAPID not supported with GCM'));
+        return;
+      }
+
       if (!gcmAPIKey) {
         console.warn('Attempt to send push notification to GCM endpoint, but no GCM key is defined'.bold.red);
       }
