@@ -263,7 +263,7 @@ suite('sendNotification', function() {
     });
   });
 
-  test('promise rejected if push serivice is GCM and you want to send a payload', function() {
+  test('promise rejected if push service is GCM and you want to send a payload', function() {
     webPush.setGCMAPIKey('my_gcm_key');
 
     return webPush.sendNotification('https://android.googleapis.com/gcm/send/someSubscriptionID', 5, urlBase64.encode(userPublicKey), 'hello')
@@ -290,6 +290,23 @@ suite('sendNotification', function() {
       assert.equal(body, 'ok');
     }, function() {
       assert(false, 'sendNotification promise rejected');
+    });
+  });
+
+  test('promise rejected if push service is GCM and you want to use VAPID', function() {
+    webPush.setGCMAPIKey('my_gcm_key');
+
+    return webPush.sendNotification('https://android.googleapis.com/gcm/send/someSubscriptionID', 5, undefined, undefined, {
+        audience: 'https://www.mozilla.org/',
+        subject: 'mailto:mozilla@example.org',
+        privateKey: vapidKeys.privateKey,
+        publicKey: vapidKeys.publicKey,
+    })
+    .then(function() {
+      assert(false, 'sendNotification promise resolved');
+    }, function(err) {
+      assert(err, 'sendNotification promise rejected');
+      assert(err instanceof webPush.WebPushError, 'err is a WebPushError');
     });
   });
 });
