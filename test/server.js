@@ -61,7 +61,10 @@ function createServer(pushPayload, pushTimeout) {
 
           var promise;
           if (!pushPayload) {
-            promise = webPush.sendNotification(obj.endpoint, pushTimeout ? 200 : undefined);
+            promise = webPush.sendNotification(obj.endpoint, pushTimeout ? 200 : undefined, obj.key, undefined, {
+              audience: 'http://marco.it',
+              subject: 'mailto:marco@mozilla.com',
+            });
           } else {
             promise = webPush.sendNotification(obj.endpoint, pushTimeout ? 200 : undefined, obj.key, pushPayload);
           }

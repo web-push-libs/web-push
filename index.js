@@ -4,6 +4,8 @@ const ece       = require('http_ece');
 const url       = require('url');
 const https     = require('https');
 const colors    = require('colors');
+const asn1      = require('asn1.js');
+const jws       = require('jws');
 
 function WebPushError(message, statusCode, headers) {
   Error.captureStackTrace(this, this.constructor);
@@ -47,7 +49,7 @@ function encrypt(userPublicKey, payload) {
   };
 }
 
-function sendNotification(endpoint, TTL, userPublicKey, payload) {
+function sendNotification(endpoint, TTL, userPublicKey, payload, vapid) {
   return new Promise(function(resolve, reject) {
     var urlParts = url.parse(endpoint);
     var options = {
@@ -70,6 +72,57 @@ function sendNotification(endpoint, TTL, userPublicKey, payload) {
         'Encryption': 'keyid=p256dh;salt=' + urlBase64.encode(encrypted.salt),
         'Content-Encoding': 'aesgcm128',
       };
+    }
+
+    if (vapid) {
+      var ECPrivateKeyASN = asn1.define('ECPrivateKey', function() {
+        this.seq().obj(
+          this.key('version').int(),
+          this.key('privateKey').octstr(),
+          this.key('parameters').explicit(0).objid().optional(),
+          this.key('publicKey').explicit(1).bitstr().optional()
+        )
+      });
+
+      function encode(key) {
+        return ECPrivateKeyASN.encode({
+          version: 1,
+          privateKey: key,
+          parameters: [1, 2, 840, 10045, 3, 1, 7], // prime256v1
+        }, 'pem', {
+          label: 'EC PRIVATE KEY',
+        });
+      }
+
+      var header = {
+        typ: "JWT",
+        alg: "ES256"
+      };
+
+      var jwtPayload = {
+        aud: vapid.audience,
+        exp: Math.floor(Date.now() / 1000) + 86400,
+        sub: vapid.subject
+      };
+
+      var curve = crypto.createECDH('prime256v1');
+      var publicKey = curve.generateKeys();
+
+      var jwt = jws.sign({
+        header: header,
+        payload: jwtPayload,
+        privateKey: encode(curve.getPrivateKey()),
+      });
+
+      options.headers['Authorization'] = 'Bearer ' + jwt;
+      var key = 'p256ecdsa=' + urlBase64.encode(publicKey);
+      if (options.headers['Crypto-Key']) {
+        options.headers['Crypto-Key'] += ';' + key;
+      } else {
+        options.headers['Crypto-Key'] = key;
+      }
+
+      console.log(JSON.stringify(options.headers, null, 2));
     }
 
     var gcmPayload;
