@@ -26,7 +26,7 @@ function toPEM(key) {
   });
 }
 
-function createVAPIDKeys() {
+function generateVAPIDKeys() {
   var curve = crypto.createECDH('prime256v1');
   curve.generateKeys();
 
@@ -199,5 +199,5 @@ module.exports = {
   sendNotification: sendNotification,
   setGCMAPIKey: setGCMAPIKey,
   WebPushError: WebPushError,
-  createVAPIDKeys: createVAPIDKeys,
+  generateVAPIDKeys: generateVAPIDKeys,
 };
