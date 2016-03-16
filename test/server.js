@@ -18,7 +18,7 @@ var options = {
   cert: pem,
 };
 
-function createServer(pushPayload, pushTimeout) {
+function createServer(pushPayload, pushTimeout, vapid) {
   var server = https.createServer(options, function(req, res) {
     if (req.method === 'GET') {
       if (req.url === '/') {
@@ -61,15 +61,9 @@ function createServer(pushPayload, pushTimeout) {
 
           var promise;
           if (!pushPayload) {
-            promise = webPush.sendNotification(obj.endpoint, pushTimeout ? 200 : undefined, obj.key, undefined, {
-              audience: 'http://marco.it',
-              subject: 'mailto:marco@mozilla.com',
-            });
+            promise = webPush.sendNotification(obj.endpoint, pushTimeout ? 200 : undefined, obj.key, undefined, vapid);
           } else {
-            promise = webPush.sendNotification(obj.endpoint, pushTimeout ? 200 : undefined, obj.key, pushPayload, {
-              audience: 'http://marco.it',
-              subject: 'mailto:marco@mozilla.com',
-            });
+            promise = webPush.sendNotification(obj.endpoint, pushTimeout ? 200 : undefined, obj.key, pushPayload, vapid);
           }
 
           promise
