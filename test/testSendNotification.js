@@ -112,8 +112,9 @@ suite('sendNotification', function() {
     .then(function() {
       return webPush.sendNotification('https://127.0.0.1:' + serverPort, 0, urlBase64.encode(userPublicKey), 'hello');
     })
-    .then(function() {
+    .then(function(body) {
       assert(true, 'sendNotification promise resolved');
+      assert.equal(body, 'ok');
     }, function() {
       assert(false, 'sendNotification promise rejected');
     });
