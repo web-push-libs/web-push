@@ -83,7 +83,7 @@ function sendNotification(endpoint, params) {
         var userPublicKey = params.userPublicKey;
         var userAuth = params.userAuth;
         var payload = params.payload;
-      } else {
+      } else if (args.length !== 1) {
         var TTL = args[1];
         var userPublicKey = args[2];
         var payload = args[3];
