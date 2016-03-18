@@ -48,6 +48,7 @@ suite('sendNotification', function() {
 
       req.on('end', function() {
         assert.equal(req.headers['content-length'], body.length, 'Content-Length header correct');
+
         if (typeof TTL !== 'undefined') {
           assert.equal(req.headers['ttl'], TTL, 'TTL header correct');
         }
@@ -72,9 +73,25 @@ suite('sendNotification', function() {
               salt: salt,
               padSize: 1,
             });
+          } else {
+            assert.equal(req.headers['crypto-key'].indexOf('keyid=p256dh;dh='), 0, 'Encryption-Key header correct');
+            assert.equal(req.headers['content-encoding'], 'aesgcm', 'Content-Encoding header correct');
+            var appServerPublicKey = req.headers['crypto-key'].substring('keyid=p256dh;dh='.length);
 
-            assert(decrypted.equals(new Buffer(message)), "Cipher text correctly decoded");
+            ece.saveKey('webpushKey', userCurve, 'P-256');
+
+            var raw_data = new Buffer(JSON.parse(body).raw_data, 'base64');
+
+            var decrypted = ece.decrypt(raw_data, {
+              keyid: 'webpushKey',
+              dh: appServerPublicKey,
+              salt: salt,
+              authSecret: urlBase64.encode(userAuth),
+              padSize: 2,
+            });
           }
+
+          assert(decrypted.equals(new Buffer(message)), "Cipher text correctly decoded");
         }
 
         if (isGCM) {
