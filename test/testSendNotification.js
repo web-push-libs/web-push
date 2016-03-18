@@ -80,7 +80,7 @@ suite('sendNotification', function() {
 
             ece.saveKey('webpushKey', userCurve, 'P-256');
 
-            var raw_data = new Buffer(JSON.parse(body).raw_data, 'base64');
+            var raw_data = urlBase64.encode(JSON.parse(body).raw_data);
 
             var decrypted = ece.decrypt(raw_data, {
               keyid: 'webpushKey',
