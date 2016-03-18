@@ -30,10 +30,11 @@ The function returns a Promise. On success, it is resolved to the body of the re
 Sets the GCM API key that the library should use in making requests to GCM endpoints (in Chromium/Google Chrome).
 - *apiKey* is your GCM API key, you can obtain it from the Google Developer Console.
 
-## encrypt(userPublicKey, payload)
+## encrypt(userPublicKey, userAuth, payload)
 
-Encrypts the payload according to the [Message Encryption for Web Push](https://tools.ietf.org/html/draft-thomson-webpush-encryption-00) standard. (*sendNotification* will automatically encrypt the payload for you, so if you use *sendNotification* you don't need to worry about it).
-- *userPublicKey* is the public key of the browser;
+Encrypts the payload according to the [Message Encryption for Web Push](https://webpush-wg.github.io/webpush-encryption/) standard. (*sendNotification* will automatically encrypt the payload for you, so if you use *sendNotification* you don't need to worry about it).
+- *userPublicKey* is the public key of the receiver (from the browser);
+- *userAuth* is the auth secret of the receiver (from the browser);
 - *payload* is the message to attach to the notification.
 
 ## Examples
