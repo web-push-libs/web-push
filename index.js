@@ -71,7 +71,21 @@ function encrypt(userPublicKey, userAuth, payload) {
   };
 }
 
-function sendNotification(endpoint, TTL, userPublicKey, userAuth, payload) {
+function sendNotification(endpoint, params) {
+  if (arguments.length === 0) {
+    throw new Error('sendNotification requires at least one argument, the endpoint URL');
+  } else if (params && typeof params === 'object') {
+    var TTL = params.TTL;
+    var userPublicKey = params.userPublicKey;
+    var userAuth = params.userAuth;
+    var payload = params.payload;
+  } else {
+    var TTL = arguments[1];
+    var userPublicKey = arguments[2];
+    var payload = arguments[3];
+    console.warn('You are using the old, deprecated, interface of the `sendNotification` function.'.bold.red);
+  }
+
   return new Promise(function(resolve, reject) {
     const isGCM = endpoint.indexOf('https://android.googleapis.com/gcm/send') === 0;
 

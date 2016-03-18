@@ -110,7 +110,11 @@ suite('sendNotification', function() {
   test('send/receive string', function() {
     return startServer('hello', 0)
     .then(function() {
-      return webPush.sendNotification('https://127.0.0.1:' + serverPort, 0, urlBase64.encode(userPublicKey), 'hello');
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+        TTL: 0,
+        userPublicKey: urlBase64.encode(userPublicKey),
+        payload: 'hello',
+      });
     })
     .then(function(body) {
       assert(true, 'sendNotification promise resolved');
@@ -123,7 +127,11 @@ suite('sendNotification', function() {
   test('send/receive buffer', function() {
     return startServer('hello', 0)
     .then(function() {
-      return webPush.sendNotification('https://127.0.0.1:' + serverPort, 0, urlBase64.encode(userPublicKey), new Buffer('hello'));
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+        TTL: 0,
+        userPublicKey: urlBase64.encode(userPublicKey),
+        payload: new Buffer('hello'),
+      });
     })
     .then(function() {
       assert(true, 'sendNotification promise resolved');
@@ -135,7 +143,11 @@ suite('sendNotification', function() {
   test('send/receive unicode character', function() {
     return startServer('😁', 0)
     .then(function() {
-      return webPush.sendNotification('https://127.0.0.1:' + serverPort, 0, urlBase64.encode(userPublicKey), '😁');
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+        TTL: 0,
+        userPublicKey: urlBase64.encode(userPublicKey),
+        payload: '😁',
+      });
     })
     .then(function() {
       assert(true, 'sendNotification promise resolved');
@@ -149,7 +161,11 @@ suite('sendNotification', function() {
     test('send/receive empty message', function() {
       return startServer('', 0)
       .then(function() {
-        return webPush.sendNotification('https://127.0.0.1:' + serverPort, 0, urlBase64.encode(userPublicKey), '');
+        return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+          TTL: 0,
+          userPublicKey: urlBase64.encode(userPublicKey),
+          payload: '',
+        });
       })
       .then(function() {
         assert(true, 'sendNotification promise resolved');
@@ -174,7 +190,9 @@ suite('sendNotification', function() {
   test('send/receive without message with TTL', function() {
     return startServer(undefined, 5)
     .then(function() {
-      return webPush.sendNotification('https://127.0.0.1:' + serverPort, 5);
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+        TTL: 5,
+      });
     })
     .then(function() {
       assert(true, 'sendNotification promise resolved');
@@ -186,7 +204,11 @@ suite('sendNotification', function() {
   test('send/receive string with TTL', function() {
     return startServer('hello', 5)
     .then(function() {
-      return webPush.sendNotification('https://127.0.0.1:' + serverPort, 5, urlBase64.encode(userPublicKey), 'hello');
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+        TTL: 5,
+        userPublicKey: urlBase64.encode(userPublicKey),
+        payload: 'hello',
+      });
     })
     .then(function() {
       assert(true, 'sendNotification promise resolved');
@@ -245,7 +267,11 @@ suite('sendNotification', function() {
   test('promise rejected if push serivice is GCM and you want to send a payload', function() {
     webPush.setGCMAPIKey('my_gcm_key');
 
-    return webPush.sendNotification('https://android.googleapis.com/gcm/send/someSubscriptionID', 5, urlBase64.encode(userPublicKey), 'hello')
+    return webPush.sendNotification('https://android.googleapis.com/gcm/send/someSubscriptionID', {
+      TTL: 5,
+      userPublicKey: urlBase64.encode(userPublicKey),
+      payload: 'hello',
+    })
     .then(function() {
       assert(false, 'sendNotification promise resolved');
     }, function(err) {
