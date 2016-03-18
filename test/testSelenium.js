@@ -276,12 +276,11 @@ suite('selenium', function() {
     return noRestartTest('firefox', 'marco');
   });
 
-  /*
   if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
     test('send/receive notification with payload with Chrome', function() {
       return noRestartTest('chrome', 'marco');
     });
-  }*/
+  }
 
   test('send/receive notification without payload with TTL with Firefox (closing and restarting the browser)', function() {
     return restartTest('firefox', undefined, 2);
@@ -297,10 +296,9 @@ suite('selenium', function() {
     return restartTest('firefox', 'marco', 2);
   });
 
-  /*
   if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
     test('send/receive notification with payload with TTL with Chrome (closing and restarting the browser)', function() {
       return restartTest('chrome', 'marco', 2);
     });
-  }*/
+  }
 });
