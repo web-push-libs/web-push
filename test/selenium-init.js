@@ -44,7 +44,8 @@ function unzip(dir, file) {
 }
 
 var destDir = 'test_tools';
-var stableDestDir = 'test_tools/stable'
+var stableDestDir = 'test_tools/stable';
+var betaDestDir = 'test_tools/beta';
 
 try {
   fs.mkdirSync(destDir);
@@ -53,6 +54,11 @@ try {
 
 try {
   fs.mkdirSync(stableDestDir);
+} catch (e) {
+}
+
+try {
+  fs.mkdirSync(betaDestDir);
 } catch (e) {
 }
 
@@ -190,6 +196,42 @@ function downloadFirefoxRelease() {
   });
 }
 
+function downloadFirefoxBeta() {
+  return new Promise(function(resolve, reject) {
+    var firefoxPlatform;
+    if (process.platform === 'linux') {
+      firefoxPlatform = 'linux';
+      if (process.arch === 'x64') {
+        firefoxPlatform += '64';
+      }
+    } else if (process.platform === 'darwin') {
+      firefoxPlatform = 'osx';
+    }
+
+    function getFile() {
+      var files = fs.readdirSync(betaDestDir);
+      return files.find(function(file) {
+        return file.indexOf('index.html?') === 0;
+      });
+    }
+
+    var fileName = 'index.html?product=firefox-beta-latest&lang=en-US&os=' + firefoxPlatform;
+
+    wget(betaDestDir, 'https://download.mozilla.org/?product=firefox-beta-latest&lang=en-US&os=' + firefoxPlatform)
+    .then(function() {
+      if (process.platform === 'linux') {
+        untar(betaDestDir, path.join(betaDestDir, fileName))
+        .then(resolve);
+      } else if (process.platform === 'darwin') {
+        dmg.mount(path.join(betaDestDir, fileName), function(err, extractedPath) {
+          fse.copySync(path.join(extractedPath, 'FirefoxBeta.app'), path.join(betaDestDir, 'FirefoxBeta.app'));
+          dmg.unmount(extractedPath, resolve);
+        });
+      }
+    });
+  });
+}
+
 // Download Chrome Canary
 
 var chromePlatform, chromeZipPlatform;
@@ -258,6 +300,7 @@ function downloadChromeDriver() {
 module.exports = {
   downloadFirefoxNightly: downloadFirefoxNightly,
   downloadFirefoxRelease: downloadFirefoxRelease,
+  downloadFirefoxBeta: downloadFirefoxBeta,
   downloadChromiumNightly: downloadChromiumNightly,
   downloadChromeDriver: downloadChromeDriver,
 };

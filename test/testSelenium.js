@@ -202,6 +202,14 @@ suite('selenium', function() {
       }
 
       promises.push(seleniumInit.downloadFirefoxRelease());
+    } else if (firefoxBinaryPath === 'beta') {
+      if (process.platform === 'linux') {
+        firefoxBinaryPath = 'test_tools/beta/firefox/firefox-bin';
+      } else if (process.platform === 'darwin') {
+        firefoxBinaryPath = 'test_tools/beta/FirefoxBeta.app/Contents/MacOS/firefox-bin';
+      }
+
+      promises.push(seleniumInit.downloadFirefoxBeta());
     }
 
     try {
