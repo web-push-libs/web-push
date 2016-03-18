@@ -23,7 +23,7 @@ suite('encryptOld', function() {
 
     return ece.decrypt(encrypted.cipherText, {
       keyid: 'webpushKey',
-      salt: urlBase64.encode(encrypted.salt),
+      salt: encrypted.salt,
       padSize: 1,
     });
   }
