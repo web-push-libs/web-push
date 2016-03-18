@@ -31,13 +31,13 @@ function encryptOld(userPublicKey, payload) {
 
   var sharedSecret = localCurve.computeSecret(urlBase64.decode(userPublicKey));
 
-  var salt = crypto.randomBytes(16);
+  var salt = urlBase64.encode(crypto.randomBytes(16));
 
   ece.saveKey('webpushKey', sharedSecret);
 
   var cipherText = ece.encrypt(payload, {
     keyid: 'webpushKey',
-    salt: urlBase64.encode(salt),
+    salt: salt,
     padSize: 1, // use the aesgcm128 encoding until aesgcm is well supported
   });
 
@@ -52,14 +52,14 @@ function encrypt(userPublicKey, userAuth, payload) {
   var localCurve = crypto.createECDH('prime256v1');
   var localPublicKey = localCurve.generateKeys();
 
-  var salt = crypto.randomBytes(16);
+  var salt = urlBase64.encode(crypto.randomBytes(16));
 
   ece.saveKey('webpushKey', localCurve, 'P-256');
 
   var cipherText = ece.encrypt(payload, {
     keyid: 'webpushKey',
     dh: userPublicKey,
-    salt: urlBase64.encode(salt),
+    salt: salt,
     authSecret: userAuth,
     padSize: 2,
   });
@@ -119,7 +119,7 @@ function sendNotification(endpoint, params) {
         options.headers = {
           'Content-Length': encrypted.cipherText.length,
           'Content-Type': 'application/octet-stream',
-          'Encryption': 'keyid=p256dh;salt=' + urlBase64.encode(encrypted.salt),
+          'Encryption': 'keyid=p256dh;salt=' + encrypted.salt,
         };
 
         var cryptoHeader = 'keyid=p256dh;dh=' + urlBase64.encode(encrypted.localPublicKey);
