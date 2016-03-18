@@ -279,4 +279,38 @@ suite('sendNotification', function() {
       assert(err instanceof webPush.WebPushError, 'err is a WebPushError');
     });
   });
+
+  test('0 arguments', function() {
+    return webPush.sendNotification()
+    .then(function() {
+      assert(false, 'sendNotification promise resolved');
+    }, function() {
+      assert(true, 'sendNotification promise rejected');
+    });
+  });
+
+  test('TTL with old interface', function() {
+    return startServer(undefined, 5)
+    .then(function() {
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort, 5);
+    })
+    .then(function(body) {
+      assert(true, 'sendNotification promise resolved');
+    }, function() {
+      assert(false, 'sendNotification promise rejected');
+    });
+  });
+
+  test('payload with old interface', function() {
+    return startServer('hello', 0)
+    .then(function() {
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort, 0, urlBase64.encode(userPublicKey), 'hello');
+    })
+    .then(function(body) {
+      assert(true, 'sendNotification promise resolved');
+      assert.equal(body, 'ok');
+    }, function() {
+      assert(false, 'sendNotification promise rejected');
+    });
+  });
 });
