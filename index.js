@@ -179,6 +179,7 @@ function sendNotification(endpoint, TTL, userPublicKey, userAuth, payload) {
 }
 
 module.exports = {
+  encryptOld: encryptOld,
   encrypt: encrypt,
   sendNotification: sendNotification,
   setGCMAPIKey: setGCMAPIKey,

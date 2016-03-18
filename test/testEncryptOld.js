@@ -4,18 +4,18 @@ var webPush   = require('../index');
 var ece       = require('http_ece');
 var urlBase64 = require('urlsafe-base64');
 
-suite('encrypt', function() {
+suite('encryptOld', function() {
   test('is defined', function() {
-    assert(webPush.encrypt);
+    assert(webPush.encryptOld);
   });
 
   function encryptDecrypt(thing) {
     var userCurve = crypto.createECDH('prime256v1');
 
-    var userPublicKey = userCurve.generateKeys();
+    var userPublicKey = urlBase64.encode(userCurve.generateKeys());
     var userPrivateKey = userCurve.getPrivateKey();
 
-    var encrypted = webPush.encrypt(userPublicKey, thing);
+    var encrypted = webPush.encryptOld(userPublicKey, thing);
 
     var sharedSecret = userCurve.computeSecret(encrypted.localPublicKey);
 
