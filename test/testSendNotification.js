@@ -197,6 +197,18 @@ suite('sendNotification', function() {
     });
   });
 
+  test('send/receive without message with default TTL', function() {
+    return startServer(undefined, 2419200)
+    .then(function() {
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort);
+    })
+    .then(function() {
+      assert(true, 'sendNotification promise resolved');
+    }, function() {
+      assert(false, 'sendNotification promise rejected');
+    });
+  });
+
   test('send/receive string with TTL', function() {
     return startServer('hello', 5)
     .then(function() {
