@@ -108,10 +108,9 @@ suite('sendNotification', function() {
   }
 
   test('send/receive string', function() {
-    return startServer('hello', 0)
+    return startServer('hello')
     .then(function() {
       return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
-        TTL: 0,
         userPublicKey: urlBase64.encode(userPublicKey),
         payload: 'hello',
       });
@@ -125,10 +124,9 @@ suite('sendNotification', function() {
   });
 
   test('send/receive buffer', function() {
-    return startServer('hello', 0)
+    return startServer('hello')
     .then(function() {
       return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
-        TTL: 0,
         userPublicKey: urlBase64.encode(userPublicKey),
         payload: new Buffer('hello'),
       });
@@ -141,10 +139,9 @@ suite('sendNotification', function() {
   });
 
   test('send/receive unicode character', function() {
-    return startServer('😁', 0)
+    return startServer('😁')
     .then(function() {
       return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
-        TTL: 0,
         userPublicKey: urlBase64.encode(userPublicKey),
         payload: '😁',
       });
@@ -159,10 +156,9 @@ suite('sendNotification', function() {
   // This test fails on Node.js v0.12.
   if (!semver.satisfies(process.version, '0.12')) {
     test('send/receive empty message', function() {
-      return startServer('', 0)
+      return startServer('')
       .then(function() {
         return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
-          TTL: 0,
           userPublicKey: urlBase64.encode(userPublicKey),
           payload: '',
         });
