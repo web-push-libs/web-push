@@ -38,6 +38,7 @@ function go() {
   })
   .then(function(subscription) {
     var key = subscription.getKey ? subscription.getKey('p256dh') : '';
+    var auth = subscription.getKey ? subscription.getKey('auth') : '';
 
     return fetch(serverAddress, {
       method: 'post',
@@ -47,6 +48,7 @@ function go() {
       body: JSON.stringify({
         endpoint: subscription.endpoint,
         key: key ? btoa(String.fromCharCode.apply(null, new Uint8Array(key))) : '',
+        auth: auth ? btoa(String.fromCharCode.apply(null, new Uint8Array(auth))) : '',
       }),
     });
   });
