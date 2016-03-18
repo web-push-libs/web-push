@@ -291,14 +291,4 @@ suite('selenium', function() {
       return restartTest('chrome', undefined, 2);
     });
   }
-
-  test('send/receive notification with payload with TTL with Firefox (closing and restarting the browser)', function() {
-    return restartTest('firefox', 'marco', 2);
-  });
-
-  if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
-    test('send/receive notification with payload with TTL with Chrome (closing and restarting the browser)', function() {
-      return restartTest('chrome', 'marco', 2);
-    });
-  }
 });
