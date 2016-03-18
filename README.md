@@ -10,13 +10,15 @@ Notification with payloads are currently only supported in Firefox (see https://
 [![dependencies](https://david-dm.org/marco-c/web-push.svg)](https://david-dm.org/marco-c/web-push)
 [![devdependencies](https://david-dm.org/marco-c/web-push/dev-status.svg)](https://david-dm.org/marco-c/web-push#info=devDependencies)
 
-## sendNotification(endpoint, TTL, userPublicKey, payload)
+## sendNotification(endpoint, params)
 
-Send a Push notification to an endpoint. *userPublicKey* and *payload* can be undefined, if you want to send a notification without a message.
-- *endpoint* is the endpoint URL;
+Send a Push notification to an endpoint. *params* containes optional parameters:
 - *TTL* is a value in seconds that describes how long a push message is retained by the push service (by default, four weeks);
-- *userPublicKey* is the public key of the browser;
+- *userPublicKey* is the public key of the receiver (from the browser);
+- *userAuth* is the auth secret of the receiver (from the browser);
 - *payload* is the message to attach to the notification.
+
+Note that, in order to encrypt the *payload*, *userPublicKey* and *userAuth* are required.
 
 The function returns a Promise. On success, it is resolved to the body of the response from the push service. On failure, it is rejected with a `WebPushError`, which extends an `Error` with the following properties:
 - *statusCode*, the status code of the response from the push service;
