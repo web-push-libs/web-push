@@ -61,9 +61,16 @@ function createServer(pushPayload, pushTimeout) {
 
           var promise;
           if (!pushPayload) {
-            promise = webPush.sendNotification(obj.endpoint, pushTimeout ? 200 : undefined);
+            promise = webPush.sendNotification(obj.endpoint, {
+              TTL: pushTimeout ? 200 : undefined,
+            });
           } else {
-            promise = webPush.sendNotification(obj.endpoint, pushTimeout ? 200 : undefined, obj.key, pushPayload);
+            promise = webPush.sendNotification(obj.endpoint, {
+              TTL: pushTimeout ? 200 : undefined,
+              payload: pushPayload,
+              userPublicKey: obj.key,
+              userAuth: obj.auth,
+            });
           }
 
           promise

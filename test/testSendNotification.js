@@ -29,6 +29,8 @@ suite('sendNotification', function() {
   var userPublicKey = userCurve.generateKeys();
   var userPrivateKey = userCurve.getPrivateKey();
 
+  var userAuth = crypto.randomBytes(16);
+
   function startServer(message, TTL, statusCode, isGCM) {
     var pem = fs.readFileSync('test/cert.pem');
 
@@ -46,38 +48,57 @@ suite('sendNotification', function() {
 
       req.on('end', function() {
         assert.equal(req.headers['content-length'], body.length, 'Content-Length header correct');
+
         if (typeof TTL !== 'undefined') {
           assert.equal(req.headers['ttl'], TTL, 'TTL header correct');
         }
 
         if (typeof message !== 'undefined') {
           assert(body.length > 0);
-          assert.equal(req.headers['content-type'], 'application/octet-stream', 'Content-Type header correct');
-          assert.equal(req.headers['encryption-key'].indexOf('keyid=p256dh;dh='), 0, 'Encryption-Key header correct');
-          assert.equal(req.headers['encryption'].indexOf('keyid=p256dh;salt='), 0, 'Encryption header correct');
-          assert.equal(req.headers['content-encoding'], 'aesgcm128', 'Content-Encoding header correct');
 
-          var appServerPublicKey = urlBase64.decode(req.headers['encryption-key'].substring('keyid=p256dh;dh='.length));
+          assert.equal(req.headers['encryption'].indexOf('keyid=p256dh;salt='), 0, 'Encryption header correct');
           var salt = req.headers['encryption'].substring('keyid=p256dh;salt='.length);
 
-          var sharedSecret = userCurve.computeSecret(appServerPublicKey);
+          if (!isGCM) {
+            assert.equal(req.headers['content-type'], 'application/octet-stream', 'Content-Type header correct');
+            assert.equal(req.headers['encryption-key'].indexOf('keyid=p256dh;dh='), 0, 'Encryption-Key header correct');
+            assert.equal(req.headers['content-encoding'], 'aesgcm128', 'Content-Encoding header correct');
+            var appServerPublicKey = urlBase64.decode(req.headers['encryption-key'].substring('keyid=p256dh;dh='.length));
+            var sharedSecret = userCurve.computeSecret(appServerPublicKey);
 
-          ece.saveKey('webpushKey', sharedSecret);
+            ece.saveKey('webpushKey', sharedSecret);
 
-          var decrypted = ece.decrypt(body, {
-            keyid: 'webpushKey',
-            salt: salt,
-            padSize: 1,
-          });
+            var decrypted = ece.decrypt(body, {
+              keyid: 'webpushKey',
+              salt: salt,
+              padSize: 1,
+            });
+          } else {
+            assert.equal(req.headers['crypto-key'].indexOf('keyid=p256dh;dh='), 0, 'Encryption-Key header correct');
+            assert.equal(req.headers['content-encoding'], 'aesgcm', 'Content-Encoding header correct');
+            var appServerPublicKey = req.headers['crypto-key'].substring('keyid=p256dh;dh='.length);
+
+            ece.saveKey('webpushKey', userCurve, 'P-256');
+
+            var raw_data = urlBase64.decode(JSON.parse(body).raw_data);
+
+            var decrypted = ece.decrypt(raw_data, {
+              keyid: 'webpushKey',
+              dh: appServerPublicKey,
+              salt: salt,
+              authSecret: urlBase64.encode(userAuth),
+              padSize: 2,
+            });
+          }
 
           assert(decrypted.equals(new Buffer(message)), "Cipher text correctly decoded");
         }
 
         if (isGCM) {
-          assert.equal(body.toString(), '{"registration_ids":["someSubscriptionID"]}');
+          assert.equal(JSON.stringify(JSON.parse(body).registration_ids), '["someSubscriptionID"]');
           assert.equal(req.headers['authorization'], 'key=my_gcm_key', 'Authorization header correct');
           assert.equal(req.headers['content-type'], 'application/json', 'Content-Type header correct');
-          assert.equal(req.headers['content-length'], 43, 'Content-Length header correct');
+          assert.equal(req.headers['content-length'], body.length, 'Content-Length header correct');
         }
 
         res.writeHead(statusCode ? statusCode : 201);
@@ -108,9 +129,12 @@ suite('sendNotification', function() {
   }
 
   test('send/receive string', function() {
-    return startServer('hello', 0)
+    return startServer('hello')
     .then(function() {
-      return webPush.sendNotification('https://127.0.0.1:' + serverPort, 0, urlBase64.encode(userPublicKey), 'hello');
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+        userPublicKey: urlBase64.encode(userPublicKey),
+        payload: 'hello',
+      });
     })
     .then(function(body) {
       assert(true, 'sendNotification promise resolved');
@@ -121,9 +145,12 @@ suite('sendNotification', function() {
   });
 
   test('send/receive buffer', function() {
-    return startServer('hello', 0)
+    return startServer('hello')
     .then(function() {
-      return webPush.sendNotification('https://127.0.0.1:' + serverPort, 0, urlBase64.encode(userPublicKey), new Buffer('hello'));
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+        userPublicKey: urlBase64.encode(userPublicKey),
+        payload: new Buffer('hello'),
+      });
     })
     .then(function() {
       assert(true, 'sendNotification promise resolved');
@@ -133,9 +160,12 @@ suite('sendNotification', function() {
   });
 
   test('send/receive unicode character', function() {
-    return startServer('😁', 0)
+    return startServer('😁')
     .then(function() {
-      return webPush.sendNotification('https://127.0.0.1:' + serverPort, 0, urlBase64.encode(userPublicKey), '😁');
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+        userPublicKey: urlBase64.encode(userPublicKey),
+        payload: '😁',
+      });
     })
     .then(function() {
       assert(true, 'sendNotification promise resolved');
@@ -147,9 +177,12 @@ suite('sendNotification', function() {
   // This test fails on Node.js v0.12.
   if (!semver.satisfies(process.version, '0.12')) {
     test('send/receive empty message', function() {
-      return startServer('', 0)
+      return startServer('')
       .then(function() {
-        return webPush.sendNotification('https://127.0.0.1:' + serverPort, 0, urlBase64.encode(userPublicKey), '');
+        return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+          userPublicKey: urlBase64.encode(userPublicKey),
+          payload: '',
+        });
       })
       .then(function() {
         assert(true, 'sendNotification promise resolved');
@@ -174,7 +207,21 @@ suite('sendNotification', function() {
   test('send/receive without message with TTL', function() {
     return startServer(undefined, 5)
     .then(function() {
-      return webPush.sendNotification('https://127.0.0.1:' + serverPort, 5);
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+        TTL: 5,
+      });
+    })
+    .then(function() {
+      assert(true, 'sendNotification promise resolved');
+    }, function() {
+      assert(false, 'sendNotification promise rejected');
+    });
+  });
+
+  test('send/receive without message with default TTL', function() {
+    return startServer(undefined, 2419200)
+    .then(function() {
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort);
     })
     .then(function() {
       assert(true, 'sendNotification promise resolved');
@@ -186,7 +233,11 @@ suite('sendNotification', function() {
   test('send/receive string with TTL', function() {
     return startServer('hello', 5)
     .then(function() {
-      return webPush.sendNotification('https://127.0.0.1:' + serverPort, 5, urlBase64.encode(userPublicKey), 'hello');
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+        TTL: 5,
+        userPublicKey: urlBase64.encode(userPublicKey),
+        payload: 'hello',
+      });
     })
     .then(function() {
       assert(true, 'sendNotification promise resolved');
@@ -242,15 +293,64 @@ suite('sendNotification', function() {
     });
   });
 
-  test('promise rejected if push serivice is GCM and you want to send a payload', function() {
+  test('send/receive string with GCM', function() {
+    var httpsrequest = https.request;
+    https.request = function(options, listener) {
+      options.hostname = '127.0.0.1';
+      options.port = serverPort;
+      options.path = '/';
+      return httpsrequest.call(https, options, listener);
+    }
+
     webPush.setGCMAPIKey('my_gcm_key');
 
-    return webPush.sendNotification('https://android.googleapis.com/gcm/send/someSubscriptionID', 5, urlBase64.encode(userPublicKey), 'hello')
+    return startServer('hello', undefined, 200, true)
+    .then(function() {
+      return webPush.sendNotification('https://android.googleapis.com/gcm/send/someSubscriptionID', {
+        userPublicKey: urlBase64.encode(userPublicKey),
+        userAuth: urlBase64.encode(userAuth),
+        payload: 'hello',
+      });
+    })
+    .then(function(body) {
+      assert(true, 'sendNotification promise resolved');
+      assert.equal(body, 'ok');
+    }, function() {
+      assert(false, 'sendNotification promise rejected');
+    });
+  });
+
+  test('0 arguments', function() {
+    return webPush.sendNotification()
     .then(function() {
       assert(false, 'sendNotification promise resolved');
-    }, function(err) {
-      assert(err, 'sendNotification promise rejected');
-      assert(err instanceof webPush.WebPushError, 'err is a WebPushError');
+    }, function() {
+      assert(true, 'sendNotification promise rejected');
+    });
+  });
+
+  test('TTL with old interface', function() {
+    return startServer(undefined, 5)
+    .then(function() {
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort, 5);
+    })
+    .then(function(body) {
+      assert(true, 'sendNotification promise resolved');
+    }, function() {
+      assert(false, 'sendNotification promise rejected');
+    });
+  });
+
+  test('payload with old interface', function() {
+    return startServer('hello', 0)
+    .then(function() {
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort, 0, urlBase64.encode(userPublicKey), 'hello');
+    })
+    .then(function(body) {
+      assert(true, 'sendNotification promise resolved');
+      assert.equal(body, 'ok');
+    }, function() {
+      assert(false, 'sendNotification promise rejected');
     });
   });
 });
