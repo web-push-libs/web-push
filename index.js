@@ -146,7 +146,7 @@ function sendNotification(endpoint, params) {
           registration_ids: [ subscriptionId ],
         };
         if (encrypted) {
-          gcmObj['raw_data'] = urlBase64.encode(encrypted.cipherText);
+          gcmObj['raw_data'] = encrypted.cipherText.toString('base64');
         }
         gcmPayload = JSON.stringify(gcmObj);
 
