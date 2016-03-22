@@ -225,7 +225,7 @@ function sendNotification(endpoint, params) {
         options.headers['Content-Length'] = gcmPayload.length;
       }
 
-      if (vapid && !isGCM && !encrypted) {
+      if (vapid && !isGCM && (!encrypted || useCryptoKey)) {
         // VAPID isn't supported by GCM.
         // We also can't use it when there's a payload on Firefox 45, because
         // Firefox 45 uses the old standard with Encryption-Key.
