@@ -218,8 +218,6 @@ function sendNotification(endpoint, params) {
         } else {
           options.headers['Crypto-Key'] = key;
         }
-
-        console.log(JSON.stringify(options.headers, null, 2));
       }
 
       if (typeof TTL !== 'undefined') {
