@@ -300,7 +300,7 @@ suite('selenium', function() {
 
   if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
     test('send/receive notification with payload with Chrome', function() {
-      return noRestartTest('chrome', 'marco');
+      return noRestartTest('chrome', undefined, 'marco');
     });
   }
 
@@ -315,7 +315,7 @@ suite('selenium', function() {
   /*
   if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
     test('send/receive notification with vapid with Chrome', function() {
-      return noRestartTest('chrome', undefined, vapidParam);
+      return noRestartTest('chrome', undefined, undefined, vapidParam);
     });
   }*/
 
@@ -326,7 +326,7 @@ suite('selenium', function() {
   /*
   if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
     test('send/receive notification with payload & vapid with Chrome', function() {
-      return noRestartTest('chrome', 'marco', vapidParam);
+      return noRestartTest('chrome', undefined, 'marco', vapidParam);
     });
   }*/
 
@@ -340,7 +340,7 @@ suite('selenium', function() {
 
   if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
     test('send/receive notification without payload with TTL with Chrome (closing and restarting the browser)', function() {
-      return restartTest('chrome', undefined, 2);
+      return restartTest('chrome', undefined, undefined, 2);
     });
   }
 });
