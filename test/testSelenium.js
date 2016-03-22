@@ -203,6 +203,14 @@ suite('selenium', function() {
       }
 
       promises.push(seleniumInit.downloadFirefoxRelease());
+    } else if (firefoxBinaryPath === 'beta') {
+      if (process.platform === 'linux') {
+        firefoxBinaryPath = 'test_tools/beta/firefox/firefox-bin';
+      } else if (process.platform === 'darwin') {
+        firefoxBinaryPath = 'test_tools/beta/FirefoxBeta.app/Contents/MacOS/firefox-bin';
+      }
+
+      promises.push(seleniumInit.downloadFirefoxBeta());
     }
 
     try {
@@ -277,12 +285,11 @@ suite('selenium', function() {
     return noRestartTest('firefox', 'marco');
   });
 
-  /*
   if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
     test('send/receive notification with payload with Chrome', function() {
       return noRestartTest('chrome', 'marco');
     });
-  }*/
+  }
 
   test('send/receive notification with vapid with Firefox', function() {
     return noRestartTest('firefox', undefined, vapidParam);
@@ -315,15 +322,4 @@ suite('selenium', function() {
       return restartTest('chrome', undefined, 2);
     });
   }
-
-  test('send/receive notification with payload with TTL with Firefox (closing and restarting the browser)', function() {
-    return restartTest('firefox', 'marco', 2);
-  });
-
-  /*
-  if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
-    test('send/receive notification with payload with TTL with Chrome (closing and restarting the browser)', function() {
-      return restartTest('chrome', 'marco', 2);
-    });
-  }*/
 });

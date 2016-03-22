@@ -54,21 +54,21 @@ function setGCMAPIKey(apiKey) {
   gcmAPIKey = apiKey;
 }
 
-function encrypt(userPublicKey, payload) {
+function encryptOld(userPublicKey, payload) {
   var localCurve = crypto.createECDH('prime256v1');
 
   var localPublicKey = localCurve.generateKeys();
   var localPrivateKey = localCurve.getPrivateKey();
 
-  var sharedSecret = localCurve.computeSecret(userPublicKey);
+  var sharedSecret = localCurve.computeSecret(urlBase64.decode(userPublicKey));
 
-  var salt = crypto.randomBytes(16);
+  var salt = urlBase64.encode(crypto.randomBytes(16));
 
   ece.saveKey('webpushKey', sharedSecret);
 
   var cipherText = ece.encrypt(payload, {
     keyid: 'webpushKey',
-    salt: urlBase64.encode(salt),
+    salt: salt,
     padSize: 1, // use the aesgcm128 encoding until aesgcm is well supported
   });
 
@@ -79,127 +79,188 @@ function encrypt(userPublicKey, payload) {
   };
 }
 
-function sendNotification(endpoint, TTL, userPublicKey, payload, vapid) {
+function encrypt(userPublicKey, userAuth, payload) {
+  var localCurve = crypto.createECDH('prime256v1');
+  var localPublicKey = localCurve.generateKeys();
+
+  var salt = urlBase64.encode(crypto.randomBytes(16));
+
+  ece.saveKey('webpushKey', localCurve, 'P-256');
+
+  var cipherText = ece.encrypt(payload, {
+    keyid: 'webpushKey',
+    dh: userPublicKey,
+    salt: salt,
+    authSecret: userAuth,
+    padSize: 2,
+  });
+
+  return {
+    localPublicKey: localPublicKey,
+    salt: salt,
+    cipherText: cipherText,
+  };
+}
+
+function sendNotification(endpoint, params) {
+  var args = arguments;
+
   return new Promise(function(resolve, reject) {
-    var urlParts = url.parse(endpoint);
-    var options = {
-      hostname: urlParts.hostname,
-      port: urlParts.port,
-      path: urlParts.pathname,
-      method: 'POST',
-      headers: {
-        'Content-Length': 0,
-      }
-    };
-
-    var encrypted;
-    if (typeof payload !== 'undefined') {
-      encrypted = encrypt(urlBase64.decode(userPublicKey), new Buffer(payload));
-      options.headers = {
-        'Content-Length': encrypted.cipherText.length,
-        'Content-Type': 'application/octet-stream',
-        'Crypto-Key': 'keyid=p256dh;dh=' + urlBase64.encode(encrypted.localPublicKey),
-        'Encryption': 'keyid=p256dh;salt=' + urlBase64.encode(encrypted.salt),
-        'Content-Encoding': 'aesgcm128',
-      };
-    }
-
-    if (vapid) {
-      var header = {
-        typ: 'JWT',
-        alg: 'ES256'
-      };
-
-      var jwtPayload = {
-        aud: vapid.audience,
-        exp: Math.floor(Date.now() / 1000) + 86400,
-        sub: vapid.subject,
-      };
-
-      var jwt = jws.sign({
-        header: header,
-        payload: jwtPayload,
-        privateKey: toPEM(vapid.privateKey),
-      });
-
-      options.headers['Authorization'] = 'Bearer ' + jwt;
-      var key = 'p256ecdsa=' + urlBase64.encode(vapid.publicKey);
-      if (options.headers['Crypto-Key']) {
-        options.headers['Crypto-Key'] += ',' + key;
-      } else {
-        options.headers['Crypto-Key'] = key;
+    try {
+      if (args.length === 0) {
+        throw new Error('sendNotification requires at least one argument, the endpoint URL');
+      } else if (params && typeof params === 'object') {
+        var TTL = params.TTL;
+        var userPublicKey = params.userPublicKey;
+        var userAuth = params.userAuth;
+        var payload = params.payload;
+        var vapid = params.vapid;
+      } else if (args.length !== 1) {
+        var TTL = args[1];
+        var userPublicKey = args[2];
+        var payload = args[3];
+        console.warn('You are using the old, deprecated, interface of the `sendNotification` function.'.bold.red);
       }
 
-      console.log(JSON.stringify(options.headers, null, 2));
-    }
+      const isGCM = endpoint.indexOf('https://android.googleapis.com/gcm/send') === 0;
 
-    var gcmPayload;
-    if (endpoint.indexOf('https://android.googleapis.com/gcm/send') === 0) {
-      if (payload) {
-        reject(new WebPushError('Payload not supported with GCM'));
-        return;
-      }
-
-      if (vapid) {
-        reject(new WebPushError('VAPID not supported with GCM'));
-        return;
-      }
-
-      if (!gcmAPIKey) {
-        console.warn('Attempt to send push notification to GCM endpoint, but no GCM key is defined'.bold.red);
-      }
-
-      var endpointSections = endpoint.split('/');
-      var subscriptionId = endpointSections[endpointSections.length - 1];
-      gcmPayload = JSON.stringify({
-        registration_ids: [ subscriptionId ],
-      });
-      options.path = options.path.substring(0, options.path.length - subscriptionId.length - 1);
-
-      options.headers['Authorization'] = 'key=' + gcmAPIKey;
-      options.headers['Content-Type'] = 'application/json';
-      options.headers['Content-Length'] = gcmPayload.length;
-    }
-
-    if (typeof TTL !== 'undefined') {
-      options.headers['TTL'] = TTL;
-    } else {
-      options.headers['TTL'] = 2419200; // Default TTL is four weeks.
-    }
-
-    var expectedStatusCode = gcmPayload ? 200 : 201;
-    var pushRequest = https.request(options, function(pushResponse) {
-      var body = "";
-
-      pushResponse.on('data', function(chunk) {
-        body += chunk;
-      });
-
-      pushResponse.on('end', function() {
-        if (pushResponse.statusCode !== expectedStatusCode) {
-          reject(new WebPushError('Received unexpected response code', pushResponse.statusCode, pushResponse.headers, body));
-        } else {
-          resolve(body);
+      var urlParts = url.parse(endpoint);
+      var options = {
+        hostname: urlParts.hostname,
+        port: urlParts.port,
+        path: urlParts.pathname,
+        method: 'POST',
+        headers: {
+          'Content-Length': 0,
         }
+      };
+
+      var encrypted;
+      if (typeof payload !== 'undefined') {
+        // Use Encryption-Key and the old standard for Firefox for now, otherwise we
+        // can't support Firefox 45.
+        // After Firefox 46 is released, we should switch to Crypto-Key, so we can
+        // support VAPID with notifications with payloads.
+        // We should take https://bugzilla.mozilla.org/show_bug.cgi?id=1257821 into
+        // account though.
+        const useNewStandard = isGCM;
+
+        encrypted = useNewStandard ? encrypt(userPublicKey, userAuth, new Buffer(payload)) :
+                                     encryptOld(userPublicKey, new Buffer(payload));
+
+        options.headers = {
+          'Content-Length': encrypted.cipherText.length,
+          'Content-Type': 'application/octet-stream',
+          'Encryption': 'keyid=p256dh;salt=' + encrypted.salt,
+        };
+
+        var cryptoHeader = 'keyid=p256dh;dh=' + urlBase64.encode(encrypted.localPublicKey);
+
+        if (useNewStandard) {
+          options.headers['Crypto-Key'] = cryptoHeader;
+          options.headers['Content-Encoding'] = 'aesgcm';
+        } else {
+          options.headers['Encryption-Key'] = cryptoHeader;
+          options.headers['Content-Encoding'] = 'aesgcm128';
+        }
+      }
+
+      var gcmPayload;
+      if (isGCM) {
+        if (!gcmAPIKey) {
+          console.warn('Attempt to send push notification to GCM endpoint, but no GCM key is defined'.bold.red);
+        }
+
+        var endpointSections = endpoint.split('/');
+        var subscriptionId = endpointSections[endpointSections.length - 1];
+
+        var gcmObj = {
+          registration_ids: [ subscriptionId ],
+        };
+        if (encrypted) {
+          gcmObj['raw_data'] = encrypted.cipherText.toString('base64');
+        }
+        gcmPayload = JSON.stringify(gcmObj);
+
+        options.path = options.path.substring(0, options.path.length - subscriptionId.length - 1);
+
+        options.headers['Authorization'] = 'key=' + gcmAPIKey;
+        options.headers['Content-Type'] = 'application/json';
+        options.headers['Content-Length'] = gcmPayload.length;
+      }
+
+      if (vapid && !isGCM && !encrypted) {
+        var header = {
+          typ: 'JWT',
+          alg: 'ES256'
+        };
+
+        var jwtPayload = {
+          aud: vapid.audience,
+          exp: Math.floor(Date.now() / 1000) + 86400,
+          sub: vapid.subject,
+        };
+
+        var jwt = jws.sign({
+          header: header,
+          payload: jwtPayload,
+          privateKey: toPEM(vapid.privateKey),
+        });
+
+        options.headers['Authorization'] = 'Bearer ' + jwt;
+        var key = 'p256ecdsa=' + urlBase64.encode(vapid.publicKey);
+        if (options.headers['Crypto-Key']) {
+          options.headers['Crypto-Key'] += ',' + key;
+        } else {
+          options.headers['Crypto-Key'] = key;
+        }
+
+        console.log(JSON.stringify(options.headers, null, 2));
+      }
+
+      if (typeof TTL !== 'undefined') {
+        options.headers['TTL'] = TTL;
+      } else {
+        options.headers['TTL'] = 2419200; // Default TTL is four weeks.
+      }
+
+      var expectedStatusCode = isGCM ? 200 : 201;
+      var pushRequest = https.request(options, function(pushResponse) {
+        var body = "";
+
+        pushResponse.on('data', function(chunk) {
+          body += chunk;
+        });
+
+        pushResponse.on('end', function() {
+          if (pushResponse.statusCode !== expectedStatusCode) {
+            reject(new WebPushError('Received unexpected response code', pushResponse.statusCode, pushResponse.headers, body));
+          } else {
+            resolve(body);
+          }
+        });
       });
-    });
 
-    if (typeof payload !== 'undefined') {
-      pushRequest.write(encrypted.cipherText);
-    }
-    if (gcmPayload) {
-      pushRequest.write(gcmPayload);
-    }
-    pushRequest.end();
+      if (isGCM) {
+        pushRequest.write(gcmPayload);
+      } else if (typeof payload !== 'undefined') {
+        pushRequest.write(encrypted.cipherText);
+      }
 
-    pushRequest.on('error', function(e) {
-      console.error(e);
+      pushRequest.end();
+
+      pushRequest.on('error', function(e) {
+        console.error(e);
+        reject(e);
+      });
+    } catch (e) {
       reject(e);
-    });
+    }
   });
 }
 
 module.exports = {
+  encryptOld: encryptOld,
   encrypt: encrypt,
   sendNotification: sendNotification,
   setGCMAPIKey: setGCMAPIKey,

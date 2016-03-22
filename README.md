@@ -2,7 +2,7 @@
 > Web Push library for Node.js
 
 Supports Firefox 44+ and Chromium/Chrome 42+.
-Notification with payloads are currently only supported in Firefox (see https://code.google.com/p/chromium/issues/detail?id=486040 for the status in Chromium).
+Notification with payloads are supported in Firefox 44+ and Chromium/Chrome 50+.
 
 [![NPM](https://nodei.co/npm/web-push.svg?downloads=true)](https://www.npmjs.com/package/web-push)
 
@@ -10,13 +10,15 @@ Notification with payloads are currently only supported in Firefox (see https://
 [![dependencies](https://david-dm.org/marco-c/web-push.svg)](https://david-dm.org/marco-c/web-push)
 [![devdependencies](https://david-dm.org/marco-c/web-push/dev-status.svg)](https://david-dm.org/marco-c/web-push#info=devDependencies)
 
-## sendNotification(endpoint, TTL, userPublicKey, payload)
+## sendNotification(endpoint, params)
 
-Send a Push notification to an endpoint. *userPublicKey* and *payload* can be undefined, if you want to send a notification without a message.
-- *endpoint* is the endpoint URL;
+Send a Push notification to an endpoint. *params* containes optional parameters:
 - *TTL* is a value in seconds that describes how long a push message is retained by the push service (by default, four weeks);
-- *userPublicKey* is the public key of the browser;
+- *userPublicKey* is the public key of the receiver (from the browser);
+- *userAuth* is the auth secret of the receiver (from the browser);
 - *payload* is the message to attach to the notification.
+
+Note that, in order to encrypt the *payload*, *userPublicKey* and *userAuth* are required.
 
 The function returns a Promise. On success, it is resolved to the body of the response from the push service. On failure, it is rejected with a `WebPushError`, which extends an `Error` with the following properties:
 - *statusCode*, the status code of the response from the push service;
@@ -28,10 +30,11 @@ The function returns a Promise. On success, it is resolved to the body of the re
 Sets the GCM API key that the library should use in making requests to GCM endpoints (in Chromium/Google Chrome).
 - *apiKey* is your GCM API key, you can obtain it from the Google Developer Console.
 
-## encrypt(userPublicKey, payload)
+## encrypt(userPublicKey, userAuth, payload)
 
-Encrypts the payload according to the [Message Encryption for Web Push](https://tools.ietf.org/html/draft-thomson-webpush-encryption-00) standard. (*sendNotification* will automatically encrypt the payload for you, so if you use *sendNotification* you don't need to worry about it).
-- *userPublicKey* is the public key of the browser;
+Encrypts the payload according to the [Message Encryption for Web Push](https://webpush-wg.github.io/webpush-encryption/) standard. (*sendNotification* will automatically encrypt the payload for you, so if you use *sendNotification* you don't need to worry about it).
+- *userPublicKey* is the public key of the receiver (from the browser);
+- *userAuth* is the auth secret of the receiver (from the browser);
 - *payload* is the message to attach to the notification.
 
 ## Examples
