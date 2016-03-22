@@ -207,7 +207,7 @@ suite('selenium', function() {
       if (process.platform === 'linux') {
         firefoxBetaBinaryPath = 'test_tools/beta/firefox/firefox-bin';
       } else if (process.platform === 'darwin') {
-        firefoxBetaBinaryPath = 'test_tools/beta/FirefoxBeta.app/Contents/MacOS/firefox-bin';
+        firefoxBetaBinaryPath = 'test_tools/beta/Firefox.app/Contents/MacOS/firefox-bin';
       }
 
       promises.push(seleniumInit.downloadFirefoxBeta());

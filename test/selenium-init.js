@@ -224,7 +224,7 @@ function downloadFirefoxBeta() {
         .then(resolve);
       } else if (process.platform === 'darwin') {
         dmg.mount(path.join(betaDestDir, fileName), function(err, extractedPath) {
-          fse.copySync(path.join(extractedPath, 'FirefoxBeta.app'), path.join(betaDestDir, 'FirefoxBeta.app'));
+          fse.copySync(path.join(extractedPath, 'Firefox.app'), path.join(betaDestDir, 'Firefox.app'));
           dmg.unmount(extractedPath, resolve);
         });
       }
