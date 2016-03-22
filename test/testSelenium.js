@@ -312,23 +312,21 @@ suite('selenium', function() {
     return noRestartTest('firefox', firefoxBetaBinaryPath, undefined, vapidParam);
   });
 
-  /*
   if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
     test('send/receive notification with vapid with Chrome', function() {
       return noRestartTest('chrome', undefined, undefined, vapidParam);
     });
-  }*/
+  }
 
   test('send/receive notification with payload & vapid with Firefox Beta', function() {
     return noRestartTest('firefox', firefoxBetaBinaryPath, 'marco', vapidParam);
   });
 
-  /*
   if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
     test('send/receive notification with payload & vapid with Chrome', function() {
       return noRestartTest('chrome', undefined, 'marco', vapidParam);
     });
-  }*/
+  }
 
   test('send/receive notification without payload with TTL with Firefox Release (closing and restarting the browser)', function() {
     return restartTest('firefox', firefoxBinaryPath, undefined, 2);
