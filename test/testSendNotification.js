@@ -98,8 +98,6 @@ suite('sendNotification', function() {
         }
 
         if (vapid) {
-          console.log('here1');
-
           var keys = req.headers['crypto-key'].split(',');
           var vapidKey = keys.find(function(key) {
             return key.indexOf('p256ecdsa=') === 0;
