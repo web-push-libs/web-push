@@ -190,6 +190,10 @@ function sendNotification(endpoint, params) {
       }
 
       if (vapid && !isGCM && !encrypted) {
+        // VAPID isn't supported by GCM.
+        // We can't use when there's a payload on Firefox 45, because
+        // Firefox 45 uses the old standard with Encryption-Key.
+
         var header = {
           typ: 'JWT',
           alg: 'ES256'
