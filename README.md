@@ -2,7 +2,8 @@
 > Web Push library for Node.js
 
 Supports Firefox 44+ and Chromium/Chrome 42+.
-Notification with payloads are supported in Firefox 44+ and Chromium/Chrome 50+.
+Notifications with payloads are supported in Firefox 44+ and Chromium/Chrome 50+.
+[VAPID](https://tools.ietf.org/html/draft-thomson-webpush-vapid-02) is supported in Firefox 45+ (for notifications without payloads).
 
 [![NPM](https://nodei.co/npm/web-push.svg?downloads=true)](https://www.npmjs.com/package/web-push)
 
@@ -17,13 +18,24 @@ Send a Push notification to an endpoint. *params* containes optional parameters:
 - *userPublicKey* is the public key of the receiver (from the browser);
 - *userAuth* is the auth secret of the receiver (from the browser);
 - *payload* is the message to attach to the notification.
+- *vapid* an object with parameters for [VAPID](https://tools.ietf.org/html/draft-thomson-webpush-vapid-02).
 
 Note that, in order to encrypt the *payload*, *userPublicKey* and *userAuth* are required.
+
+The properties of the *vapid* objects are:
+- *audience*, the origin of the application server;
+- *subject*, a contact URI for the application server (either 'mailto:' or 'https:');
+- *privateKey*;
+- *publicKey*.
 
 The function returns a Promise. On success, it is resolved to the body of the response from the push service. On failure, it is rejected with a `WebPushError`, which extends an `Error` with the following properties:
 - *statusCode*, the status code of the response from the push service;
 - *headers*, the headers of the response from the push service;
 - *body*, the body of the response from the push service.
+
+## generateVAPIDKeys()
+Generates the keys needed for [VAPID](https://tools.ietf.org/html/draft-thomson-webpush-vapid-02). Returns an object with two properties: *privateKey* and *publicKey*.
+The keys should be stored and always reused when sending notifications with VAPID.
 
 ## setGCMAPIKey(apiKey)
 
