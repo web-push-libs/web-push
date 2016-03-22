@@ -30,6 +30,7 @@ suite('sendNotification', function() {
   var userPublicKey = userCurve.generateKeys();
   var userPrivateKey = userCurve.getPrivateKey();
 
+  var intermediateUserAuth = crypto.randomBytes(12);
   var userAuth = crypto.randomBytes(16);
 
   var vapidKeys = webPush.generateVAPIDKeys();
@@ -56,6 +57,8 @@ suite('sendNotification', function() {
           assert.equal(req.headers['ttl'], TTL, 'TTL header correct');
         }
 
+        var cryptoHeader = !!req.headers['encryption-key'] ? 'encryption-key' : 'crypto-key';
+
         if (typeof message !== 'undefined') {
           assert(body.length > 0);
 
@@ -64,20 +67,48 @@ suite('sendNotification', function() {
 
           if (!isGCM) {
             assert.equal(req.headers['content-type'], 'application/octet-stream', 'Content-Type header correct');
-            assert.equal(req.headers['encryption-key'].indexOf('keyid=p256dh;dh='), 0, 'Encryption-Key header correct');
-            assert.equal(req.headers['content-encoding'], 'aesgcm128', 'Content-Encoding header correct');
-            var appServerPublicKey = urlBase64.decode(req.headers['encryption-key'].substring('keyid=p256dh;dh='.length));
-            var sharedSecret = userCurve.computeSecret(appServerPublicKey);
 
-            ece.saveKey('webpushKey', sharedSecret);
+            var keys = req.headers[cryptoHeader].split(',');
+            var appServerPublicKey = keys.find(function(key) {
+              return key.indexOf('keyid=p256dh;dh=') === 0;
+            }).substring('keyid=p256dh;dh='.length);
 
-            var decrypted = ece.decrypt(body, {
-              keyid: 'webpushKey',
-              salt: salt,
-              padSize: 1,
-            });
+            if (cryptoHeader === 'encryption-key') {
+              assert.equal(req.headers['content-encoding'], 'aesgcm128', 'Content-Encoding header correct');
+
+              var sharedSecret = userCurve.computeSecret(urlBase64.decode(appServerPublicKey));
+              ece.saveKey('webpushKey', sharedSecret);
+
+              var decrypted = ece.decrypt(body, {
+                keyid: 'webpushKey',
+                salt: salt,
+                padSize: 1,
+              });
+            } else if (req.headers['content-encoding'] === 'aesgcm128') {
+              ece.saveKey('webpushKey', userCurve, 'P-256');
+
+              var decrypted = ece.decrypt(body, {
+                keyid: 'webpushKey',
+                dh: appServerPublicKey,
+                salt: salt,
+                authSecret: urlBase64.encode(intermediateUserAuth),
+                padSize: 1,
+              });
+            } else if (req.headers['content-encoding'] === 'aesgcm') {
+              ece.saveKey('webpushKey', userCurve, 'P-256');
+
+              var decrypted = ece.decrypt(body, {
+                keyid: 'webpushKey',
+                dh: appServerPublicKey,
+                salt: salt,
+                authSecret: urlBase64.encode(userAuth),
+                padSize: 2,
+              });
+            } else {
+              assert(false, 'Invalid crypto header or content-encoding header value');
+            }
           } else {
-            assert.equal(req.headers['crypto-key'].indexOf('keyid=p256dh;dh='), 0, 'Encryption-Key header correct');
+            assert.equal(req.headers[cryptoHeader].indexOf('keyid=p256dh;dh='), 0, 'Encryption-Key header correct');
             assert.equal(req.headers['content-encoding'], 'aesgcm', 'Content-Encoding header correct');
             var appServerPublicKey = req.headers['crypto-key'].substring('keyid=p256dh;dh='.length);
 
@@ -98,7 +129,8 @@ suite('sendNotification', function() {
         }
 
         if (vapid) {
-          var keys = req.headers['crypto-key'].split(',');
+          assert.equal(cryptoHeader, 'crypto-key');
+          var keys = req.headers[cryptoHeader].split(',');
           var vapidKey = keys.find(function(key) {
             return key.indexOf('p256ecdsa=') === 0;
           });
@@ -154,7 +186,7 @@ suite('sendNotification', function() {
     });
   }
 
-  test('send/receive string', function() {
+  test('send/receive string (old standard)', function() {
     return startServer('hello')
     .then(function() {
       return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
@@ -165,8 +197,42 @@ suite('sendNotification', function() {
     .then(function(body) {
       assert(true, 'sendNotification promise resolved');
       assert.equal(body, 'ok');
-    }, function() {
-      assert(false, 'sendNotification promise rejected');
+    }, function(e) {
+      assert(false, 'sendNotification promise rejected with: ' + e);
+    });
+  });
+
+  test('send/receive string (intermediate standard)', function() {
+    return startServer('hello')
+    .then(function() {
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+        userPublicKey: urlBase64.encode(userPublicKey),
+        userAuth: urlBase64.encode(intermediateUserAuth),
+        payload: 'hello',
+      });
+    })
+    .then(function(body) {
+      assert(true, 'sendNotification promise resolved');
+      assert.equal(body, 'ok');
+    }, function(e) {
+      assert(false, 'sendNotification promise rejected with: ' + e);
+    });
+  });
+
+  test('send/receive string (new standard)', function() {
+    return startServer('hello')
+    .then(function() {
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+        userPublicKey: urlBase64.encode(userPublicKey),
+        userAuth: urlBase64.encode(userAuth),
+        payload: 'hello',
+      });
+    })
+    .then(function(body) {
+      assert(true, 'sendNotification promise resolved');
+      assert.equal(body, 'ok');
+    }, function(e) {
+      assert(false, 'sendNotification promise rejected with: ' + e);
     });
   });
 
@@ -405,7 +471,6 @@ suite('sendNotification', function() {
     .then(function() {
       return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
         userPublicKey: urlBase64.encode(userPublicKey),
-        userAuth: urlBase64.encode(userAuth),
         payload: 'hello',
         vapid: {
           audience: 'https://www.mozilla.org/',
