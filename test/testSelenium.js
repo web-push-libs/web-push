@@ -7,6 +7,7 @@ var colors = require('colors');
 var semver = require('semver');
 var childProcess = require('child_process');
 var seleniumInit = require('./selenium-init');
+var webPush = require('../index.js');
 
 if (!process.env.GCM_API_KEY) {
   console.log('You need to set the GCM_API_KEY env variable to run the tests with Chromium.'.bold.red);
@@ -30,8 +31,8 @@ suite('selenium', function() {
   var createServer = require('./server');
 
   var server;
-  function startServer(pushPayload, pushTimeout) {
-    return createServer(pushPayload, pushTimeout ? pushTimeout : 0)
+  function startServer(pushPayload, pushTimeout, vapid) {
+    return createServer(pushPayload, pushTimeout ? pushTimeout : 0, vapid)
     .then(function(newServer) {
       server = newServer;
 
@@ -116,21 +117,21 @@ suite('selenium', function() {
     return driver.wait(until.titleIs(pushPayload ? pushPayload : 'no payload'), 60000);
   }
 
-  function noRestartTest(browser, pushPayload, pushTimeout) {
+  function noRestartTest(browser, pushPayload, pushTimeout, vapid) {
     process.env.SELENIUM_BROWSER = browser;
 
-    return startServer(pushPayload, pushTimeout)
+    return startServer(pushPayload, pushTimeout, vapid)
     .then(function() {
       driver = startBrowser();
       return checkEnd(driver, pushPayload)
     });
   }
 
-  function restartTest(browser, pushPayload, pushTimeout) {
+  function restartTest(browser, pushPayload, pushTimeout, vapid) {
     return new Promise(function(resolve, reject) {
       process.env.SELENIUM_BROWSER = browser;
 
-      return startServer(pushPayload, pushTimeout)
+      return startServer(pushPayload, pushTimeout, vapid)
       .then(function() {
         driver = startBrowser();
 
@@ -262,6 +263,14 @@ suite('selenium', function() {
     });
   });
 
+  var vapidKeys = webPush.generateVAPIDKeys();
+  var vapidParam = {
+    audience: 'https://www.mozilla.org/',
+    subject: 'mailto:web-push@mozilla.org',
+    privateKey: vapidKeys.privateKey,
+    publicKey: vapidKeys.publicKey,
+  };
+
   test('send/receive notification without payload with Firefox', function() {
     return noRestartTest('firefox');
   });
@@ -281,6 +290,28 @@ suite('selenium', function() {
       return noRestartTest('chrome', 'marco');
     });
   }
+
+  test('send/receive notification with vapid with Firefox', function() {
+    return noRestartTest('firefox', undefined, vapidParam);
+  });
+
+  /*
+  if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
+    test('send/receive notification with vapid with Chrome', function() {
+      return noRestartTest('chrome', undefined, vapidParam);
+    });
+  }*/
+
+  /*test('send/receive notification with payload & vapid with Firefox', function() {
+    return noRestartTest('firefox', 'marco', vapidParam);
+  });*/
+
+  /*
+  if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
+    test('send/receive notification with payload & vapid with Chrome', function() {
+      return noRestartTest('chrome', 'marco', vapidParam);
+    });
+  }*/
 
   test('send/receive notification without payload with TTL with Firefox (closing and restarting the browser)', function() {
     return restartTest('firefox', undefined, 2);

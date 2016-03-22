@@ -7,6 +7,7 @@ var ece        = require('http_ece');
 var urlBase64  = require('urlsafe-base64');
 var semver     = require('semver');
 var portfinder = require('portfinder');
+var jws        = require('jws');
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
@@ -31,7 +32,9 @@ suite('sendNotification', function() {
 
   var userAuth = crypto.randomBytes(16);
 
-  function startServer(message, TTL, statusCode, isGCM) {
+  var vapidKeys = webPush.generateVAPIDKeys();
+
+  function startServer(message, TTL, statusCode, isGCM, vapid) {
     var pem = fs.readFileSync('test/cert.pem');
 
     var options = {
@@ -92,6 +95,29 @@ suite('sendNotification', function() {
           }
 
           assert(decrypted.equals(new Buffer(message)), "Cipher text correctly decoded");
+        }
+
+        if (vapid) {
+          var keys = req.headers['crypto-key'].split(',');
+          var vapidKey = keys.find(function(key) {
+            return key.indexOf('p256ecdsa=') === 0;
+          });
+
+          assert.equal(vapidKey.indexOf('p256ecdsa='), 0, 'Crypto-Key header correct');
+          var appServerVapidPublicKey = urlBase64.decode(vapidKey.substring('p256ecdsa='.length));
+
+          assert(appServerVapidPublicKey.equals(vapidKeys.publicKey));
+
+          var authorizationHeader = req.headers['authorization'];
+          assert.equal(authorizationHeader.indexOf('Bearer '), 0, 'Authorization header correct');
+          var jwt = authorizationHeader.substring('Bearer '.length);
+          //assert(jws.verify(jwt, 'ES256', appServerVapidPublicKey)), 'JWT valid');
+          var decoded = jws.decode(jwt);
+          assert.equal(decoded.header.typ, 'JWT');
+          assert.equal(decoded.header.alg, 'ES256');
+          assert.equal(decoded.payload.aud, 'https://www.mozilla.org/');
+          assert(decoded.payload.exp > Date.now() / 1000);
+          assert.equal(decoded.payload.sub, 'mailto:mozilla@example.org');
         }
 
         if (isGCM) {
@@ -345,6 +371,77 @@ suite('sendNotification', function() {
     return startServer('hello', 0)
     .then(function() {
       return webPush.sendNotification('https://127.0.0.1:' + serverPort, 0, urlBase64.encode(userPublicKey), 'hello');
+    })
+    .then(function(body) {
+      assert(true, 'sendNotification promise resolved');
+      assert.equal(body, 'ok');
+    }, function() {
+      assert(false, 'sendNotification promise rejected');
+    });
+  });
+
+  test('send notification without message with vapid', function() {
+    return startServer(undefined, undefined, undefined, undefined, true)
+    .then(function() {
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+        vapid: {
+          audience: 'https://www.mozilla.org/',
+          subject: 'mailto:mozilla@example.org',
+          privateKey: vapidKeys.privateKey,
+          publicKey: vapidKeys.publicKey,
+        },
+      });
+    })
+    .then(function(body) {
+      assert(true, 'sendNotification promise resolved');
+      assert.equal(body, 'ok');
+    }, function(e) {
+      assert(false, 'sendNotification promise rejected with ' + e);
+    });
+  });
+
+  test('send notification with message with vapid', function() {
+    return startServer('hello', undefined, undefined, undefined, false)
+    .then(function() {
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+        userPublicKey: urlBase64.encode(userPublicKey),
+        userAuth: urlBase64.encode(userAuth),
+        payload: 'hello',
+        vapid: {
+          audience: 'https://www.mozilla.org/',
+          subject: 'mailto:mozilla@example.org',
+          privateKey: vapidKeys.privateKey,
+          publicKey: vapidKeys.publicKey,
+        },
+      });
+    })
+    .then(function(body) {
+      assert(true, 'sendNotification promise resolved');
+      assert.equal(body, 'ok');
+    }, function(e) {
+      assert(false, 'sendNotification promise rejected with ' + e);
+    });
+  });
+
+  test('send notification if push service is GCM and you want to use VAPID', function() {
+    var httpsrequest = https.request;
+    https.request = function(options, listener) {
+      options.hostname = '127.0.0.1';
+      options.port = serverPort;
+      options.path = '/';
+      return httpsrequest.call(https, options, listener);
+    }
+
+    webPush.setGCMAPIKey('my_gcm_key');
+
+    return startServer(undefined, undefined, 200, true)
+    .then(function() {
+      return webPush.sendNotification('https://android.googleapis.com/gcm/send/someSubscriptionID', 5, undefined, undefined, {
+          audience: 'https://www.mozilla.org/',
+          subject: 'mailto:mozilla@example.org',
+          privateKey: vapidKeys.privateKey,
+          publicKey: vapidKeys.publicKey,
+      });
     })
     .then(function(body) {
       assert(true, 'sendNotification promise resolved');

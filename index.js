@@ -4,6 +4,37 @@ const ece       = require('http_ece');
 const url       = require('url');
 const https     = require('https');
 const colors    = require('colors');
+const asn1      = require('asn1.js');
+const jws       = require('jws');
+
+var ECPrivateKeyASN = asn1.define('ECPrivateKey', function() {
+  this.seq().obj(
+    this.key('version').int(),
+    this.key('privateKey').octstr(),
+    this.key('parameters').explicit(0).objid().optional(),
+    this.key('publicKey').explicit(1).bitstr().optional()
+  )
+});
+
+function toPEM(key) {
+  return ECPrivateKeyASN.encode({
+    version: 1,
+    privateKey: key,
+    parameters: [1, 2, 840, 10045, 3, 1, 7], // prime256v1
+  }, 'pem', {
+    label: 'EC PRIVATE KEY',
+  });
+}
+
+function generateVAPIDKeys() {
+  var curve = crypto.createECDH('prime256v1');
+  curve.generateKeys();
+
+  return {
+    publicKey: curve.getPublicKey(),
+    privateKey: curve.getPrivateKey(),
+  };
+}
 
 function WebPushError(message, statusCode, headers, body) {
   Error.captureStackTrace(this, this.constructor);
@@ -83,6 +114,7 @@ function sendNotification(endpoint, params) {
         var userPublicKey = params.userPublicKey;
         var userAuth = params.userAuth;
         var payload = params.payload;
+        var vapid = params.vapid;
       } else if (args.length !== 1) {
         var TTL = args[1];
         var userPublicKey = args[2];
@@ -157,6 +189,37 @@ function sendNotification(endpoint, params) {
         options.headers['Content-Length'] = gcmPayload.length;
       }
 
+      if (vapid && !isGCM && !encrypted) {
+        // VAPID isn't supported by GCM.
+        // We also can't use it when there's a payload on Firefox 45, because
+        // Firefox 45 uses the old standard with Encryption-Key.
+
+        var header = {
+          typ: 'JWT',
+          alg: 'ES256'
+        };
+
+        var jwtPayload = {
+          aud: vapid.audience,
+          exp: Math.floor(Date.now() / 1000) + 86400,
+          sub: vapid.subject,
+        };
+
+        var jwt = jws.sign({
+          header: header,
+          payload: jwtPayload,
+          privateKey: toPEM(vapid.privateKey),
+        });
+
+        options.headers['Authorization'] = 'Bearer ' + jwt;
+        var key = 'p256ecdsa=' + urlBase64.encode(vapid.publicKey);
+        if (options.headers['Crypto-Key']) {
+          options.headers['Crypto-Key'] += ',' + key;
+        } else {
+          options.headers['Crypto-Key'] = key;
+        }
+      }
+
       if (typeof TTL !== 'undefined') {
         options.headers['TTL'] = TTL;
       } else {
@@ -204,4 +267,5 @@ module.exports = {
   sendNotification: sendNotification,
   setGCMAPIKey: setGCMAPIKey,
   WebPushError: WebPushError,
+  generateVAPIDKeys: generateVAPIDKeys,
 };
