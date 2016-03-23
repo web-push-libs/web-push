@@ -18,7 +18,7 @@ var options = {
   cert: pem,
 };
 
-function createServer(pushPayload, pushTimeout, vapid) {
+function createServer(pushPayload, vapid) {
   var server = https.createServer(options, function(req, res) {
     if (req.method === 'GET') {
       if (req.url === '/') {
@@ -70,7 +70,11 @@ function createServer(pushPayload, pushTimeout, vapid) {
         promise
         .then(function() {
           console.log('Push Application Server - Notification sent to ' + obj.endpoint);
-        });
+        })
+        .catch(function(error) {
+          console.log('Push Application Server - Error in sending notification to ' + obj.endpoint);
+          console.log(error);
+        })
       });
 
       res.writeHead(200, {
