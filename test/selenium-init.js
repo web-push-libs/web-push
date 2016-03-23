@@ -158,9 +158,7 @@ function downloadFirefoxNightly() {
   });
 }
 
-// Download Firefox Release
-
-function downloadFirefoxRelease() {
+function downloadFirefoxFromDMO(product, destDir) {
   return new Promise(function(resolve, reject) {
     var firefoxPlatform;
     if (process.platform === 'linux') {
@@ -173,22 +171,22 @@ function downloadFirefoxRelease() {
     }
 
     function getFile() {
-      var files = fs.readdirSync(stableDestDir);
+      var files = fs.readdirSync(destDir);
       return files.find(function(file) {
         return file.indexOf('index.html?') === 0;
       });
     }
 
-    var fileName = 'index.html?product=firefox-latest&lang=en-US&os=' + firefoxPlatform;
+    var fileName = 'index.html?product=' + product + '&lang=en-US&os=' + firefoxPlatform;
 
-    wget(stableDestDir, 'https://download.mozilla.org/?product=firefox-latest&lang=en-US&os=' + firefoxPlatform)
+    wget(destDir, 'https://download.mozilla.org/?product=' + product + '&lang=en-US&os=' + firefoxPlatform)
     .then(function() {
       if (process.platform === 'linux') {
-        untar(stableDestDir, path.join(stableDestDir, fileName))
+        untar(destDir, path.join(destDir, fileName))
         .then(resolve);
       } else if (process.platform === 'darwin') {
-        dmg.mount(path.join(stableDestDir, fileName), function(err, extractedPath) {
-          fse.copySync(path.join(extractedPath, 'Firefox.app'), path.join(stableDestDir, 'Firefox.app'));
+        dmg.mount(path.join(destDir, fileName), function(err, extractedPath) {
+          fse.copySync(path.join(extractedPath, 'Firefox.app'), path.join(destDir, 'Firefox.app'));
           dmg.unmount(extractedPath, resolve);
         });
       }
@@ -196,40 +194,14 @@ function downloadFirefoxRelease() {
   });
 }
 
+// Download Firefox Release
+
+function downloadFirefoxRelease() {
+  return downloadFirefoxFromDMO('firefox-latest', stableDestDir);
+}
+
 function downloadFirefoxBeta() {
-  return new Promise(function(resolve, reject) {
-    var firefoxPlatform;
-    if (process.platform === 'linux') {
-      firefoxPlatform = 'linux';
-      if (process.arch === 'x64') {
-        firefoxPlatform += '64';
-      }
-    } else if (process.platform === 'darwin') {
-      firefoxPlatform = 'osx';
-    }
-
-    function getFile() {
-      var files = fs.readdirSync(betaDestDir);
-      return files.find(function(file) {
-        return file.indexOf('index.html?') === 0;
-      });
-    }
-
-    var fileName = 'index.html?product=firefox-beta-latest&lang=en-US&os=' + firefoxPlatform;
-
-    wget(betaDestDir, 'https://download.mozilla.org/?product=firefox-beta-latest&lang=en-US&os=' + firefoxPlatform)
-    .then(function() {
-      if (process.platform === 'linux') {
-        untar(betaDestDir, path.join(betaDestDir, fileName))
-        .then(resolve);
-      } else if (process.platform === 'darwin') {
-        dmg.mount(path.join(betaDestDir, fileName), function(err, extractedPath) {
-          fse.copySync(path.join(extractedPath, 'Firefox.app'), path.join(betaDestDir, 'Firefox.app'));
-          dmg.unmount(extractedPath, resolve);
-        });
-      }
-    });
-  });
+  return downloadFirefoxFromDMO('firefox-beta-latest', betaDestDir);
 }
 
 // Download Chrome Canary
