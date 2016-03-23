@@ -49,7 +49,6 @@ suite('selenium', function() {
       var profilePath = temp.mkdirSync('marco');
 
       var profile = new firefox.Profile(profilePath);
-      profile.acceptUntrustedCerts();
       profile.setPreference('security.turn_off_all_security_so_that_viruses_can_take_over_this_computer', true);
       profile.setPreference('extensions.checkCompatibility.nightly', false);
       // Only allow installation of third-party addons from the user's profile dir (needed to block the third-party
@@ -77,16 +76,16 @@ suite('selenium', function() {
         if (typeof netscape !== 'undefined') {
           netscape.security.PrivilegeManager.enablePrivilege('UniversalXPConnect');
           Components.utils.import('resource://gre/modules/Services.jsm');
-          var uri = Services.io.newURI('https://127.0.0.1:' + port, null, null);
+          var uri = Services.io.newURI('http://127.0.0.1:' + port, null, null);
           var principal = Services.scriptSecurityManager.getNoAppCodebasePrincipal(uri);
           Services.perms.addFromPrincipal(principal, 'desktop-notification', Services.perms.ALLOW_ACTION);
         }
       }, server.port);
 
-      driver.get('https://127.0.0.1:' + server.port);
+      driver.get('http://127.0.0.1:' + server.port);
 
       driver.executeScript(function(port) {
-        serverAddress = 'https://127.0.0.1:' + port;
+        serverAddress = 'http://127.0.0.1:' + port;
         go();
       }, server.port);
 
