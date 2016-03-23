@@ -142,7 +142,7 @@ suite('selenium', function() {
 
     if (process.env.GCM_API_KEY) {
       chromeBinaryPath = process.env.CHROME;
-      if (!chromeBinaryPath || chromeBinaryPath === 'nightly') {
+      if (chromeBinaryPath === 'nightly') {
         if (process.platform === 'linux') {
           chromeBinaryPath = 'test_tools/chrome-linux/chrome';
         } else if (process.platform === 'darwin') {
@@ -150,7 +150,7 @@ suite('selenium', function() {
         }
 
         promises.push(seleniumInit.downloadChromiumNightly());
-      } else if (chromeBinaryPath === 'stable') {
+      } else if (chromeBinaryPath === 'all') {
         // TODO: Download Chromium release.
         chromeBinaryPath = childProcess.execSync('which chromium-browser').toString().replace('\n', '');
       }
