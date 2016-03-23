@@ -446,10 +446,12 @@ suite('sendNotification', function() {
     });
   });
 
-  test('send notification without message with vapid', function() {
-    return startServer(undefined, undefined, undefined, undefined, true)
+  test('send notification with message (old standard) with vapid', function() {
+    return startServer('hello', undefined, undefined, undefined, false)
     .then(function() {
       return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+        userPublicKey: urlBase64.encode(userPublicKey),
+        payload: 'hello',
         vapid: {
           audience: 'https://www.mozilla.org/',
           subject: 'mailto:mozilla@example.org',
@@ -466,11 +468,35 @@ suite('sendNotification', function() {
     });
   });
 
-  test('send notification with message with vapid', function() {
-    return startServer('hello', undefined, undefined, undefined, false)
+  test('send notification with message (intermediate standard) with vapid', function() {
+    return startServer('hello', undefined, undefined, undefined, true)
     .then(function() {
       return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
         userPublicKey: urlBase64.encode(userPublicKey),
+        userAuth: urlBase64.encode(intermediateUserAuth),
+        payload: 'hello',
+        vapid: {
+          audience: 'https://www.mozilla.org/',
+          subject: 'mailto:mozilla@example.org',
+          privateKey: vapidKeys.privateKey,
+          publicKey: vapidKeys.publicKey,
+        },
+      });
+    })
+    .then(function(body) {
+      assert(true, 'sendNotification promise resolved');
+      assert.equal(body, 'ok');
+    }, function(e) {
+      assert(false, 'sendNotification promise rejected with ' + e);
+    });
+  });
+
+  test('send notification with message (new standard) with vapid', function() {
+    return startServer('hello', undefined, undefined, undefined, true)
+    .then(function() {
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+        userPublicKey: urlBase64.encode(userPublicKey),
+        userAuth: urlBase64.encode(userAuth),
         payload: 'hello',
         vapid: {
           audience: 'https://www.mozilla.org/',

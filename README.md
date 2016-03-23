@@ -3,7 +3,7 @@
 
 Supports Firefox 44+ and Chromium/Chrome 42+.
 Notifications with payloads are supported in Firefox 44+ and Chromium/Chrome 50+.
-[VAPID](https://tools.ietf.org/html/draft-thomson-webpush-vapid-02) is supported in Firefox 45+ (for notifications without payloads).
+[VAPID](https://tools.ietf.org/html/draft-thomson-webpush-vapid-02) is supported in Firefox 45+ (for notifications without payloads) and in Firefox 46+ for all notifications.
 
 [![NPM](https://nodei.co/npm/web-push.svg?downloads=true)](https://www.npmjs.com/package/web-push)
 
