@@ -46,63 +46,54 @@ suite('selenium', function() {
 
   var driver;
 
-  function startBrowser(firefoxBinaryPath) {
-    var profile = new firefox.Profile(profilePath);
-    profile.acceptUntrustedCerts();
-    profile.setPreference('security.turn_off_all_security_so_that_viruses_can_take_over_this_computer', true);
-    profile.setPreference('extensions.checkCompatibility.nightly', false);
-    // Only allow installation of third-party addons from the user's profile dir (needed to block the third-party
-    // installation prompt for the Ubuntu Modifications addon on Ubuntu).
-    profile.setPreference('extensions.enabledScopes', 1);
-    //profile.setPreference('dom.push.debug', true);
-    //profile.setPreference('browser.dom.window.dump.enabled', true);
-
-    var firefoxBinary = new firefox.Binary(firefoxBinaryPath);
-
-    var firefoxOptions = new firefox.Options().setProfile(profile).setBinary(firefoxBinary);
-
-    var chromeOptions = new chrome.Options()
-      .setChromeBinaryPath(chromeBinaryPath)
-      .addArguments('--no-sandbox')
-      .addArguments('user-data-dir=' + profilePath);
-
-    var builder = new webdriver.Builder()
-      .forBrowser('firefox')
-      .setFirefoxOptions(firefoxOptions)
-      .setChromeOptions(chromeOptions);
-    var driver = builder.build();
-
-    driver.executeScript(function(port) {
-      if (typeof netscape !== 'undefined') {
-        netscape.security.PrivilegeManager.enablePrivilege('UniversalXPConnect');
-        Components.utils.import('resource://gre/modules/Services.jsm');
-        var uri = Services.io.newURI('https://127.0.0.1:' + port, null, null);
-        var principal = Services.scriptSecurityManager.getNoAppCodebasePrincipal(uri);
-        Services.perms.addFromPrincipal(principal, 'desktop-notification', Services.perms.ALLOW_ACTION);
-      }
-    }, server.port);
-
-    driver.get('https://127.0.0.1:' + server.port);
-
-    driver.executeScript(function(port) {
-      serverAddress = 'https://127.0.0.1:' + port;
-      go();
-    }, server.port);
-
-    return driver;
-  }
-
-  function checkEnd(driver, pushPayload) {
-    return driver.wait(until.titleIs(pushPayload ? pushPayload : 'no payload'), 60000);
-  }
-
   function noRestartTest(browser, firefoxBinaryPath, pushPayload, pushTimeout, vapid) {
     process.env.SELENIUM_BROWSER = browser;
 
     return startServer(pushPayload, pushTimeout, vapid)
     .then(function() {
-      driver = startBrowser(firefoxBinaryPath);
-      return checkEnd(driver, pushPayload)
+      var profile = new firefox.Profile(profilePath);
+      profile.acceptUntrustedCerts();
+      profile.setPreference('security.turn_off_all_security_so_that_viruses_can_take_over_this_computer', true);
+      profile.setPreference('extensions.checkCompatibility.nightly', false);
+      // Only allow installation of third-party addons from the user's profile dir (needed to block the third-party
+      // installation prompt for the Ubuntu Modifications addon on Ubuntu).
+      profile.setPreference('extensions.enabledScopes', 1);
+      //profile.setPreference('dom.push.debug', true);
+      //profile.setPreference('browser.dom.window.dump.enabled', true);
+
+      var firefoxBinary = new firefox.Binary(firefoxBinaryPath);
+
+      var firefoxOptions = new firefox.Options().setProfile(profile).setBinary(firefoxBinary);
+
+      var chromeOptions = new chrome.Options()
+        .setChromeBinaryPath(chromeBinaryPath)
+        .addArguments('--no-sandbox')
+        .addArguments('user-data-dir=' + profilePath);
+
+      var builder = new webdriver.Builder()
+        .forBrowser('firefox')
+        .setFirefoxOptions(firefoxOptions)
+        .setChromeOptions(chromeOptions);
+      driver = builder.build();
+
+      driver.executeScript(function(port) {
+        if (typeof netscape !== 'undefined') {
+          netscape.security.PrivilegeManager.enablePrivilege('UniversalXPConnect');
+          Components.utils.import('resource://gre/modules/Services.jsm');
+          var uri = Services.io.newURI('https://127.0.0.1:' + port, null, null);
+          var principal = Services.scriptSecurityManager.getNoAppCodebasePrincipal(uri);
+          Services.perms.addFromPrincipal(principal, 'desktop-notification', Services.perms.ALLOW_ACTION);
+        }
+      }, server.port);
+
+      driver.get('https://127.0.0.1:' + server.port);
+
+      driver.executeScript(function(port) {
+        serverAddress = 'https://127.0.0.1:' + port;
+        go();
+      }, server.port);
+
+      return driver.wait(until.titleIs(pushPayload ? pushPayload : 'no payload'), 60000);
     });
   }
 
