@@ -18,7 +18,7 @@ var options = {
   cert: pem,
 };
 
-function createServer(pushPayload, pushTimeout, vapid) {
+function createServer(pushPayload, vapid) {
   var server = https.createServer(options, function(req, res) {
     if (req.method === 'GET') {
       if (req.url === '/') {
@@ -51,40 +51,30 @@ function createServer(pushPayload, pushTimeout, vapid) {
 
         console.log('Push Application Server - Register: ' + obj.endpoint);
 
-        server.clientRegistered = true;
-        if (server.onClientRegistered && server.onClientRegistered()) {
-          return;
+        console.log('Push Application Server - Send notification to ' + obj.endpoint);
+
+        var promise;
+        if (!pushPayload) {
+          promise = webPush.sendNotification(obj.endpoint, {
+            vapid: vapid,
+          });
+        } else {
+          promise = webPush.sendNotification(obj.endpoint, {
+            payload: pushPayload,
+            userPublicKey: obj.key,
+            userAuth: obj.auth,
+            vapid: vapid,
+          });
         }
 
-        setTimeout(function() {
-          console.log('Push Application Server - Send notification to ' + obj.endpoint);
-
-          var promise;
-          if (!pushPayload) {
-            promise = webPush.sendNotification(obj.endpoint, {
-              TTL: pushTimeout ? 200 : undefined,
-              vapid: vapid,
-            });
-          } else {
-            promise = webPush.sendNotification(obj.endpoint, {
-              TTL: pushTimeout ? 200 : undefined,
-              payload: pushPayload,
-              userPublicKey: obj.key,
-              userAuth: obj.auth,
-              vapid: vapid,
-            });
-          }
-
-          promise
-          .then(function() {
-            console.log('Push Application Server - Notification sent to ' + obj.endpoint);
-
-            server.notificationSent = true;
-            if (server.onNotificationSent) {
-              server.onNotificationSent();
-            }
-          });
-        }, pushTimeout * 1000);
+        promise
+        .then(function() {
+          console.log('Push Application Server - Notification sent to ' + obj.endpoint);
+        })
+        .catch(function(error) {
+          console.log('Push Application Server - Error in sending notification to ' + obj.endpoint);
+          console.log(error);
+        })
       });
 
       res.writeHead(200, {
@@ -105,9 +95,6 @@ function createServer(pushPayload, pushTimeout, vapid) {
     }
     server.listen(server.port);
   });
-
-  server.notificationSent = false;
-  server.clientRegistered = false;
 
   return new Promise(function(resolve, reject) {
     server.on('listening', function() {
