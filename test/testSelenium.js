@@ -27,8 +27,6 @@ suite('selenium', function() {
 
   this.timeout(180000);
 
-  var profilePath = temp.mkdirSync('marco');
-
   var firefoxStableBinaryPath, firefoxBetaBinaryPath, chromeBinaryPath;
   var server, driver;
 
@@ -50,6 +48,8 @@ suite('selenium', function() {
     return createServer(payload, vapid)
     .then(function(newServer) {
       server = newServer;
+
+      var profilePath = temp.mkdirSync('marco');
 
       var profile = new firefox.Profile(profilePath);
       profile.acceptUntrustedCerts();
