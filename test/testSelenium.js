@@ -33,7 +33,7 @@ suite('selenium', function() {
   function runTest(params) {
     var firefoxBinaryPath;
     if (params.browser === 'firefox') {
-      firefoxBinaryPath = firefoxStableBinaryPath
+      firefoxBinaryPath = firefoxStableBinaryPath;
     } else if (params.browser === 'firefox-beta') {
       params.browser = 'firefox';
       firefoxBinaryPath = firefoxBetaBinaryPath;
@@ -109,9 +109,9 @@ suite('selenium', function() {
       promises.push(seleniumInit.downloadFirefoxNightly());
     } else if (firefoxBinaryPath === 'all') {
       if (process.platform === 'linux') {
-        firefoxBinaryPath = 'test_tools/stable/firefox/firefox-bin';
+        firefoxStableBinaryPath = 'test_tools/stable/firefox/firefox-bin';
       } else if (process.platform === 'darwin') {
-        firefoxBinaryPath = 'test_tools/stable/Firefox.app/Contents/MacOS/firefox-bin';
+        firefoxStableBinaryPath = 'test_tools/stable/Firefox.app/Contents/MacOS/firefox-bin';
       }
 
       promises.push(seleniumInit.downloadFirefoxRelease());
@@ -126,8 +126,8 @@ suite('selenium', function() {
     }
 
     try {
-      console.log('Using Firefox: ' + firefoxBinaryPath);
-      console.log('Version: ' + childProcess.execSync(firefoxBinaryPath + ' --version'));
+      console.log('Using Firefox: ' + firefoxStableBinaryPath);
+      console.log('Version: ' + childProcess.execSync(firefoxStableBinaryPath + ' --version'));
       console.log('Beta Version: ' + childProcess.execSync(firefoxBetaBinaryPath + ' --version'));
     } catch (e) {}
 
@@ -156,8 +156,8 @@ suite('selenium', function() {
 
     return Promise.all(promises)
     .then(function() {
-      if (!fs.existsSync(firefoxBinaryPath)) {
-        throw new Error('Firefox binary doesn\'t exist at ' + firefoxBinaryPath + '. Use your installed Firefox binary by setting the FIREFOX environment'.bold.red);
+      if (!fs.existsSync(firefoxStableBinaryPath)) {
+        throw new Error('Firefox binary doesn\'t exist at ' + firefoxStableBinaryPath + '. Use your installed Firefox binary by setting the FIREFOX environment'.bold.red);
       }
 
       if (firefoxBetaBinaryPath && !fs.existsSync(firefoxBetaBinaryPath)) {
