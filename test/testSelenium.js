@@ -14,6 +14,14 @@ if (!process.env.GCM_API_KEY) {
   console.log('You need to set the GCM_API_KEY env variable to run the tests with Chromium.'.bold.red);
 }
 
+if (!process.env.VAPID_PRIVATE_KEY || !process.env.VAPID_PUBLIC_KEY) {
+  console.log('You haven\'t set the VAPID env variables, I\'ll generate them for you.'.bold.yellow);
+
+  var keys = webPush.generateVAPIDKeys();
+  process.env.VAPID_PRIVATE_KEY = keys.privateKey.toString('base64');
+  process.env.VAPID_PUBLIC_KEY = keys.publicKey.toString('base64');
+}
+
 process.env.PATH = process.env.PATH + ':test_tools/';
 
 suite('selenium', function() {
@@ -177,12 +185,11 @@ suite('selenium', function() {
     });
   });
 
-  var vapidKeys = webPush.generateVAPIDKeys();
   var vapidParam = {
     audience: 'https://www.mozilla.org/',
     subject: 'mailto:web-push@mozilla.org',
-    privateKey: vapidKeys.privateKey,
-    publicKey: vapidKeys.publicKey,
+    privateKey: new Buffer(process.env.VAPID_PRIVATE_KEY, 'base64'),
+    publicKey: new Buffer(process.env.VAPID_PUBLIC_KEY, 'base64'),
   };
 
   test('send/receive notification without payload with Firefox Release', function() {
