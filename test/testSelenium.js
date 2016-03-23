@@ -6,6 +6,9 @@ var temp = require('temp').track();
 var colors = require('colors');
 var semver = require('semver');
 var childProcess = require('child_process');
+var webdriver = require('selenium-webdriver');
+var firefox = require('selenium-webdriver/firefox');
+var chrome = require('selenium-webdriver/chrome');
 var seleniumInit = require('./selenium-init');
 var createServer = require('./server');
 var webPush = require('../index.js');
@@ -13,6 +16,8 @@ var webPush = require('../index.js');
 if (!process.env.GCM_API_KEY) {
   console.log('You need to set the GCM_API_KEY env variable to run the tests with Chromium.'.bold.red);
 }
+
+process.env.PATH = process.env.PATH + ':test_tools/';
 
 suite('selenium', function() {
   if (semver.satisfies(process.version, '0.12')) {
@@ -22,19 +27,9 @@ suite('selenium', function() {
 
   this.timeout(180000);
 
-  var firefoxStableBinaryPath, firefoxBetaBinaryPath, chromeBinaryPath;
-
-  process.env.PATH = process.env.PATH + ':test_tools/';
-
-  var webdriver = require('selenium-webdriver'),
-      By = require('selenium-webdriver').By,
-      until = require('selenium-webdriver').until;
-
-  var firefox = require('selenium-webdriver/firefox');
-  var chrome = require('selenium-webdriver/chrome');
-
   var profilePath = temp.mkdirSync('marco');
 
+  var firefoxStableBinaryPath, firefoxBetaBinaryPath, chromeBinaryPath;
   var server, driver;
 
   function runTest(params) {
@@ -98,7 +93,7 @@ suite('selenium', function() {
         go();
       }, server.port);
 
-      return driver.wait(until.titleIs(payload ? payload : 'no payload'), 60000);
+      return driver.wait(webdriver.until.titleIs(payload ? payload : 'no payload'), 60000);
     });
   }
 
