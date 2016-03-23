@@ -6,9 +6,6 @@ var temp = require('temp').track();
 var colors = require('colors');
 var semver = require('semver');
 var childProcess = require('child_process');
-var webdriver = require('selenium-webdriver');
-var firefox = require('selenium-webdriver/firefox');
-var chrome = require('selenium-webdriver/chrome');
 var seleniumInit = require('./selenium-init');
 var createServer = require('./server');
 var webPush = require('../index.js');
@@ -24,6 +21,10 @@ suite('selenium', function() {
     console.log('selenium-webdriver is incompatible with Node.js v0.12');
     return;
   }
+
+  var webdriver = require('selenium-webdriver');
+  var firefox = require('selenium-webdriver/firefox');
+  var chrome = require('selenium-webdriver/chrome');
 
   this.timeout(180000);
 
