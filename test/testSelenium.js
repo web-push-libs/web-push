@@ -131,19 +131,13 @@ suite('selenium', function() {
     promises.push(seleniumInit.downloadFirefoxNightly());
 
     if (process.env.GCM_API_KEY) {
-      chromeBinaryPath = process.env.CHROME;
-      if (chromeBinaryPath === 'nightly') {
-        if (process.platform === 'linux') {
-          chromeBinaryPath = 'test_tools/chrome-linux/chrome';
-        } else if (process.platform === 'darwin') {
-          chromeBinaryPath = 'test_tools/chrome-mac/Chromium.app/Contents/MacOS/Chromium';
-        }
-
-        promises.push(seleniumInit.downloadChromiumNightly());
-      } else if (chromeBinaryPath === 'all') {
-        // TODO: Download Chromium release.
-        chromeBinaryPath = childProcess.execSync('which chromium-browser').toString().replace('\n', '');
+      if (process.platform === 'linux') {
+        chromeBinaryPath = 'test_tools/chrome-linux/chrome';
+      } else if (process.platform === 'darwin') {
+        chromeBinaryPath = 'test_tools/chrome-mac/Chromium.app/Contents/MacOS/Chromium';
       }
+
+      promises.push(seleniumInit.downloadChromiumNightly());
 
       promises.push(seleniumInit.downloadChromeDriver());
     }
