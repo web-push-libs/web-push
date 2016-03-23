@@ -51,30 +51,26 @@ function createServer(pushPayload, pushTimeout, vapid) {
 
         console.log('Push Application Server - Register: ' + obj.endpoint);
 
-        setTimeout(function() {
-          console.log('Push Application Server - Send notification to ' + obj.endpoint);
+        console.log('Push Application Server - Send notification to ' + obj.endpoint);
 
-          var promise;
-          if (!pushPayload) {
-            promise = webPush.sendNotification(obj.endpoint, {
-              TTL: pushTimeout ? 200 : undefined,
-              vapid: vapid,
-            });
-          } else {
-            promise = webPush.sendNotification(obj.endpoint, {
-              TTL: pushTimeout ? 200 : undefined,
-              payload: pushPayload,
-              userPublicKey: obj.key,
-              userAuth: obj.auth,
-              vapid: vapid,
-            });
-          }
-
-          promise
-          .then(function() {
-            console.log('Push Application Server - Notification sent to ' + obj.endpoint);
+        var promise;
+        if (!pushPayload) {
+          promise = webPush.sendNotification(obj.endpoint, {
+            vapid: vapid,
           });
-        }, pushTimeout * 1000);
+        } else {
+          promise = webPush.sendNotification(obj.endpoint, {
+            payload: pushPayload,
+            userPublicKey: obj.key,
+            userAuth: obj.auth,
+            vapid: vapid,
+          });
+        }
+
+        promise
+        .then(function() {
+          console.log('Push Application Server - Notification sent to ' + obj.endpoint);
+        });
       });
 
       res.writeHead(200, {

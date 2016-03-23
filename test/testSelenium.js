@@ -7,6 +7,7 @@ var colors = require('colors');
 var semver = require('semver');
 var childProcess = require('child_process');
 var seleniumInit = require('./selenium-init');
+var createServer = require('./server');
 var webPush = require('../index.js');
 
 if (!process.env.GCM_API_KEY) {
@@ -25,16 +26,6 @@ suite('selenium', function() {
 
   process.env.PATH = process.env.PATH + ':test_tools/';
 
-  var createServer = require('./server');
-
-  var server;
-  function startServer(pushPayload, pushTimeout, vapid) {
-    return createServer(pushPayload, pushTimeout ? pushTimeout : 0, vapid)
-    .then(function(newServer) {
-      server = newServer;
-    });
-  }
-
   var webdriver = require('selenium-webdriver'),
       By = require('selenium-webdriver').By,
       until = require('selenium-webdriver').until;
@@ -44,13 +35,27 @@ suite('selenium', function() {
 
   var profilePath = temp.mkdirSync('marco');
 
-  var driver;
+  var server, driver;
 
-  function noRestartTest(browser, firefoxBinaryPath, pushPayload, pushTimeout, vapid) {
+  function runTest(params) {
+    var browser = params.browser;
+    var payload = params.payload;
+    var vapid = params.vapid;
+
+    var firefoxBinaryPath;
+    if (browser === 'firefox') {
+      firefoxBinaryPath = firefoxStableBinaryPath
+    } else if (browser === 'firefox-beta') {
+      browser = 'firefox';
+      firefoxBinaryPath = firefoxBetaBinaryPath;
+    }
+
     process.env.SELENIUM_BROWSER = browser;
 
-    return startServer(pushPayload, pushTimeout, vapid)
-    .then(function() {
+    return createServer(payload, vapid)
+    .then(function(newServer) {
+      server = newServer;
+
       var profile = new firefox.Profile(profilePath);
       profile.acceptUntrustedCerts();
       profile.setPreference('security.turn_off_all_security_so_that_viruses_can_take_over_this_computer', true);
@@ -93,7 +98,7 @@ suite('selenium', function() {
         go();
       }, server.port);
 
-      return driver.wait(until.titleIs(pushPayload ? pushPayload : 'no payload'), 60000);
+      return driver.wait(until.titleIs(payload ? payload : 'no payload'), 60000);
     });
   }
 
@@ -193,54 +198,86 @@ suite('selenium', function() {
   };
 
   test('send/receive notification without payload with Firefox Release', function() {
-    return noRestartTest('firefox', firefoxBinaryPath);
+    return runTest({
+      browser: 'firefox',
+    });
   });
 
   test('send/receive notification without payload with Firefox Beta', function() {
-    return noRestartTest('firefox', firefoxBetaBinaryPath);
+    return runTest({
+      browser: 'firefox-beta',
+    });
   });
 
   if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
     test('send/receive notification without payload with Chrome', function() {
-      return noRestartTest('chrome');
+      return runTest({
+        browser: 'chrome',
+      });
     });
   }
 
   test('send/receive notification with payload with Firefox Release', function() {
-    return noRestartTest('firefox', firefoxBinaryPath, 'marco');
+    return runTest({
+      browser: 'firefox',
+      payload: 'marco',
+    });
   });
 
   test('send/receive notification with payload with Firefox Beta', function() {
-    return noRestartTest('firefox', firefoxBetaBinaryPath, 'marco');
+    return runTest({
+      browser: 'firefox-beta',
+      payload: 'marco',
+    });
   });
 
   if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
     test('send/receive notification with payload with Chrome', function() {
-      return noRestartTest('chrome', undefined, 'marco');
+      return runTest({
+        browser: 'chrome',
+        payload: 'marco',
+      });
     });
   }
 
   test('send/receive notification with vapid with Firefox Release', function() {
-    return noRestartTest('firefox', firefoxBinaryPath, undefined, vapidParam);
+    return runTest({
+      browser: 'firefox',
+      vapid: vapidParam,
+    });
   });
 
   test('send/receive notification with vapid with Firefox Beta', function() {
-    return noRestartTest('firefox', firefoxBetaBinaryPath, undefined, vapidParam);
+    return runTest({
+      browser: 'firefox-beta',
+      vapid: vapidParam,
+    });
   });
 
   if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
     test('send/receive notification with vapid with Chrome', function() {
-      return noRestartTest('chrome', undefined, undefined, vapidParam);
+      return runTest({
+        browser: 'chrome',
+        vapid: vapidParam,
+      });
     });
   }
 
   test('send/receive notification with payload & vapid with Firefox Beta', function() {
-    return noRestartTest('firefox', firefoxBetaBinaryPath, 'marco', vapidParam);
+    return runTest({
+      browser: 'firefox-beta',
+      payload: 'marco',
+      vapid: vapidParam,
+    });
   });
 
   if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
     test('send/receive notification with payload & vapid with Chrome', function() {
-      return noRestartTest('chrome', undefined, 'marco', vapidParam);
+      return runTest({
+        browser: 'chrome',
+        payload: 'marco',
+        vapid: vapidParam,
+      });
     });
   }
 });
