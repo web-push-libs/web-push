@@ -31,21 +31,17 @@ suite('selenium', function() {
   var server, driver;
 
   function runTest(params) {
-    var browser = params.browser;
-    var payload = params.payload;
-    var vapid = params.vapid;
-
     var firefoxBinaryPath;
-    if (browser === 'firefox') {
+    if (params.browser === 'firefox') {
       firefoxBinaryPath = firefoxStableBinaryPath
-    } else if (browser === 'firefox-beta') {
-      browser = 'firefox';
+    } else if (params.browser === 'firefox-beta') {
+      params.browser = 'firefox';
       firefoxBinaryPath = firefoxBetaBinaryPath;
     }
 
-    process.env.SELENIUM_BROWSER = browser;
+    process.env.SELENIUM_BROWSER = params.browser;
 
-    return createServer(payload, vapid)
+    return createServer(params.payload, params.vapid)
     .then(function(newServer) {
       server = newServer;
 
@@ -93,7 +89,7 @@ suite('selenium', function() {
         go();
       }, server.port);
 
-      return driver.wait(webdriver.until.titleIs(payload ? payload : 'no payload'), 60000);
+      return driver.wait(webdriver.until.titleIs(params.payload ? params.payload : 'no payload'), 60000);
     });
   }
 
