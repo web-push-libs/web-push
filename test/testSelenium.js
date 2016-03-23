@@ -15,6 +15,8 @@ if (!process.env.GCM_API_KEY) {
 }
 
 if (!process.env.VAPID_PRIVATE_KEY || !process.env.VAPID_PUBLIC_KEY) {
+  console.log('You haven\'t set the VAPID env variables, I\'ll generate them for you.'.bold.yellow);
+
   var keys = webPush.generateVAPIDKeys();
   process.env.VAPID_PRIVATE_KEY = keys.privateKey.toString('base64');
   process.env.VAPID_PUBLIC_KEY = keys.publicKey.toString('base64');
