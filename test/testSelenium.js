@@ -27,7 +27,7 @@ suite('selenium', function() {
 
   this.timeout(180000);
 
-  var firefoxStableBinaryPath, firefoxBetaBinaryPath, chromeBinaryPath;
+  var firefoxStableBinaryPath, firefoxBetaBinaryPath, firefoxNightlyBinaryPath, chromeBinaryPath;
   var server, driver;
 
   function runTest(params) {
@@ -98,32 +98,29 @@ suite('selenium', function() {
 
     var promises = [];
 
-    firefoxBinaryPath = process.env.FIREFOX;
-    if (firefoxBinaryPath === 'nightly') {
-      if (process.platform === 'linux') {
-        firefoxBinaryPath = 'test_tools/firefox/firefox-bin';
-      } else if (process.platform === 'darwin') {
-        firefoxBinaryPath = 'test_tools/FirefoxNightly.app/Contents/MacOS/firefox-bin';
-      }
-
-      promises.push(seleniumInit.downloadFirefoxNightly());
-    } else if (firefoxBinaryPath === 'all') {
-      if (process.platform === 'linux') {
-        firefoxStableBinaryPath = 'test_tools/stable/firefox/firefox-bin';
-      } else if (process.platform === 'darwin') {
-        firefoxStableBinaryPath = 'test_tools/stable/Firefox.app/Contents/MacOS/firefox-bin';
-      }
-
-      promises.push(seleniumInit.downloadFirefoxRelease());
-
-      if (process.platform === 'linux') {
-        firefoxBetaBinaryPath = 'test_tools/beta/firefox/firefox-bin';
-      } else if (process.platform === 'darwin') {
-        firefoxBetaBinaryPath = 'test_tools/beta/Firefox.app/Contents/MacOS/firefox-bin';
-      }
-
-      promises.push(seleniumInit.downloadFirefoxBeta());
+    if (process.platform === 'linux') {
+      firefoxStableBinaryPath = 'test_tools/stable/firefox/firefox-bin';
+    } else if (process.platform === 'darwin') {
+      firefoxStableBinaryPath = 'test_tools/stable/Firefox.app/Contents/MacOS/firefox-bin';
     }
+
+    promises.push(seleniumInit.downloadFirefoxRelease());
+
+    if (process.platform === 'linux') {
+      firefoxBetaBinaryPath = 'test_tools/beta/firefox/firefox-bin';
+    } else if (process.platform === 'darwin') {
+      firefoxBetaBinaryPath = 'test_tools/beta/Firefox.app/Contents/MacOS/firefox-bin';
+    }
+
+    promises.push(seleniumInit.downloadFirefoxBeta());
+
+    if (process.platform === 'linux') {
+      firefoxNightlyBinaryPath = 'test_tools/firefox/firefox-bin';
+    } else if (process.platform === 'darwin') {
+      firefoxNightlyBinaryPath = 'test_tools/FirefoxNightly.app/Contents/MacOS/firefox-bin';
+    }
+
+    promises.push(seleniumInit.downloadFirefoxNightly());
 
     try {
       console.log('Using Firefox: ' + firefoxStableBinaryPath);
