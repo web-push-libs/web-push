@@ -25,9 +25,6 @@ suite('selenium', function() {
 
   process.env.PATH = process.env.PATH + ':test_tools/';
 
-  var pageLoaded = false;
-  var clientRegistered = 0;
-
   var createServer = require('./server');
 
   var server;
@@ -35,14 +32,6 @@ suite('selenium', function() {
     return createServer(pushPayload, pushTimeout ? pushTimeout : 0, vapid)
     .then(function(newServer) {
       server = newServer;
-
-      pageLoaded = false;
-      clientRegistered = 0;
-      server.onClientRegistered = function() {
-        pageLoaded = true;
-        clientRegistered++;
-        return clientRegistered > 1;
-      }
     });
   }
 
@@ -95,16 +84,6 @@ suite('selenium', function() {
 
     driver.get('https://127.0.0.1:' + server.port);
 
-    /* XXX: This hack was needed to support Firefox Nightly, but now
-            Firefox won't even start with the standard Selenium WebDriver.
-    driver.executeScript(function() {
-      window.location = 'https://127.0.0.1:' + server.port;
-    });
-    driver.wait(function() {
-      return pageLoaded;
-    });
-    */
-
     driver.executeScript(function(port) {
       serverAddress = 'https://127.0.0.1:' + port;
       go();
@@ -124,60 +103,6 @@ suite('selenium', function() {
     .then(function() {
       driver = startBrowser(firefoxBinaryPath);
       return checkEnd(driver, pushPayload)
-    });
-  }
-
-  function restartTest(browser, firefoxBinaryPath, pushPayload, pushTimeout, vapid) {
-    return new Promise(function(resolve, reject) {
-      process.env.SELENIUM_BROWSER = browser;
-
-      return startServer(pushPayload, pushTimeout, vapid)
-      .then(function() {
-        driver = startBrowser(firefoxBinaryPath);
-
-        function restart() {
-          console.log('Browser - Restart');
-          driver = startBrowser(firefoxBinaryPath);
-          checkEnd(driver, pushPayload)
-          .then(resolve);
-        }
-
-        // Wait client to be registered before closing the browser.
-        driver.wait(function() {
-          return server.clientRegistered;
-        });
-
-        driver.close()
-        .then(function() {
-          console.log('Browser - Closed');
-
-          pageLoaded = false;
-
-          setTimeout(function() {
-            try {
-              // In Firefox, we need to copy the storage directory (because the PushDB is
-              // stored in an IndexedDB) and the prefs.js file, which contains a preference
-              // (dom.push.userAgentID) storing the User Agent ID.
-              // We need to wait a bit before copying these files because Firefox updates
-              // some of them when shutting down.
-              [ 'storage', 'prefs.js', 'serviceworker.txt' ].forEach(function(file) {
-                fse.copySync(path.join(driver.profilePath_, file), path.join(profilePath, file));
-              });
-            } catch (e) {
-              console.log('Error while copying: ' + e);
-            }
-
-            if (server.notificationSent) {
-              restart();
-            } else {
-              server.onNotificationSent = function() {
-                server.onNotificationSent = null;
-                restart();
-              };
-            }
-          }, 1000);
-        });
-      });
     });
   }
 
@@ -325,20 +250,6 @@ suite('selenium', function() {
   if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
     test('send/receive notification with payload & vapid with Chrome', function() {
       return noRestartTest('chrome', undefined, 'marco', vapidParam);
-    });
-  }
-
-  test('send/receive notification without payload with TTL with Firefox Release (closing and restarting the browser)', function() {
-    return restartTest('firefox', firefoxBinaryPath, undefined, 2);
-  });
-
-  test('send/receive notification without payload with TTL with Firefox Beta (closing and restarting the browser)', function() {
-    return restartTest('firefox', firefoxBetaBinaryPath, undefined, 2);
-  });
-
-  if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
-    test('send/receive notification without payload with TTL with Chrome (closing and restarting the browser)', function() {
-      return restartTest('chrome', undefined, undefined, 2);
     });
   }
 });

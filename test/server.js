@@ -51,11 +51,6 @@ function createServer(pushPayload, pushTimeout, vapid) {
 
         console.log('Push Application Server - Register: ' + obj.endpoint);
 
-        server.clientRegistered = true;
-        if (server.onClientRegistered && server.onClientRegistered()) {
-          return;
-        }
-
         setTimeout(function() {
           console.log('Push Application Server - Send notification to ' + obj.endpoint);
 
@@ -78,11 +73,6 @@ function createServer(pushPayload, pushTimeout, vapid) {
           promise
           .then(function() {
             console.log('Push Application Server - Notification sent to ' + obj.endpoint);
-
-            server.notificationSent = true;
-            if (server.onNotificationSent) {
-              server.onNotificationSent();
-            }
           });
         }, pushTimeout * 1000);
       });
@@ -105,9 +95,6 @@ function createServer(pushPayload, pushTimeout, vapid) {
     }
     server.listen(server.port);
   });
-
-  server.notificationSent = false;
-  server.clientRegistered = false;
 
   return new Promise(function(resolve, reject) {
     server.on('listening', function() {
