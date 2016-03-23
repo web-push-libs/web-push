@@ -1,5 +1,5 @@
 var webPush    = require('../index');
-var https      = require('https');
+var http       = require('http');
 var fs         = require('fs');
 var path       = require('path');
 var colors     = require('colors');
@@ -11,15 +11,8 @@ if (!process.env.GCM_API_KEY) {
   webPush.setGCMAPIKey(process.env.GCM_API_KEY);
 }
 
-var pem = fs.readFileSync('test/cert.pem');
-
-var options = {
-  key: pem,
-  cert: pem,
-};
-
 function createServer(pushPayload, vapid) {
-  var server = https.createServer(options, function(req, res) {
+  var server = http.createServer(function(req, res) {
     if (req.method === 'GET') {
       if (req.url === '/') {
         req.url = '/index.html';

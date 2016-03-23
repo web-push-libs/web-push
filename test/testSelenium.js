@@ -77,16 +77,16 @@ suite('selenium', function() {
         if (typeof netscape !== 'undefined') {
           netscape.security.PrivilegeManager.enablePrivilege('UniversalXPConnect');
           Components.utils.import('resource://gre/modules/Services.jsm');
-          var uri = Services.io.newURI('https://127.0.0.1:' + port, null, null);
+          var uri = Services.io.newURI('http://127.0.0.1:' + port, null, null);
           var principal = Services.scriptSecurityManager.getNoAppCodebasePrincipal(uri);
           Services.perms.addFromPrincipal(principal, 'desktop-notification', Services.perms.ALLOW_ACTION);
         }
       }, server.port);
 
-      driver.get('https://127.0.0.1:' + server.port);
+      driver.get('http://127.0.0.1:' + server.port);
 
       driver.executeScript(function(port) {
-        serverAddress = 'https://127.0.0.1:' + port;
+        serverAddress = 'http://127.0.0.1:' + port;
         go();
       }, server.port);
 
