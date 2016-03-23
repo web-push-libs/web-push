@@ -254,13 +254,15 @@ suite('selenium', function() {
     });
   }
 
+  /*
+  XXX: Currently broken, see https://github.com/mozilla-services/autopush/issues/426.
   test('send/receive notification with payload & vapid with Firefox Beta', function() {
     return runTest({
       browser: 'firefox-beta',
       payload: 'marco',
       vapid: vapidParam,
     });
-  });
+  });*/
 
   if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
     test('send/receive notification with payload & vapid with Chrome', function() {
