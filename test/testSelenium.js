@@ -49,7 +49,6 @@ suite('selenium', function() {
       var profilePath = temp.mkdirSync('marco');
 
       var profile = new firefox.Profile(profilePath);
-      profile.acceptUntrustedCerts();
       profile.setPreference('security.turn_off_all_security_so_that_viruses_can_take_over_this_computer', true);
       profile.setPreference('extensions.checkCompatibility.nightly', false);
       // Only allow installation of third-party addons from the user's profile dir (needed to block the third-party
