@@ -122,12 +122,6 @@ suite('selenium', function() {
 
     promises.push(seleniumInit.downloadFirefoxNightly());
 
-    try {
-      console.log('Using Firefox: ' + firefoxStableBinaryPath);
-      console.log('Version: ' + childProcess.execSync(firefoxStableBinaryPath + ' --version'));
-      console.log('Beta Version: ' + childProcess.execSync(firefoxBetaBinaryPath + ' --version'));
-    } catch (e) {}
-
     if (process.env.GCM_API_KEY) {
       chromeBinaryPath = process.env.CHROME;
       if (chromeBinaryPath === 'nightly') {
@@ -144,11 +138,6 @@ suite('selenium', function() {
       }
 
       promises.push(seleniumInit.downloadChromeDriver());
-
-      try {
-        console.log('Using Chromium: ' + chromeBinaryPath);
-        console.log('Version: ' + childProcess.execSync(chromeBinaryPath + ' --version'));
-      } catch (e) {}
     }
 
     return Promise.all(promises)
@@ -161,9 +150,20 @@ suite('selenium', function() {
         throw new Error('Firefox binary doesn\'t exist at ' + firefoxBetaBinaryPath + '.'.bold.red);
       }
 
+      try {
+        console.log('Using Firefox: ' + firefoxStableBinaryPath);
+        console.log('Version: ' + childProcess.execSync(firefoxStableBinaryPath + ' --version'));
+        console.log('Beta Version: ' + childProcess.execSync(firefoxBetaBinaryPath + ' --version'));
+      } catch (e) {}
+
       if (process.env.GCM_API_KEY && !fs.existsSync(chromeBinaryPath)) {
         throw new Error('Chrome binary doesn\'t exist at ' + chromeBinaryPath + '. Use your installed Chrome binary by setting the CHROME environment'.bold.red);
       }
+
+      try {
+        console.log('Using Chromium: ' + chromeBinaryPath);
+        console.log('Version: ' + childProcess.execSync(chromeBinaryPath + ' --version'));
+      } catch (e) {}
     });
   });
 
