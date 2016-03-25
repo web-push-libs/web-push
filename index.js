@@ -215,6 +215,10 @@ function sendNotification(endpoint, params) {
         };
         if (encrypted) {
           gcmObj['raw_data'] = encrypted.cipherText.toString('base64');
+        } else if (payload) {
+          for (var item in payload) {
+            gcmObj[item] = payload[item];
+          }
         }
         gcmPayload = JSON.stringify(gcmObj);
 
