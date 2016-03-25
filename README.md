@@ -13,7 +13,7 @@ Notifications with payloads are supported in Firefox 44+ and Chromium/Chrome 50+
 
 ## sendNotification(endpoint, params)
 
-Send a Push notification to an endpoint. *params* containes optional parameters:
+Send a Push notification to an endpoint. *params* contains optional parameters:
 - *TTL* is a value in seconds that describes how long a push message is retained by the push service (by default, four weeks);
 - *userPublicKey* is the public key of the receiver (from the browser);
 - *userAuth* is the auth secret of the receiver (from the browser);
