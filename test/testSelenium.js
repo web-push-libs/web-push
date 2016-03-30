@@ -36,7 +36,7 @@ suite('selenium', function() {
 
   this.timeout(180000);
 
-  var firefoxStableBinaryPath, firefoxBetaBinaryPath, firefoxNightlyBinaryPath, chromeBinaryPath;
+  var firefoxStableBinaryPath, firefoxBetaBinaryPath, firefoxAuroraBinaryPath, firefoxNightlyBinaryPath, chromeBinaryPath;
   var server, driver;
 
   function runTest(params) {
@@ -46,6 +46,10 @@ suite('selenium', function() {
     } else if (params.browser === 'firefox-beta') {
       params.browser = 'firefox';
       firefoxBinaryPath = firefoxBetaBinaryPath;
+    } else if (params.browser === 'firefox-aurora') {
+      params.browser = 'firefox';
+      firefoxBinaryPath = firefoxAuroraBinaryPath;
+      process.env.SELENIUM_MARIONETTE = true;
     }
 
     process.env.SELENIUM_BROWSER = params.browser;
@@ -92,11 +96,6 @@ suite('selenium', function() {
 
       driver.get('http://127.0.0.1:' + server.port);
 
-      driver.executeScript(function(port) {
-        serverAddress = 'http://127.0.0.1:' + port;
-        go();
-      }, server.port);
-
       return driver.wait(webdriver.until.titleIs(params.payload ? params.payload : 'no payload'), 60000);
     });
   }
@@ -121,6 +120,14 @@ suite('selenium', function() {
     }
 
     promises.push(seleniumInit.downloadFirefoxBeta());
+
+    /*if (process.platform === 'linux') {
+      firefoxAuroraBinaryPath = 'test_tools/aurora/firefox/firefox-bin';
+    } else if (process.platform === 'darwin') {
+      firefoxAuroraBinaryPath = 'test_tools/aurora/Firefox.app/Contents/MacOS/firefox-bin';
+    }
+
+    promises.push(seleniumInit.downloadFirefoxAurora());*/
 
     if (process.platform === 'linux') {
       firefoxNightlyBinaryPath = 'test_tools/firefox/firefox-bin';
@@ -154,8 +161,9 @@ suite('selenium', function() {
 
       try {
         console.log('Using Firefox: ' + firefoxStableBinaryPath);
-        console.log('Version: ' + childProcess.execSync(firefoxStableBinaryPath + ' --version'));
-        console.log('Beta Version: ' + childProcess.execSync(firefoxBetaBinaryPath + ' --version'));
+        console.log('Version: ' + childProcess.execSync(firefoxStableBinaryPath + ' --version').replace('\n', ''));
+        console.log('Beta Version: ' + childProcess.execSync(firefoxBetaBinaryPath + ' --version').replace('\n', ''));
+        console.log('Aurora Version: ' + childProcess.execSync(firefoxAuroraBinaryPath + ' --version').replace('\n', ''));
       } catch (e) {}
 
       if (process.env.GCM_API_KEY && !fs.existsSync(chromeBinaryPath)) {
@@ -164,7 +172,7 @@ suite('selenium', function() {
 
       try {
         console.log('Using Chromium: ' + chromeBinaryPath);
-        console.log('Version: ' + childProcess.execSync(chromeBinaryPath + ' --version'));
+        console.log('Version: ' + childProcess.execSync(chromeBinaryPath + ' --version').replace('\n', ''));
       } catch (e) {}
     });
   });
