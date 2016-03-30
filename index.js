@@ -80,7 +80,7 @@ function encryptOld(userPublicKey, payload) {
   };
 }
 
-// Intermediate standard, Firefox 46-47.
+// Intermediate standard, Firefox 46.
 function encryptIntermediate(userPublicKey, userAuth, payload) {
   var localCurve = crypto.createECDH('prime256v1');
   var localPublicKey = localCurve.generateKeys();
@@ -104,7 +104,7 @@ function encryptIntermediate(userPublicKey, userAuth, payload) {
   };
 }
 
-// New standard, Firefox 48+ and Chrome 50+.
+// New standard, Firefox 47+ and Chrome 50+.
 function encrypt(userPublicKey, userAuth, payload) {
   var localCurve = crypto.createECDH('prime256v1');
   var localPublicKey = localCurve.generateKeys();
@@ -171,11 +171,11 @@ function sendNotification(endpoint, params) {
 
           var userAuthBuf = urlBase64.decode(userAuth);
           if (userAuthBuf.length === 16) {
-            // Use the new standard if userAuth is defined and is 16 bytes long (Firefox 48+ and Chrome 50+).
+            // Use the new standard if userAuth is defined and is 16 bytes long (Firefox 47+ and Chrome 50+).
             encrypted = encrypt(userPublicKey, userAuth, new Buffer(payload));
             encodingHeader = 'aesgcm';
           } else {
-            // Use the intermediate standard if userAuth is defined and is 12 bytes long (Firefox 46-47).
+            // Use the intermediate standard if userAuth is defined and is 12 bytes long (Firefox 46).
             encrypted = encryptIntermediate(userPublicKey, userAuth, new Buffer(payload));
             encodingHeader = 'aesgcm128';
           }
