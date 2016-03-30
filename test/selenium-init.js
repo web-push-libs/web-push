@@ -46,6 +46,7 @@ function unzip(dir, file) {
 var destDir = 'test_tools';
 var stableDestDir = 'test_tools/stable';
 var betaDestDir = 'test_tools/beta';
+var auroraDestDir = 'test_tools/aurora';
 
 try {
   fs.mkdirSync(destDir);
@@ -59,6 +60,11 @@ try {
 
 try {
   fs.mkdirSync(betaDestDir);
+} catch (e) {
+}
+
+try {
+  fs.mkdirSync(auroraDestDir);
 } catch (e) {
 }
 
@@ -204,6 +210,10 @@ function downloadFirefoxBeta() {
   return downloadFirefoxFromDMO('firefox-beta-latest', betaDestDir);
 }
 
+function downloadFirefoxAurora() {
+  return downloadFirefoxFromDMO('firefox-aurora-latest', auroraDestDir);
+}
+
 // Download Chrome Canary
 
 var chromePlatform, chromeZipPlatform;
@@ -273,6 +283,7 @@ module.exports = {
   downloadFirefoxNightly: downloadFirefoxNightly,
   downloadFirefoxRelease: downloadFirefoxRelease,
   downloadFirefoxBeta: downloadFirefoxBeta,
+  downloadFirefoxAurora: downloadFirefoxAurora,
   downloadChromiumNightly: downloadChromiumNightly,
   downloadChromeDriver: downloadChromeDriver,
 };

@@ -13,46 +13,42 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-var serverAddress;
+navigator.serviceWorker.ready
+.then(function(reg) {
+  var channel = new MessageChannel();
+  channel.port1.onmessage = function(e) {
+    window.document.title = e.data;
+  }
+  reg.active.postMessage('setup', [channel.port2]);
 
-function go() {
-  navigator.serviceWorker.ready
-  .then(function(reg) {
-    var channel = new MessageChannel();
-    channel.port1.onmessage = function(e) {
-      window.document.title = e.data;
-    }
-    reg.active.postMessage('setup', [channel.port2]);
-
-    return reg.pushManager.getSubscription()
-    .then(function(subscription) {
-      if (!subscription) {
-        return reg.pushManager.subscribe({ userVisibleOnly: true })
-        .then(function(subscription) {
-          return subscription;
-        });
-      } else {
-        return subscription;
-      }
-    });
-  })
+  return reg.pushManager.getSubscription()
   .then(function(subscription) {
-    var key = subscription.getKey ? subscription.getKey('p256dh') : '';
-    var auth = subscription.getKey ? subscription.getKey('auth') : '';
-
-    return fetch(serverAddress, {
-      method: 'post',
-      headers: {
-        'Content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        endpoint: subscription.endpoint,
-        key: key ? btoa(String.fromCharCode.apply(null, new Uint8Array(key))) : '',
-        auth: auth ? btoa(String.fromCharCode.apply(null, new Uint8Array(auth))) : '',
-      }),
-    });
+    if (!subscription) {
+      return reg.pushManager.subscribe({ userVisibleOnly: true })
+      .then(function(subscription) {
+        return subscription;
+      });
+    } else {
+      return subscription;
+    }
   });
-}
+})
+.then(function(subscription) {
+  var key = subscription.getKey ? subscription.getKey('p256dh') : '';
+  var auth = subscription.getKey ? subscription.getKey('auth') : '';
+
+  return fetch('/', {
+    method: 'post',
+    headers: {
+      'Content-type': 'application/json'
+    },
+    body: JSON.stringify({
+      endpoint: subscription.endpoint,
+      key: key ? btoa(String.fromCharCode.apply(null, new Uint8Array(key))) : '',
+      auth: auth ? btoa(String.fromCharCode.apply(null, new Uint8Array(auth))) : '',
+    }),
+  });
+});
 </script>
 </body>
 </html>
