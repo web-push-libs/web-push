@@ -80,31 +80,7 @@ function encryptOld(userPublicKey, payload) {
   };
 }
 
-// Intermediate standard, Firefox 46.
-function encryptIntermediate(userPublicKey, userAuth, payload) {
-  var localCurve = crypto.createECDH('prime256v1');
-  var localPublicKey = localCurve.generateKeys();
-
-  var salt = urlBase64.encode(crypto.randomBytes(16));
-
-  ece.saveKey('webpushKey', localCurve, 'P-256');
-
-  var cipherText = ece.encrypt(payload, {
-    keyid: 'webpushKey',
-    dh: userPublicKey,
-    salt: salt,
-    authSecret: userAuth,
-    padSize: 1,
-  });
-
-  return {
-    localPublicKey: localPublicKey,
-    salt: salt,
-    cipherText: cipherText,
-  };
-}
-
-// New standard, Firefox 47+ and Chrome 50+.
+// New standard, Firefox 46+ and Chrome 50+.
 function encrypt(userPublicKey, userAuth, payload) {
   var localCurve = crypto.createECDH('prime256v1');
   var localPublicKey = localCurve.generateKeys();
@@ -169,18 +145,11 @@ function sendNotification(endpoint, params) {
         if (userAuth) {
           useCryptoKey = true;
 
-          var userAuthBuf = urlBase64.decode(userAuth);
-          if (userAuthBuf.length === 16) {
-            // Use the new standard if userAuth is defined and is 16 bytes long (Firefox 47+ and Chrome 50+).
-            encrypted = encrypt(userPublicKey, userAuth, new Buffer(payload));
-            encodingHeader = 'aesgcm';
-          } else {
-            // Use the intermediate standard if userAuth is defined and is 12 bytes long (Firefox 46).
-            encrypted = encryptIntermediate(userPublicKey, userAuth, new Buffer(payload));
-            encodingHeader = 'aesgcm128';
-          }
+          // Use the new standard if userAuth is defined (Firefox 46+ and Chrome 50+).
+          encrypted = encrypt(userPublicKey, userAuth, new Buffer(payload));
+          encodingHeader = 'aesgcm';
         } else {
-          // Use the old standard if userAuth isn't defined (Firefox 45).
+          // Use the old standard if userAuth isn't defined (up to Firefox 45).
           encrypted = encryptOld(userPublicKey, new Buffer(payload));
           encodingHeader = 'aesgcm128';
         }
