@@ -96,11 +96,6 @@ suite('selenium', function() {
 
       driver.get('http://127.0.0.1:' + server.port);
 
-      driver.executeScript(function(port) {
-        serverAddress = 'http://127.0.0.1:' + port;
-        go();
-      }, server.port);
-
       return driver.wait(webdriver.until.titleIs(params.payload ? params.payload : 'no payload'), 60000);
     });
   }
