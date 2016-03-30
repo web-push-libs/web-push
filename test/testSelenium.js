@@ -54,9 +54,7 @@ suite('selenium', function() {
     .then(function(newServer) {
       server = newServer;
 
-      var profilePath = temp.mkdirSync('marco');
-
-      var profile = new firefox.Profile(profilePath);
+      var profile = new firefox.Profile();
       profile.setPreference('security.turn_off_all_security_so_that_viruses_can_take_over_this_computer', true);
       profile.setPreference('extensions.checkCompatibility.nightly', false);
       // Only allow installation of third-party addons from the user's profile dir (needed to block the third-party
@@ -72,7 +70,7 @@ suite('selenium', function() {
       var chromeOptions = new chrome.Options()
         .setChromeBinaryPath(chromeBinaryPath)
         .addArguments('--no-sandbox')
-        .addArguments('user-data-dir=' + profilePath);
+        .addArguments('user-data-dir=' + temp.mkdirSync('marco'));
 
       var builder = new webdriver.Builder()
         .forBrowser('firefox')
