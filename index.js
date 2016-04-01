@@ -148,12 +148,20 @@ function sendNotification(endpoint, params) {
         console.warn('You are using the old, deprecated, interface of the `sendNotification` function.'.bold.red);
       }
 
-      if (typeof userPublicKey !== 'undefined' && typeof userPublicKey !== 'string') {
-        throw new Error('userPublicKey should be a base64-encoded string.');
+      if (typeof userPublicKey !== 'undefined') {
+        if (typeof userPublicKey !== 'string') {
+          throw new Error('userPublicKey should be a base64-encoded string.');
+        } else if (urlBase64.decode(userPublicKey).length !== 65) {
+          throw new Error('userPublicKey should be 65 bytes long.');
+        }
       }
 
-      if (typeof userAuth !== 'undefined' && typeof userAuth !== 'string') {
-        throw new Error('userAuth should be a base64-encoded string.');
+      if (typeof userAuth !== 'undefined') {
+        if (typeof userAuth !== 'string') {
+          throw new Error('userAuth should be a base64-encoded string.');
+        } else if (urlBase64.decode(userAuth).length < 12) {
+          throw new Error('userAuth should be at least 12 bytes long');
+        }
       }
 
       const isGCM = endpoint.indexOf('https://android.googleapis.com/gcm/send') === 0;

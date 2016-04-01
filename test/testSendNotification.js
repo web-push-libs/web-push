@@ -421,7 +421,7 @@ suite('sendNotification', function() {
     });
   });
 
-  test('invalid userPublicKey arguments', function() {
+  test('userPublicKey argument isn\'t a string', function() {
     return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
       userPublicKey: userPublicKey,
       userAuth: urlBase64.encode(userAuth),
@@ -434,10 +434,49 @@ suite('sendNotification', function() {
     });
   });
 
-  test('invalid userAuth arguments', function() {
+  test('userAuth argument isn\'t a string', function() {
     return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
       userPublicKey: urlBase64.encode(userPublicKey),
       userAuth: userAuth,
+      payload: 'hello',
+    })
+    .then(function(body) {
+      assert(false, 'sendNotification promise resolved');
+    }, function() {
+      assert(true, 'sendNotification promise rejected');
+    });
+  });
+
+  test('userPublicKey argument is too long', function() {
+    return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+      userPublicKey: urlBase64.encode(Buffer.concat([ userPublicKey, new Buffer(1) ])),
+      userAuth: urlBase64.encode(userAuth),
+      payload: 'hello',
+    })
+    .then(function(body) {
+      assert(false, 'sendNotification promise resolved');
+    }, function() {
+      assert(true, 'sendNotification promise rejected');
+    });
+  });
+
+  test('userPublicKey argument is too short', function() {
+    return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+      userPublicKey: urlBase64.encode(userPublicKey.slice(1)),
+      userAuth: urlBase64.encode(userAuth),
+      payload: 'hello',
+    })
+    .then(function(body) {
+      assert(false, 'sendNotification promise resolved');
+    }, function() {
+      assert(true, 'sendNotification promise rejected');
+    });
+  });
+
+  test('userAuth argument is too short', function() {
+    return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+      userPublicKey: urlBase64.encode(userPublicKey),
+      userAuth: urlBase64.encode(userAuth.slice(1)),
       payload: 'hello',
     })
     .then(function(body) {
