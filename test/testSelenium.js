@@ -161,9 +161,10 @@ suite('selenium', function() {
 
       try {
         console.log('Using Firefox: ' + firefoxStableBinaryPath);
-        console.log('Version: ' + childProcess.execSync(firefoxStableBinaryPath + ' --version').replace('\n', ''));
-        console.log('Beta Version: ' + childProcess.execSync(firefoxBetaBinaryPath + ' --version').replace('\n', ''));
-        console.log('Aurora Version: ' + childProcess.execSync(firefoxAuroraBinaryPath + ' --version').replace('\n', ''));
+        console.log('Version: ' + childProcess.execSync(firefoxStableBinaryPath + ' --version').toString().replace('\n', ''));
+        console.log('Beta Version: ' + childProcess.execSync(firefoxBetaBinaryPath + ' --version').toString().replace('\n', ''));
+        //console.log('Aurora Version: ' + childProcess.execSync(firefoxAuroraBinaryPath + ' --version').toString().replace('\n', ''));
+        console.log('Nightly Version: ' + childProcess.execSync(firefoxNightlyBinaryPath + ' --version').toString().replace('\n', ''));
       } catch (e) {}
 
       if (process.env.GCM_API_KEY && !fs.existsSync(chromeBinaryPath)) {
@@ -172,7 +173,7 @@ suite('selenium', function() {
 
       try {
         console.log('Using Chromium: ' + chromeBinaryPath);
-        console.log('Version: ' + childProcess.execSync(chromeBinaryPath + ' --version').replace('\n', ''));
+        console.log('Version: ' + childProcess.execSync(chromeBinaryPath + ' --version').toString().replace('\n', ''));
       } catch (e) {}
     });
   });
