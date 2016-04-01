@@ -421,6 +421,32 @@ suite('sendNotification', function() {
     });
   });
 
+  test('invalid userPublicKey arguments', function() {
+    return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+      userPublicKey: userPublicKey,
+      userAuth: urlBase64.encode(userAuth),
+      payload: 'hello',
+    })
+    .then(function(body) {
+      assert(false, 'sendNotification promise resolved');
+    }, function() {
+      assert(true, 'sendNotification promise rejected');
+    });
+  });
+
+  test('invalid userAuth arguments', function() {
+    return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+      userPublicKey: urlBase64.encode(userPublicKey),
+      userAuth: userAuth,
+      payload: 'hello',
+    })
+    .then(function(body) {
+      assert(false, 'sendNotification promise resolved');
+    }, function() {
+      assert(true, 'sendNotification promise rejected');
+    });
+  });
+
   test('TTL with old interface', function() {
     return startServer(undefined, 5)
     .then(function() {
