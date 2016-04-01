@@ -236,6 +236,23 @@ suite('sendNotification', function() {
     });
   });
 
+  test('send/receive string (non-urlsafe base64)', function() {
+    return startServer('hello')
+    .then(function() {
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+        userPublicKey: userPublicKey.toString('base64'),
+        userAuth: userAuth.toString('base64'),
+        payload: 'hello',
+      });
+    })
+    .then(function(body) {
+      assert(true, 'sendNotification promise resolved');
+      assert.equal(body, 'ok');
+    }, function(e) {
+      assert(false, 'sendNotification promise rejected with: ' + e);
+    });
+  });
+
   test('send/receive buffer', function() {
     return startServer('hello')
     .then(function() {
