@@ -153,11 +153,11 @@ function sendNotification(endpoint, params) {
         }
       };
 
-      var encrypted;
+      var requestPayload;
       if (typeof payload !== 'undefined') {
+        var encrypted;
         var encodingHeader;
         var cryptoHeaderName;
-
         if (userAuth) {
           // Use the new standard if userAuth is defined (Firefox 46+ and Chrome 50+).
           encrypted = encrypt(userPublicKey, userAuth, new Buffer(payload));
@@ -171,16 +171,16 @@ function sendNotification(endpoint, params) {
         }
 
         options.headers = {
-          'Content-Length': encrypted.cipherText.length,
           'Content-Type': 'application/octet-stream',
           'Content-Encoding': encodingHeader,
           'Encryption': 'keyid=p256dh;salt=' + encrypted.salt,
         };
 
         options.headers[cryptoHeaderName] = 'keyid=p256dh;dh=' + urlBase64.encode(encrypted.localPublicKey);
+
+        requestPayload = encrypted.cipherText;
       }
 
-      var gcmPayload;
       if (isGCM) {
         if (!gcmAPIKey) {
           console.warn('Attempt to send push notification to GCM endpoint, but no GCM key is defined'.bold.red);
@@ -192,16 +192,15 @@ function sendNotification(endpoint, params) {
         var gcmObj = {
           registration_ids: [ subscriptionId ],
         };
-        if (encrypted) {
-          gcmObj['raw_data'] = encrypted.cipherText.toString('base64');
+        if (requestPayload) {
+          gcmObj['raw_data'] = requestPayload.toString('base64');
         }
-        gcmPayload = JSON.stringify(gcmObj);
+        requestPayload = JSON.stringify(gcmObj);
 
         options.path = options.path.substring(0, options.path.length - subscriptionId.length - 1);
 
         options.headers['Authorization'] = 'key=' + gcmAPIKey;
         options.headers['Content-Type'] = 'application/json';
-        options.headers['Content-Length'] = gcmPayload.length;
       }
 
       if (vapid && !isGCM && (typeof payload === 'undefined' || 'Crypto-Key' in options.headers)) {
@@ -241,6 +240,10 @@ function sendNotification(endpoint, params) {
         options.headers['TTL'] = 2419200; // Default TTL is four weeks.
       }
 
+      if (requestPayload) {
+        options.headers['Content-Length'] = requestPayload.length;
+      }
+
       var expectedStatusCode = isGCM ? 200 : 201;
       var pushRequest = https.request(options, function(pushResponse) {
         var body = "";
@@ -258,10 +261,8 @@ function sendNotification(endpoint, params) {
         });
       });
 
-      if (isGCM) {
-        pushRequest.write(gcmPayload);
-      } else if (typeof payload !== 'undefined') {
-        pushRequest.write(encrypted.cipherText);
+      if (requestPayload) {
+        pushRequest.write(requestPayload);
       }
 
       pushRequest.end();
