@@ -80,31 +80,7 @@ function encryptOld(userPublicKey, payload) {
   };
 }
 
-// Intermediate standard, Firefox 46.
-function encryptIntermediate(userPublicKey, userAuth, payload) {
-  var localCurve = crypto.createECDH('prime256v1');
-  var localPublicKey = localCurve.generateKeys();
-
-  var salt = urlBase64.encode(crypto.randomBytes(16));
-
-  ece.saveKey('webpushKey', localCurve, 'P-256');
-
-  var cipherText = ece.encrypt(payload, {
-    keyid: 'webpushKey',
-    dh: userPublicKey,
-    salt: salt,
-    authSecret: userAuth,
-    padSize: 1,
-  });
-
-  return {
-    localPublicKey: localPublicKey,
-    salt: salt,
-    cipherText: cipherText,
-  };
-}
-
-// New standard, Firefox 47+ and Chrome 50+.
+// New standard, Firefox 46+ and Chrome 50+.
 function encrypt(userPublicKey, userAuth, payload) {
   var localCurve = crypto.createECDH('prime256v1');
   var localPublicKey = localCurve.generateKeys();
@@ -159,8 +135,8 @@ function sendNotification(endpoint, params) {
       if (userAuth) {
         if (typeof userAuth !== 'string') {
           throw new Error('userAuth should be a base64-encoded string.');
-        } else if (urlBase64.decode(userAuth).length < 12) {
-          throw new Error('userAuth should be at least 12 bytes long');
+        } else if (urlBase64.decode(userAuth).length < 16) {
+          throw new Error('userAuth should be at least 16 bytes long');
         }
       }
 
@@ -177,47 +153,34 @@ function sendNotification(endpoint, params) {
         }
       };
 
-      var encrypted;
-      var useCryptoKey = false;
+      var requestPayload;
       if (typeof payload !== 'undefined') {
+        var encrypted;
         var encodingHeader;
-
+        var cryptoHeaderName;
         if (userAuth) {
-          useCryptoKey = true;
-
-          var userAuthBuf = urlBase64.decode(userAuth);
-          if (userAuthBuf.length === 16) {
-            // Use the new standard if userAuth is defined and is 16 bytes long (Firefox 47+ and Chrome 50+).
-            encrypted = encrypt(userPublicKey, userAuth, new Buffer(payload));
-            encodingHeader = 'aesgcm';
-          } else {
-            // Use the intermediate standard if userAuth is defined and is 12 bytes long (Firefox 46).
-            encrypted = encryptIntermediate(userPublicKey, userAuth, new Buffer(payload));
-            encodingHeader = 'aesgcm128';
-          }
+          // Use the new standard if userAuth is defined (Firefox 46+ and Chrome 50+).
+          encrypted = encrypt(userPublicKey, userAuth, new Buffer(payload));
+          encodingHeader = 'aesgcm';
+          cryptoHeaderName = 'Crypto-Key';
         } else {
-          // Use the old standard if userAuth isn't defined (Firefox 45).
+          // Use the old standard if userAuth isn't defined (up to Firefox 45).
           encrypted = encryptOld(userPublicKey, new Buffer(payload));
           encodingHeader = 'aesgcm128';
+          cryptoHeaderName = 'Encryption-Key';
         }
 
         options.headers = {
-          'Content-Length': encrypted.cipherText.length,
           'Content-Type': 'application/octet-stream',
+          'Content-Encoding': encodingHeader,
           'Encryption': 'keyid=p256dh;salt=' + encrypted.salt,
         };
 
-        var cryptoHeader = 'keyid=p256dh;dh=' + urlBase64.encode(encrypted.localPublicKey);
+        options.headers[cryptoHeaderName] = 'keyid=p256dh;dh=' + urlBase64.encode(encrypted.localPublicKey);
 
-        if (useCryptoKey) {
-          options.headers['Crypto-Key'] = cryptoHeader;
-        } else {
-          options.headers['Encryption-Key'] = cryptoHeader;
-        }
-        options.headers['Content-Encoding'] = encodingHeader;
+        requestPayload = encrypted.cipherText;
       }
 
-      var gcmPayload;
       if (isGCM) {
         if (!gcmAPIKey) {
           console.warn('Attempt to send push notification to GCM endpoint, but no GCM key is defined'.bold.red);
@@ -229,19 +192,18 @@ function sendNotification(endpoint, params) {
         var gcmObj = {
           registration_ids: [ subscriptionId ],
         };
-        if (encrypted) {
-          gcmObj['raw_data'] = encrypted.cipherText.toString('base64');
+        if (requestPayload) {
+          gcmObj['raw_data'] = requestPayload.toString('base64');
         }
-        gcmPayload = JSON.stringify(gcmObj);
+        requestPayload = JSON.stringify(gcmObj);
 
         options.path = options.path.substring(0, options.path.length - subscriptionId.length - 1);
 
         options.headers['Authorization'] = 'key=' + gcmAPIKey;
         options.headers['Content-Type'] = 'application/json';
-        options.headers['Content-Length'] = gcmPayload.length;
       }
 
-      if (vapid && !isGCM && (!encrypted || useCryptoKey)) {
+      if (vapid && !isGCM && (typeof payload === 'undefined' || 'Crypto-Key' in options.headers)) {
         // VAPID isn't supported by GCM.
         // We also can't use it when there's a payload on Firefox 45, because
         // Firefox 45 uses the old standard with Encryption-Key.
@@ -278,6 +240,10 @@ function sendNotification(endpoint, params) {
         options.headers['TTL'] = 2419200; // Default TTL is four weeks.
       }
 
+      if (requestPayload) {
+        options.headers['Content-Length'] = requestPayload.length;
+      }
+
       var expectedStatusCode = isGCM ? 200 : 201;
       var pushRequest = https.request(options, function(pushResponse) {
         var body = "";
@@ -295,10 +261,8 @@ function sendNotification(endpoint, params) {
         });
       });
 
-      if (isGCM) {
-        pushRequest.write(gcmPayload);
-      } else if (typeof payload !== 'undefined') {
-        pushRequest.write(encrypted.cipherText);
+      if (requestPayload) {
+        pushRequest.write(requestPayload);
       }
 
       pushRequest.end();
