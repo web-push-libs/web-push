@@ -135,8 +135,8 @@ function sendNotification(endpoint, params) {
       if (userAuth) {
         if (typeof userAuth !== 'string') {
           throw new Error('userAuth should be a base64-encoded string.');
-        } else if (urlBase64.decode(userAuth).length < 12) {
-          throw new Error('userAuth should be at least 12 bytes long');
+        } else if (urlBase64.decode(userAuth).length < 16) {
+          throw new Error('userAuth should be at least 16 bytes long');
         }
       }
 
