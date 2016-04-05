@@ -154,36 +154,30 @@ function sendNotification(endpoint, params) {
       };
 
       var encrypted;
-      var useCryptoKey = false;
       if (typeof payload !== 'undefined') {
         var encodingHeader;
+        var cryptoHeaderName;
 
         if (userAuth) {
-          useCryptoKey = true;
-
           // Use the new standard if userAuth is defined (Firefox 46+ and Chrome 50+).
           encrypted = encrypt(userPublicKey, userAuth, new Buffer(payload));
           encodingHeader = 'aesgcm';
+          cryptoHeaderName = 'Crypto-Key';
         } else {
           // Use the old standard if userAuth isn't defined (up to Firefox 45).
           encrypted = encryptOld(userPublicKey, new Buffer(payload));
           encodingHeader = 'aesgcm128';
+          cryptoHeaderName = 'Encryption-Key';
         }
 
         options.headers = {
           'Content-Length': encrypted.cipherText.length,
           'Content-Type': 'application/octet-stream',
+          'Content-Encoding': encodingHeader,
           'Encryption': 'keyid=p256dh;salt=' + encrypted.salt,
         };
 
-        var cryptoHeader = 'keyid=p256dh;dh=' + urlBase64.encode(encrypted.localPublicKey);
-
-        if (useCryptoKey) {
-          options.headers['Crypto-Key'] = cryptoHeader;
-        } else {
-          options.headers['Encryption-Key'] = cryptoHeader;
-        }
-        options.headers['Content-Encoding'] = encodingHeader;
+        options.headers[cryptoHeaderName] = 'keyid=p256dh;dh=' + urlBase64.encode(encrypted.localPublicKey);
       }
 
       var gcmPayload;
@@ -210,7 +204,7 @@ function sendNotification(endpoint, params) {
         options.headers['Content-Length'] = gcmPayload.length;
       }
 
-      if (vapid && !isGCM && (!encrypted || useCryptoKey)) {
+      if (vapid && !isGCM && (typeof payload === 'undefined' || 'Crypto-Key' in options.headers)) {
         // VAPID isn't supported by GCM.
         // We also can't use it when there's a payload on Firefox 45, because
         // Firefox 45 uses the old standard with Encryption-Key.
