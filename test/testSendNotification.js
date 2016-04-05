@@ -211,6 +211,23 @@ suite('sendNotification', function() {
     });
   });
 
+  test('send/receive string (non-urlsafe base64)', function() {
+    return startServer('hello')
+    .then(function() {
+      return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+        userPublicKey: userPublicKey.toString('base64'),
+        userAuth: userAuth.toString('base64'),
+        payload: 'hello',
+      });
+    })
+    .then(function(body) {
+      assert(true, 'sendNotification promise resolved');
+      assert.equal(body, 'ok');
+    }, function(e) {
+      assert(false, 'sendNotification promise rejected with: ' + e);
+    });
+  });
+
   test('send/receive buffer', function() {
     return startServer('hello')
     .then(function() {
@@ -390,6 +407,71 @@ suite('sendNotification', function() {
   test('0 arguments', function() {
     return webPush.sendNotification()
     .then(function() {
+      assert(false, 'sendNotification promise resolved');
+    }, function() {
+      assert(true, 'sendNotification promise rejected');
+    });
+  });
+
+  test('userPublicKey argument isn\'t a string', function() {
+    return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+      userPublicKey: userPublicKey,
+      userAuth: urlBase64.encode(userAuth),
+      payload: 'hello',
+    })
+    .then(function(body) {
+      assert(false, 'sendNotification promise resolved');
+    }, function() {
+      assert(true, 'sendNotification promise rejected');
+    });
+  });
+
+  test('userAuth argument isn\'t a string', function() {
+    return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+      userPublicKey: urlBase64.encode(userPublicKey),
+      userAuth: userAuth,
+      payload: 'hello',
+    })
+    .then(function(body) {
+      assert(false, 'sendNotification promise resolved');
+    }, function() {
+      assert(true, 'sendNotification promise rejected');
+    });
+  });
+
+  test('userPublicKey argument is too long', function() {
+    return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+      userPublicKey: urlBase64.encode(Buffer.concat([ userPublicKey, new Buffer(1) ])),
+      userAuth: urlBase64.encode(userAuth),
+      payload: 'hello',
+    })
+    .then(function(body) {
+      assert(false, 'sendNotification promise resolved');
+    }, function() {
+      assert(true, 'sendNotification promise rejected');
+    });
+  });
+
+  test('userPublicKey argument is too short', function() {
+    return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+      userPublicKey: urlBase64.encode(userPublicKey.slice(1)),
+      userAuth: urlBase64.encode(userAuth),
+      payload: 'hello',
+    })
+    .then(function(body) {
+      assert(false, 'sendNotification promise resolved');
+    }, function() {
+      assert(true, 'sendNotification promise rejected');
+    });
+  });
+
+  test('userAuth argument is too short', function() {
+    return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
+      userPublicKey: urlBase64.encode(userPublicKey),
+      userAuth: urlBase64.encode(userAuth.slice(1)),
+      payload: 'hello',
+    })
+    .then(function(body) {
       assert(false, 'sendNotification promise resolved');
     }, function() {
       assert(true, 'sendNotification promise rejected');
