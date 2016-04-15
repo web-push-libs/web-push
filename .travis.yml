@@ -6,6 +6,7 @@ env:
     - DISPLAY=$(if [[ $TRAVIS_OS_NAME == "linux" ]]; then echo ':99.0'; fi)
     - MOZ_XVFB=$(if [[ $TRAVIS_OS_NAME == "linux" ]]; then echo 1; fi)
   matrix:
+    - NODE_VERSION="0.10"
     - NODE_VERSION="0.12"
     - NODE_VERSION="4"
     - NODE_VERSION="stable"
@@ -16,6 +17,8 @@ before_install:
   - nvm install $NODE_VERSION
   - export NODE=$(nvm which $NODE_VERSION)
   - export NPM=${NODE%node}npm
+  - wget http://selenium-release.storage.googleapis.com/2.53/selenium-server-standalone-2.53.0.jar
+  - java -jar selenium-server-standalone-2.53.0.jar &> /dev/null &
 install:
   - $NPM install
   - $NPM install mocha

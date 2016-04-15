@@ -25,11 +25,6 @@ if (!process.env.VAPID_PRIVATE_KEY || !process.env.VAPID_PUBLIC_KEY) {
 process.env.PATH = process.env.PATH + ':test_tools/';
 
 suite('selenium', function() {
-  if (semver.satisfies(process.version, '0.12')) {
-    console.log('selenium-webdriver is incompatible with Node.js v0.12');
-    return;
-  }
-
   var webdriver = require('selenium-webdriver');
   var firefox = require('selenium-webdriver/firefox');
   var chrome = require('selenium-webdriver/chrome');
@@ -50,6 +45,13 @@ suite('selenium', function() {
       params.browser = 'firefox';
       firefoxBinaryPath = firefoxAuroraBinaryPath;
       process.env.SELENIUM_MARIONETTE = true;
+    }
+
+    if (firefoxBinaryPath) {
+      firefoxBinaryPath = path.resolve(firefoxBinaryPath);
+    }
+    if (chromeBinaryPath) {
+      chromeBinaryPath = path.resolve(chromeBinaryPath);
     }
 
     process.env.SELENIUM_BROWSER = params.browser;
@@ -80,6 +82,9 @@ suite('selenium', function() {
         .forBrowser('firefox')
         .setFirefoxOptions(firefoxOptions)
         .setChromeOptions(chromeOptions);
+      if (params.browser !== "chrome") {
+        builder.usingServer('http://localhost:4444/wd/hub');
+      }
       driver = builder.build();
 
       driver.executeScript(function(port) {
@@ -178,7 +183,7 @@ suite('selenium', function() {
 
   teardown(function(done) {
     driver.quit()
-    .catch(function() {})
+    .thenCatch(function() {})
     .then(function() {
       server.close(function() {
         done();
