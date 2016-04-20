@@ -56,6 +56,9 @@ function setGCMAPIKey(apiKey) {
 
 // Old standard, Firefox 44+.
 function encryptOld(userPublicKey, payload) {
+  if (typeof payload === 'string' || payload instanceof String) {
+    payload = new Buffer(payload);
+  }
   var localCurve = crypto.createECDH('prime256v1');
 
   var localPublicKey = localCurve.generateKeys();
@@ -82,6 +85,9 @@ function encryptOld(userPublicKey, payload) {
 
 // New standard, Firefox 46+ and Chrome 50+.
 function encrypt(userPublicKey, userAuth, payload) {
+  if (typeof payload === 'string' || payload instanceof String) {
+    payload = new Buffer(payload);
+  }
   var localCurve = crypto.createECDH('prime256v1');
   var localPublicKey = localCurve.generateKeys();
 
@@ -160,12 +166,12 @@ function sendNotification(endpoint, params) {
         var cryptoHeaderName;
         if (userAuth) {
           // Use the new standard if userAuth is defined (Firefox 46+ and Chrome 50+).
-          encrypted = encrypt(userPublicKey, userAuth, new Buffer(payload));
+          encrypted = encrypt(userPublicKey, userAuth, payload);
           encodingHeader = 'aesgcm';
           cryptoHeaderName = 'Crypto-Key';
         } else {
           // Use the old standard if userAuth isn't defined (up to Firefox 45).
-          encrypted = encryptOld(userPublicKey, new Buffer(payload));
+          encrypted = encryptOld(userPublicKey, payload);
           encodingHeader = 'aesgcm128';
           cryptoHeaderName = 'Encryption-Key';
         }
