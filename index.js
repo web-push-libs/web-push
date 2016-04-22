@@ -6,6 +6,7 @@ const https     = require('https');
 const colors    = require('colors');
 const asn1      = require('asn1.js');
 const jws       = require('jws');
+require('./shim');
 
 var ECPrivateKeyASN = asn1.define('ECPrivateKey', function() {
   this.seq().obj(
