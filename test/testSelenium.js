@@ -4,7 +4,6 @@ var path = require('path');
 var fse = require('fs-extra');
 var temp = require('temp').track();
 var colors = require('colors');
-var semver = require('semver');
 var childProcess = require('child_process');
 var net = require('net');
 var seleniumInit = require('./selenium-init');
