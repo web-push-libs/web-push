@@ -63,25 +63,13 @@ The [Service Worker Cookbook](https://serviceworke.rs/) is full of Web Push exam
 
 #### Prerequisites:
   * Java JDK or JRE (http://www.oracle.com/technetwork/java/javase/downloads/index.html)
-  * Selenium Server 2.53.0 ([Download](http://selenium-release.storage.googleapis.com/2.53/selenium-server-standalone-2.53.0.jar))
 
-### Setup
-
-* Run Selenium Server
-
-e.g. in shell form:
-
-```sh
-java -jar selenium-server-standalone-2.53.0.jar
-```
-
-To run tests locally with Selenium:
-
+To run tests:
 ```sh
 npm test
 ```
 
 In order to make the tests run in Chromium/Chrome, you need a GCM API key and you need to define a GCM_API_KEY environment variable:
-```
+```sh
 GCM_API_KEY=your_API_key npm test
 ```

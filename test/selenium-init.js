@@ -279,6 +279,12 @@ function downloadChromeDriver() {
   });
 }
 
+// Download Selenium server
+
+function downloadSeleniumServer() {
+  return wget(destDir, 'https://selenium-release.storage.googleapis.com/2.53/selenium-server-standalone-2.53.0.jar');
+}
+
 module.exports = {
   downloadFirefoxNightly: downloadFirefoxNightly,
   downloadFirefoxRelease: downloadFirefoxRelease,
@@ -286,4 +292,5 @@ module.exports = {
   downloadFirefoxAurora: downloadFirefoxAurora,
   downloadChromiumNightly: downloadChromiumNightly,
   downloadChromeDriver: downloadChromeDriver,
+  downloadSeleniumServer: downloadSeleniumServer,
 };

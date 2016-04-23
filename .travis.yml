@@ -17,8 +17,6 @@ before_install:
   - nvm install $NODE_VERSION
   - export NODE=$(nvm which $NODE_VERSION)
   - export NPM=${NODE%node}npm
-  - wget http://selenium-release.storage.googleapis.com/2.53/selenium-server-standalone-2.53.0.jar
-  - java -jar selenium-server-standalone-2.53.0.jar &> /dev/null &
 install:
   - $NPM install
   - $NPM install mocha
