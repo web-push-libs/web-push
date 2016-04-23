@@ -61,6 +61,26 @@ The [Service Worker Cookbook](https://serviceworke.rs/) is full of Web Push exam
 
 ## Running tests
 
+#### Prerequisites:
+  * Java JDK or JRE (http://www.oracle.com/technetwork/java/javase/downloads/index.html)
+  * Selenium Server 2.53.0 ([Download](http://selenium-release.storage.googleapis.com/2.53/selenium-server-standalone-2.53.0.jar))
+
+### Setup
+
+* Run Selenium Server
+
+e.g. in shell form:
+
+```sh
+java -jar selenium-server-standalone-2.53.0.jar
+```
+
+To run tests locally with Selenium:
+
+```sh
+npm test
+```
+
 Selenium tests require Firefox or Chromium/Chrome. You can either use your installed versions or let the tests download the browsers for you.
 
 ```
