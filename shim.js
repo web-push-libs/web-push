@@ -1,10 +1,21 @@
-var semver = require('semver');
-if (semver.satisfies(process.version, '>= 0.12.0')) {
-  return;
+if (typeof Promise === 'undefined') {
+  global.Promise = require('bluebird');
 }
 
-global.Promise = require('bluebird');
-require('array.prototype.find').shim();
-require('buffer-compare-shim');
-require('buffer-equals-polyfill');
-require('crypto').createECDH = require('create-ecdh');
+if (!Array.prototype.find) {
+  require('array.prototype.find').shim();
+}
+
+if (!Buffer.prototype.compare || !Buffer.compare) {
+  require('buffer-compare-shim');
+}
+
+if (!Buffer.prototype.equals) {
+  require('buffer-equals-polyfill');
+}
+
+var crypto = require('crypto');
+
+if (!crypto.createECDH) {
+  crypto.createECDH = require('create-ecdh');
+}
