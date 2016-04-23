@@ -27,25 +27,20 @@ process.env.PATH = process.env.PATH + ':test_tools/';
 
 function isPortOpen(port) {
   return new Promise(function(resolve, reject) {
-    var tester = net.createServer();
+    var socket = new net.Socket();
 
-    tester.once('error', function(err) {
-      if (err.code !== 'EADDRINUSE') {
-        reject(err);
-      } else {
-        resolve(true);
-      }
+    socket.on('connect', function() {
+      socket.end();
+      resolve(true);
     });
 
-    tester.once('listening', function() {
-      tester.once('close', function() {
-        resolve(false);
-      });
-
-      tester.close();
+    socket.on('error', () => {
+      resolve(false);
     });
 
-    tester.listen(port);
+    socket.connect({
+      port: port,
+    });
   });
 }
 
