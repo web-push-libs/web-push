@@ -6,6 +6,7 @@ var temp = require('temp').track();
 var colors = require('colors');
 var semver = require('semver');
 var childProcess = require('child_process');
+var net = require('net');
 var seleniumInit = require('./selenium-init');
 var createServer = require('./server');
 var webPush = require('../index.js');
@@ -23,6 +24,30 @@ if (!process.env.VAPID_PRIVATE_KEY || !process.env.VAPID_PUBLIC_KEY) {
 }
 
 process.env.PATH = process.env.PATH + ':test_tools/';
+
+function isPortOpen(port) {
+  return new Promise(function(resolve, reject) {
+    var tester = net.createServer();
+
+    tester.once('error', function(err) {
+      if (err.code !== 'EADDRINUSE') {
+        reject(err);
+      } else {
+        resolve(true);
+      }
+    });
+
+    tester.once('listening', function() {
+      tester.once('close', function() {
+        resolve(false);
+      });
+
+      tester.close();
+    });
+
+    tester.listen(port);
+  });
+}
 
 suite('selenium', function() {
   var webdriver = require('selenium-webdriver');
@@ -140,6 +165,8 @@ suite('selenium', function() {
 
     promises.push(seleniumInit.downloadFirefoxNightly());
 
+    promises.push(seleniumInit.downloadSeleniumServer());
+
     if (process.env.GCM_API_KEY) {
       if (process.platform === 'linux') {
         chromeBinaryPath = 'test_tools/chrome-linux/chrome';
@@ -178,6 +205,29 @@ suite('selenium', function() {
         console.log('Using Chromium: ' + chromeBinaryPath);
         console.log('Version: ' + childProcess.execSync(chromeBinaryPath + ' --version').toString().replace('\n', ''));
       } catch (e) {}
+
+      if (!fs.existsSync('test_tools/selenium-server-standalone-2.53.0.jar')) {
+        throw new Error('Selenium server doesn\'t exist.');
+      }
+
+      childProcess.exec('java -jar test_tools/selenium-server-standalone-2.53.0.jar');
+
+      // Return a promise that resolved once the Selenium server is listening to the port 4444.
+      return new Promise(function(resolve, reject) {
+        var timerID = setInterval(function() {
+          isPortOpen(4444)
+          .then(function(isOpen) {
+            if (isOpen) {
+              clearInterval(timerID);
+              resolve();
+            }
+          })
+          .catch(function() {
+            clearInterval(timerID);
+            reject();
+          });
+        }, 1000);
+      })
     });
   });
 
