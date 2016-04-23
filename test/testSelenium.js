@@ -34,7 +34,7 @@ function isPortOpen(port) {
       resolve(true);
     });
 
-    socket.on('error', () => {
+    socket.on('error', function() {
       resolve(false);
     });
 
