@@ -81,18 +81,7 @@ To run tests locally with Selenium:
 npm test
 ```
 
-Selenium tests require Firefox or Chromium/Chrome. You can either use your installed versions or let the tests download the browsers for you.
-
+In order to make the tests run in Chromium/Chrome, you need a GCM API key and you need to define a GCM_API_KEY environment variable:
 ```
-FIREFOX="stable" CHROME="nightly" npm test
-```
-
-Possible values for FIREFOX and CHROME are:
-- "stable", the test will automatically download the stable version;
-- "nightly", the test will automatically download the nightly/canary version;
-- path to the Firefox/Chromium binary, the test will use it instead of automatically download the browser for you.
-
-In order to make the tests run in Chromium/Chrome, you also need a GCM API key and you need to define a GCM_API_KEY environment variable:
-```
-GCM_API_KEY=your_API_key FIREFOX="stable" CHROME="nightly" npm test
+GCM_API_KEY=your_API_key npm test
 ```
