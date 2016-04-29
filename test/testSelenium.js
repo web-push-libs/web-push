@@ -223,13 +223,13 @@ suite('selenium', function() {
 
     promises.push(seleniumInit.downloadFirefoxRelease());
 
-    if (process.platform === 'linux') {
+    /*if (process.platform === 'linux') {
       firefoxBetaBinaryPath = 'test_tools/beta/firefox/firefox-bin';
     } else if (process.platform === 'darwin') {
       firefoxBetaBinaryPath = 'test_tools/beta/Firefox.app/Contents/MacOS/firefox-bin';
     }
 
-    promises.push(seleniumInit.downloadFirefoxBeta());
+    promises.push(seleniumInit.downloadFirefoxBeta());*/
 
     /*if (process.platform === 'linux') {
       firefoxAuroraBinaryPath = 'test_tools/aurora/firefox/firefox-bin';
@@ -245,7 +245,7 @@ suite('selenium', function() {
       firefoxNightlyBinaryPath = 'test_tools/FirefoxNightly.app/Contents/MacOS/firefox-bin';
     }
 
-    promises.push(seleniumInit.downloadFirefoxNightly());
+    //promises.push(seleniumInit.downloadFirefoxNightly());
 
     promises.push(seleniumInit.downloadSeleniumServer());
 
@@ -267,16 +267,16 @@ suite('selenium', function() {
         throw new Error('Firefox binary doesn\'t exist at ' + firefoxStableBinaryPath + '. Use your installed Firefox binary by setting the FIREFOX environment'.bold.red);
       }
 
-      if (firefoxBetaBinaryPath && !fs.existsSync(firefoxBetaBinaryPath)) {
+      /*if (firefoxBetaBinaryPath && !fs.existsSync(firefoxBetaBinaryPath)) {
         throw new Error('Firefox binary doesn\'t exist at ' + firefoxBetaBinaryPath + '.'.bold.red);
-      }
+      }*/
 
       try {
         console.log('Using Firefox: ' + firefoxStableBinaryPath);
         console.log('Version: ' + childProcess.execSync(firefoxStableBinaryPath + ' --version').toString().replace('\n', ''));
-        console.log('Beta Version: ' + childProcess.execSync(firefoxBetaBinaryPath + ' --version').toString().replace('\n', ''));
+        //console.log('Beta Version: ' + childProcess.execSync(firefoxBetaBinaryPath + ' --version').toString().replace('\n', ''));
         //console.log('Aurora Version: ' + childProcess.execSync(firefoxAuroraBinaryPath + ' --version').toString().replace('\n', ''));
-        console.log('Nightly Version: ' + childProcess.execSync(firefoxNightlyBinaryPath + ' --version').toString().replace('\n', ''));
+        //console.log('Nightly Version: ' + childProcess.execSync(firefoxNightlyBinaryPath + ' --version').toString().replace('\n', ''));
       } catch (e) {}
 
       if (process.env.GCM_API_KEY && !fs.existsSync(chromeBinaryPath)) {
@@ -336,11 +336,11 @@ suite('selenium', function() {
     });
   });
 
-  test('send/receive notification without payload with Firefox Beta', function() {
+  /*test('send/receive notification without payload with Firefox Beta', function() {
     return runTest({
       browser: 'firefox-beta',
     });
-  });
+  });*/
 
   if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
     test('send/receive notification without payload with Chrome', function() {
@@ -357,12 +357,12 @@ suite('selenium', function() {
     });
   });
 
-  test('send/receive notification with payload with Firefox Beta', function() {
+  /*test('send/receive notification with payload with Firefox Beta', function() {
     return runTest({
       browser: 'firefox-beta',
       payload: 'marco',
     });
-  });
+  });*/
 
   if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
     test('send/receive notification with payload with Chrome', function() {
@@ -380,12 +380,12 @@ suite('selenium', function() {
     });
   });
 
-  test('send/receive notification with vapid with Firefox Beta', function() {
+  /*test('send/receive notification with vapid with Firefox Beta', function() {
     return runTest({
       browser: 'firefox-beta',
       vapid: vapidParam,
     });
-  });
+  });*/
 
   if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
     test('send/receive notification with vapid with Chrome', function() {
@@ -396,13 +396,13 @@ suite('selenium', function() {
     });
   }
 
-  test('send/receive notification with payload & vapid with Firefox Beta', function() {
+  /*test('send/receive notification with payload & vapid with Firefox Beta', function() {
     return runTest({
       browser: 'firefox-beta',
       payload: 'marco',
       vapid: vapidParam,
     });
-  });
+  });*/
 
   if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
     test('send/receive notification with payload & vapid with Chrome', function() {
