@@ -284,10 +284,100 @@ function sendNotification(endpoint, params) {
   });
 }
 
+function sendChromeMulticastNotification(endpoints, params) {
+  var args = arguments;
+
+  return new Promise(function(resolve, reject) {
+    try {
+      if (args.length === 0) {
+        throw new Error('sendChromeMulticastNotification requires at least one argument, the endpoints array');
+      } else if (params && typeof params === 'object') {
+        var TTL = params.TTL;
+      } else if (args.length !== 1) {
+        var TTL = args[1];
+        console.warn('You are using the old, deprecated, interface of the `sendChromeMulticastNotification` function.'.bold.red);
+      }
+
+      if (endpoints.length === 0) {
+        throw new Error('sendChromeMulticastNotification requires at least one endpoint.');
+      } else if (endpoints.length > 1000) {
+        throw new Error('sendChromeMulticastNotification requires at most 1000 endpoints.');
+      }
+
+      var urlParts = url.parse('https://android.googleapis.com/gcm/send');
+      var options = {
+        hostname: urlParts.hostname,
+        port: urlParts.port,
+        path: urlParts.pathname,
+        method: 'POST',
+        headers: {
+          'Content-Length': 0,
+        }
+      };
+
+      if (!gcmAPIKey) {
+        console.warn('Attempt to send push notification to GCM endpoint, but no GCM key is defined'.bold.red);
+      }
+
+      for (var i = 0; i < endpoints.length; i++) {
+        endpoints[i] = endpoints[i].split('/').pop();
+      }
+
+      var requestPayload = JSON.stringify({
+        registration_ids: endpoints,
+      });
+
+      options.headers['Authorization'] = 'key=' + gcmAPIKey;
+      options.headers['Content-Type'] = 'application/json';
+
+      if (typeof TTL !== 'undefined') {
+        options.headers['TTL'] = TTL;
+      } else {
+        options.headers['TTL'] = 2419200; // Default TTL is four weeks.
+      }
+
+      if (requestPayload) {
+        options.headers['Content-Length'] = requestPayload.length;
+      }
+
+      var expectedStatusCode = 200;
+      var pushRequest = https.request(options, function(pushResponse) {
+        var body = "";
+
+        pushResponse.on('data', function(chunk) {
+          body += chunk;
+        });
+
+        pushResponse.on('end', function() {
+          if (pushResponse.statusCode !== expectedStatusCode) {
+            reject(new WebPushError('Received unexpected response code', pushResponse.statusCode, pushResponse.headers, body));
+          } else {
+            resolve(body);
+          }
+        });
+      });
+
+      if (requestPayload) {
+        pushRequest.write(requestPayload);
+      }
+
+      pushRequest.end();
+
+      pushRequest.on('error', function(e) {
+        console.error(e);
+        reject(e);
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
+
 module.exports = {
   encryptOld: encryptOld,
   encrypt: encrypt,
   sendNotification: sendNotification,
+  sendChromeMulticastNotification: sendChromeMulticastNotification,
   setGCMAPIKey: setGCMAPIKey,
   WebPushError: WebPushError,
   generateVAPIDKeys: generateVAPIDKeys,
