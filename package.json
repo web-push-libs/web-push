@@ -45,9 +45,10 @@
     "mocha": "^2.4.5",
     "portfinder": "^1.0.2",
     "request": "^2.69.0",
-    "selenium-webdriver": "~2.47.0",
+    "selenium-webdriver": "~2.53.2",
     "semver": "^5.1.0",
-    "temp": "^0.8.3"
+    "temp": "^0.8.3",
+    "which": "^1.2.9"
   },
   "bin": {
     "web-push": "bin/web-push.js"

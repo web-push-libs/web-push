@@ -36,7 +36,7 @@ suite('sendNotification', function() {
   var vapidKeys = webPush.generateVAPIDKeys();
 
   function startServer(message, TTL, statusCode, isGCM, vapid) {
-    var pem = fs.readFileSync('test/cert.pem');
+    var pem = fs.readFileSync('test/data/certs/cert.pem');
 
     var options = {
       key: pem,
