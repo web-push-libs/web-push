@@ -11,7 +11,7 @@
     return;
   }
 
-  navigator.serviceWorker.register('service-worker.js')
+  return navigator.serviceWorker.register('service-worker.js')
   .then(function(registration) {
     console.log('service worker registered');
     return navigator.serviceWorker.ready;
@@ -26,20 +26,18 @@
     return reg.pushManager.subscribe({ userVisibleOnly: true });
   })
   .then(function(subscription) {
+    window.subscribeSuccess = true;
     var key = subscription.getKey ? subscription.getKey('p256dh') : '';
     var auth = subscription.getKey ? subscription.getKey('auth') : '';
-
-    return fetch('/', {
-      method: 'post',
-      headers: {
-        'Content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        endpoint: subscription.endpoint,
-        key: key ? btoa(String.fromCharCode.apply(null, new Uint8Array(key))) : '',
-        auth: auth ? btoa(String.fromCharCode.apply(null, new Uint8Array(auth))) : '',
-      }),
-    });
+    window.testSubscription = {
+      endpoint: subscription.endpoint,
+      key: key ? btoa(String.fromCharCode.apply(null, new Uint8Array(key))) : '',
+      auth: auth ? btoa(String.fromCharCode.apply(null, new Uint8Array(auth))) : '',
+    };
+  })
+  .catch(function(err) {
+    window.subscribeSuccess = false;
+    window.subscribeError = err;
   });
 })();
 </script>

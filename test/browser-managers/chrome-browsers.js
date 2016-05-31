@@ -23,6 +23,14 @@ function ChromeBrowsers() {
       'Contents/MacOS/Google Chrome Beta';
   }
 
+  var chromeUnstablePath;
+  if (process.platform === 'linux') {
+    chromeUnstablePath = which.sync('google-chrome-unstable');
+  } else if (process.platform === 'darwin') {
+    chromeUnstablePath = '/Applications/Google Chrome Canary.app/' +
+      'Contents/MacOS/Google Chrome Canary';
+  }
+
   var chromiumPath
   if (process.platform === 'linux') {
     chromiumPath = 'test_tools/chrome-linux/chrome';
@@ -30,10 +38,10 @@ function ChromeBrowsers() {
     chromiumPath = 'test_tools/chrome-mac/Chromium.app/Contents/MacOS/Chromium';
   }
 
-  this.downloadBrowsers = function() {
+  this.downloadDependencies = function() {
     return Promise.all([
-      seleniumInit.downloadChromiumNightly(),
-      seleniumInit.downloadChromeDriver(),
+      // seleniumInit.downloadChromiumNightly(),
+      seleniumInit.downloadChromeDriver()
     ]);
   }
 
@@ -45,6 +53,9 @@ function ChromeBrowsers() {
         break;
       case 'chrome-beta':
         chromeBinaryPath = chromeBetaPath;
+        break;
+      case 'chrome-unstable':
+        chromeBinaryPath = chromeUnstablePath;
         break;
       case 'chromium':
         chromeBinaryPath = chromiumPath;

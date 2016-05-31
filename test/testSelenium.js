@@ -1,3 +1,4 @@
+var assert = require('assert');
 var webPush = require('../index');
 var createServer = require('./helpers/create-server');
 var isPortOpen = require('./helpers/port-open');
@@ -31,8 +32,8 @@ suite('selenium', function() {
     this.timeout(0);
 
     var promises = [];
-    promises.push(firefoxBrowsers.downloadBrowsers());
-    promises.push(chromeBrowsers.downloadBrowsers());
+    promises.push(firefoxBrowsers.downloadDependencies());
+    promises.push(chromeBrowsers.downloadDependencies());
 
     return Promise.all(promises)
     .then(function() {
@@ -84,6 +85,14 @@ suite('selenium', function() {
       return new Promise(function(resolve, reject) {
         globalDriver.get('http://127.0.0.1:' + globalServer.port)
         .then(function() {
+          return globalDriver.executeScript(function() {
+            return typeof navigator.serviceWorker !== 'undefined';
+          });
+        })
+        .then(function(serviceWorkerSupported) {
+          assert(serviceWorkerSupported);
+        })
+        .then(function() {
           return globalDriver.executeScript(function(port) {
             if (typeof netscape !== 'undefined') {
               netscape.security.PrivilegeManager.enablePrivilege('UniversalXPConnect');
@@ -93,6 +102,72 @@ suite('selenium', function() {
               Services.perms.addFromPrincipal(principal, 'desktop-notification', Services.perms.ALLOW_ACTION);
             }
           }, globalServer.port);
+        })
+        .then(function() {
+          return globalDriver.wait(function() {
+            return globalDriver.executeScript(function() {
+              return typeof window.subscribeSuccess !== 'undefined';
+            });
+          });
+        })
+        .then(function() {
+          return globalDriver.executeScript(function() {
+            if (!window.subscribeSuccess) {
+              return window.subscribeError;
+            }
+
+            return null;
+          });
+        })
+        .then(function(subscribeError) {
+          if (subscribeError) {
+            throw subscribeError;
+          }
+
+          return globalDriver.executeScript(function() {
+            return window.testSubscription;
+          });
+        })
+        .then(function(subscription) {
+          if (!subscription) {
+            throw new Error('No subscription found.');
+          }
+
+          // console.log('Push Application Server - Register: ' + obj.endpoint);
+          // console.log('Push Application Server - Send notification to ' + obj.endpoint);
+
+          var promise;
+          var pushPayload = null;
+          var vapid = null;
+          if (options) {
+            pushPayload = options.payload;
+            vapid = options.vapid;
+          }
+
+          if (!pushPayload) {
+            promise = webPush.sendNotification(subscription.endpoint, {
+              vapid: vapid,
+            });
+          } else {
+            promise = webPush.sendNotification(subscription.endpoint, {
+              payload: pushPayload,
+              userPublicKey: subscription.key,
+              userAuth: subscription.auth,
+              vapid: vapid,
+            });
+          }
+
+          return promise
+          .then(function(response) {
+            if (response.length > 0) {
+              var data = JSON.parse(response);
+              if (typeof data.failure !== 'undefined' && data.failure > 0) {
+                throw new Error('Bad GCM Response: ' + response);
+              }
+            }
+
+            //console.log('Push Application Server - Notification sent to ' + obj.endpoint);
+          });
         })
         .then(function() {
           var expectedTitle = options.payload ? options.payload : 'no payload';

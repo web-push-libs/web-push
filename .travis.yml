@@ -9,6 +9,7 @@ addons:
     packages:
       - google-chrome-stable
       - google-chrome-beta
+      - google-chrome-unstable
 env:
   global:
     - DISPLAY=$(if [[ $TRAVIS_OS_NAME == "linux" ]]; then echo ':99.0'; fi)
