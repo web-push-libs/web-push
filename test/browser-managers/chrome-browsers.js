@@ -31,12 +31,10 @@ function ChromeBrowsers() {
   }
 
   this.downloadBrowsers = function() {
-    var promises = [];
-    if (process.env.GCM_API_KEY) {
-      promises.push(seleniumInit.downloadChromiumNightly());
-      promises.push(seleniumInit.downloadChromeDriver());
-    }
-    return Promise.all(promises);
+    return Promise.all([
+      seleniumInit.downloadChromiumNightly(),
+      seleniumInit.downloadChromeDriver(),
+    ]);
   }
 
   this.getBrowserDriver = function(browserId, testServerURL) {

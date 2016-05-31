@@ -2,19 +2,7 @@ var webPush = require('../index');
 var createServer = require('./helpers/create-server');
 var isPortOpen = require('./helpers/port-open');
 
-if (!process.env.GCM_API_KEY) {
-  console.log('You need to set the GCM_API_KEY env variable to run the tests with Chromium.'.bold.red);
-} else {
-  webPush.setGCMAPIKey(process.env.GCM_API_KEY);
-}
-
-if (!process.env.VAPID_PRIVATE_KEY || !process.env.VAPID_PUBLIC_KEY) {
-  console.log('You haven\'t set the VAPID env variables, I\'ll generate them for you.'.bold.yellow);
-
-  var keys = webPush.generateVAPIDKeys();
-  process.env.VAPID_PRIVATE_KEY = keys.privateKey.toString('base64');
-  process.env.VAPID_PUBLIC_KEY = keys.publicKey.toString('base64');
-}
+webPush.setGCMAPIKey('AIzaSyAwmdX6KKd4hPfIcGU2SOfj9vuRDW6u-wo');
 
 process.env.PATH = process.env.PATH + ':test_tools/';
 
@@ -34,8 +22,8 @@ suite('selenium', function() {
   var VAPID_PARAM = {
     audience: 'https://www.mozilla.org/',
     subject: 'mailto:web-push@mozilla.org',
-    privateKey: new Buffer(process.env.VAPID_PRIVATE_KEY, 'base64'),
-    publicKey: new Buffer(process.env.VAPID_PUBLIC_KEY, 'base64'),
+    privateKey: new Buffer('H6tqEMswzHOFlPHFi2JPfDQRiKN32ZJIwvSPWZl1VTA=', 'base64'),
+    publicKey: new Buffer('BIx6khu9Z/5lBwNEXYNEOQiL70IKYDpDxsTyoiCb82puQ/V4c/NFdyrBFpWdsz3mikmV6sWARNuhRbbbLTMOmB0=', 'base64'),
   };
   var globalServer, globalDriver;
 
@@ -152,7 +140,7 @@ suite('selenium', function() {
     browserDrivers.push(browserInfo);
   });
 
-  if (process.env.GCM_API_KEY && process.env.TRAVIS_OS_NAME !== 'osx') {
+  if (process.env.TRAVIS_OS_NAME !== 'osx') {
     chromeBrowsersToTest.forEach(function(browserInfo) {
       browserInfo.getBrowserDriver = function() {
         return chromeBrowsers.getBrowserDriver(browserInfo.id, 'http://127.0.0.1:' + globalServer.port);
