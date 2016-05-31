@@ -36,7 +36,7 @@ function FirefoxBrowsers() {
     throw new Error('Firefox binary doesn\'t exist at ' + firefoxBetaBinaryPath + '.'.bold.red);
   }*/
 
-  this.downloadBrowsers = function() {
+  this.downloadDependencies = function() {
     return seleniumInit.downloadFirefoxRelease();
     // promises.push(seleniumInit.downloadFirefoxBeta());
     // promises.push(seleniumInit.downloadFirefoxAurora());
