@@ -24,10 +24,10 @@ const vapidPvtKey = argv['vapid-pvtkey'] || null;
 
 function getKeys() {
   if (vapidPubKey && vapidPvtKey) {
-    const publicKey = fs.readFileSync(argv['vapid-pubkey']);
-    const privateKey = fs.readFileSync(argv['vapid-pvtkey']);
+    const publicKey = fs.readFileSync(vapidPubKey);
+    const privateKey = fs.readFileSync(vapidPvtKey);
 
-    if (pubKey && pvtKey) {
+    if (publicKey && privateKey) {
       return {
         privateKey,
         publicKey
