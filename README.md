@@ -7,9 +7,9 @@ Notifications with payloads are supported in Firefox 44+ and Chromium/Chrome 50+
 
 [![NPM](https://nodei.co/npm/web-push.svg?downloads=true)](https://www.npmjs.com/package/web-push)
 
-[![Build Status](https://travis-ci.org/marco-c/web-push.svg?branch=master)](https://travis-ci.org/marco-c/web-push)
-[![dependencies](https://david-dm.org/marco-c/web-push.svg)](https://david-dm.org/marco-c/web-push)
-[![devdependencies](https://david-dm.org/marco-c/web-push/dev-status.svg)](https://david-dm.org/marco-c/web-push#info=devDependencies)
+[![Build Status](https://travis-ci.org/web-push-libs/web-push.svg?branch=master)](https://travis-ci.org/web-push-libs/web-push)
+[![dependencies](https://david-dm.org/web-push-libs/web-push.svg)](https://david-dm.org/web-push-libs/web-push)
+[![devdependencies](https://david-dm.org/web-push-libs/web-push/dev-status.svg)](https://david-dm.org/web-push-libs/web-push#info=devDependencies)
 
 ## sendNotification(endpoint, params)
 
