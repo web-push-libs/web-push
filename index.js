@@ -55,35 +55,6 @@ function setGCMAPIKey(apiKey) {
   gcmAPIKey = apiKey;
 }
 
-// Old standard, Firefox 44+.
-function encryptOld(userPublicKey, payload) {
-  if (typeof payload === 'string' || payload instanceof String) {
-    payload = new Buffer(payload);
-  }
-  var localCurve = crypto.createECDH('prime256v1');
-
-  var localPublicKey = localCurve.generateKeys();
-  var localPrivateKey = localCurve.getPrivateKey();
-
-  var sharedSecret = localCurve.computeSecret(urlBase64.decode(userPublicKey));
-
-  var salt = urlBase64.encode(crypto.randomBytes(16));
-
-  ece.saveKey('webpushKey', sharedSecret);
-
-  var cipherText = ece.encrypt(payload, {
-    keyid: 'webpushKey',
-    salt: salt,
-    padSize: 1, // use the aesgcm128 encoding until aesgcm is well supported
-  });
-
-  return {
-    localPublicKey: localPublicKey,
-    salt: salt,
-    cipherText: cipherText,
-  };
-}
-
 // New standard, Firefox 46+ and Chrome 50+.
 function encrypt(userPublicKey, userAuth, payload) {
   if (typeof payload === 'string' || payload instanceof String) {
@@ -117,7 +88,7 @@ function sendNotification(endpoint, params) {
   return new Promise(function(resolve, reject) {
     try {
       if (args.length === 0) {
-        throw new Error('sendNotification requires at least one argument, the endpoint URL');
+        throw new Error('sendNotification requires at least one argument, the endpoint URL.');
       } else if (params && typeof params === 'object') {
         var TTL = params.TTL;
         var userPublicKey = params.userPublicKey;
@@ -125,10 +96,7 @@ function sendNotification(endpoint, params) {
         var payload = params.payload;
         var vapid = params.vapid;
       } else if (args.length !== 1) {
-        var TTL = args[1];
-        var userPublicKey = args[2];
-        var payload = args[3];
-        console.warn('You are using the old, deprecated, interface of the `sendNotification` function.'.bold.red);
+        throw new Error('You are using the old, deprecated, interface of the `sendNotification` function.');
       }
 
       if (userPublicKey) {
@@ -162,28 +130,15 @@ function sendNotification(endpoint, params) {
 
       var requestPayload;
       if (typeof payload !== 'undefined') {
-        var encrypted;
-        var encodingHeader;
-        var cryptoHeaderName;
-        if (userAuth) {
-          // Use the new standard if userAuth is defined (Firefox 46+ and Chrome 50+).
-          encrypted = encrypt(userPublicKey, userAuth, payload);
-          encodingHeader = 'aesgcm';
-          cryptoHeaderName = 'Crypto-Key';
-        } else {
-          // Use the old standard if userAuth isn't defined (up to Firefox 45).
-          encrypted = encryptOld(userPublicKey, payload);
-          encodingHeader = 'aesgcm128';
-          cryptoHeaderName = 'Encryption-Key';
-        }
+        var encrypted = encrypt(userPublicKey, userAuth, payload);
 
         options.headers = {
           'Content-Type': 'application/octet-stream',
-          'Content-Encoding': encodingHeader,
+          'Content-Encoding': 'aesgcm',
           'Encryption': 'keyid=p256dh;salt=' + encrypted.salt,
         };
 
-        options.headers[cryptoHeaderName] = 'keyid=p256dh;dh=' + urlBase64.encode(encrypted.localPublicKey);
+        options.headers['Crypto-Key'] = 'keyid=p256dh;dh=' + urlBase64.encode(encrypted.localPublicKey);
 
         requestPayload = encrypted.cipherText;
       }
@@ -210,10 +165,8 @@ function sendNotification(endpoint, params) {
         options.headers['Content-Type'] = 'application/json';
       }
 
-      if (vapid && !isGCM && (typeof payload === 'undefined' || 'Crypto-Key' in options.headers)) {
+      if (vapid && !isGCM) {
         // VAPID isn't supported by GCM.
-        // We also can't use it when there's a payload on Firefox 45, because
-        // Firefox 45 uses the old standard with Encryption-Key.
 
         var header = {
           typ: 'JWT',
@@ -285,7 +238,6 @@ function sendNotification(endpoint, params) {
 }
 
 module.exports = {
-  encryptOld: encryptOld,
   encrypt: encrypt,
   sendNotification: sendNotification,
   setGCMAPIKey: setGCMAPIKey,
