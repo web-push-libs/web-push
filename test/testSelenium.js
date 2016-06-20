@@ -1,89 +1,106 @@
-var assert = require('assert');
-var webPush = require('../index');
-var createServer = require('./helpers/create-server');
-var isPortOpen = require('./helpers/port-open');
+'use strict';
 
-webPush.setGCMAPIKey('AIzaSyAwmdX6KKd4hPfIcGU2SOfj9vuRDW6u-wo');
-
-process.env.PATH = process.env.PATH + ':test_tools/';
-
-suite('selenium', function() {
-  this.timeout(180000);
-
+(function() {
   var invalidNodeVersions = /0.(10|12).(\d+)/;
   if (process.versions.node.match(invalidNodeVersions)) {
-    console.log('Skipping selenium tests as they can\'t run on ' + process.versions.node);
+    console.log('Skipping downloading browsers as selenium tests can\'t run on ' + process.versions.node);
     return;
   }
 
-  var webdriver = require('selenium-webdriver');
-  var firefoxBrowsers = require('./browser-managers/firefox-browsers.js');
-  var chromeBrowsers = require('./browser-managers/chrome-browsers.js');
+  const seleniumAssistant = require('selenium-assistant');
+  const webdriver = require('selenium-webdriver');
+  const seleniumFirefox = require('selenium-webdriver/firefox');
+  const assert = require('assert');
+  const mkdirp = require('mkdirp');
+  const fs = require('fs');
+  const del = require('del');
+  const chalk = require('chalk');
+  const webPush = require('../index');
+  const createServer = require('./helpers/create-server');
+  const isPortOpen = require('./helpers/port-open');
 
-  var VAPID_PARAM = {
+  webPush.setGCMAPIKey('AIzaSyAwmdX6KKd4hPfIcGU2SOfj9vuRDW6u-wo');
+
+  const PUSH_TEST_TIMEOUT = 120 * 1000;
+  const VAPID_PARAM = {
     audience: 'https://www.mozilla.org/',
     subject: 'mailto:web-push@mozilla.org',
     privateKey: new Buffer('H6tqEMswzHOFlPHFi2JPfDQRiKN32ZJIwvSPWZl1VTA=', 'base64'),
     publicKey: new Buffer('BIx6khu9Z/5lBwNEXYNEOQiL70IKYDpDxsTyoiCb82puQ/V4c/NFdyrBFpWdsz3mikmV6sWARNuhRbbbLTMOmB0=', 'base64'),
   };
-  var globalServer, globalDriver;
+  const testDirectory = './test/output/';
 
-  suiteSetup(function() {
-    this.timeout(0);
+  let globalServer, globalDriver, testServerURL;
 
-    var promises = [];
-    promises.push(firefoxBrowsers.downloadDependencies());
-    promises.push(chromeBrowsers.downloadDependencies());
+  function runTest(browser, options) {
+    options = options ? options : {};
 
-    return Promise.all(promises)
-    .then(function() {
+    if (browser.getSeleniumBrowserId() === 'firefox' &&
+      browser.getVersionNumber() < 47) {
+      // There are a range of issues with Marionette and notification permission
+      // acceptance, so tests will only work in 49+
       console.log('');
+      console.warn(chalk.red('Skipping test since version is < 47'));
       console.log('');
-      console.log('     Suite setup complete');
-      console.log('');
-      console.log('');
-    });
-  });
-
-  teardown(function(done) {
-    var closeDriverPromise = Promise.resolve();
-    if (globalDriver) {
-      closeDriverPromise = new Promise(function(resolve) {
-        globalDriver.quit()
-        .then(function() {
-          resolve();
-        })
-        .thenCatch(function(err) {
-          console.log('Error when quiting driver: ', err);
-          resolve();
-        })
-      });
+      return;
     }
 
-    closeDriverPromise
-    .then(function() {
-      globalDriver = null;
-      globalServer.close(function() {
-        globalServer = null;
-        done();
-      });
-    });
-  });
-
-  function runTest(driverFunction, options) {
-    options = options ? options : {};
+    if (browser.getSeleniumBrowserId() === 'firefox' &&
+      process.env.TRAVIS === 'true') {
+      console.log('');
+      console.warn(chalk.red(
+        'Running on Travis so skipping firefox tests as ' +
+        'they don\'t currently work.'
+      ));
+      console.log('');
+      return;
+    }
 
     return createServer(options, webPush)
     .then(function(server) {
       globalServer = server;
-      return driverFunction();
+      testServerURL = 'http://127.0.0.1:' + server.port;
+      if (browser.getSeleniumBrowserId() === 'firefox') {
+        // This is based off of: https://bugzilla.mozilla.org/show_bug.cgi?id=1275521
+        // Unfortunately it doesn't seem to work :(
+        const ffProfile = new seleniumFirefox.Profile();
+        ffProfile.setPreference('dom.push.testing.ignorePermission', true);
+        ffProfile.setPreference('notification.prompt.testing', true);
+        ffProfile.setPreference('notification.prompt.testing.allow', true);
+        browser.getSeleniumOptions().setProfile(ffProfile);
+      } else if (browser.getSeleniumBrowserId() === 'chrome') {
+        const chromeOperaPreferences = {
+          profile: {
+            content_settings: {
+              exceptions: {
+                notifications: {}
+              }
+            }
+          }
+        };
+        chromeOperaPreferences.profile.content_settings.exceptions.notifications[testServerURL + ',*'] = {
+          setting: 1
+        };
+        /* eslint-enable camelcase */
+
+        // Write to a file
+        const tempPreferenceDir = './test/output/temp/chromeOperaPreferences';
+        mkdirp.sync(tempPreferenceDir + '/Default');
+
+        // NOTE: The Default part of this path might be Chrome specific.
+        fs.writeFileSync(tempPreferenceDir + '/Default/Preferences', JSON.stringify(chromeOperaPreferences));
+
+        const options = browser.getSeleniumOptions();
+        options.addArguments('user-data-dir=' + tempPreferenceDir + '/');
+      }
+      return browser.getSeleniumDriver();
     })
     .then(function(driver) {
       globalDriver = driver;
       // Tests will likely expect a native promise with then and catch
       // Not the web driver promise of then and thenCatch
       return new Promise(function(resolve, reject) {
-        globalDriver.get('http://127.0.0.1:' + globalServer.port)
+        globalDriver.get(testServerURL)
         .then(function() {
           return globalDriver.executeScript(function() {
             return typeof navigator.serviceWorker !== 'undefined';
@@ -93,27 +110,27 @@ suite('selenium', function() {
           assert(serviceWorkerSupported);
         })
         .then(function() {
-          return globalDriver.executeScript(function(port) {
-            if (typeof netscape !== 'undefined') {
-              netscape.security.PrivilegeManager.enablePrivilege('UniversalXPConnect');
-              Components.utils.import('resource://gre/modules/Services.jsm');
-              var uri = Services.io.newURI('http://127.0.0.1:' + port, null, null);
-              var principal = Services.scriptSecurityManager.getNoAppCodebasePrincipal(uri);
-              Services.perms.addFromPrincipal(principal, 'desktop-notification', Services.perms.ALLOW_ACTION);
-            }
-          }, globalServer.port);
-        })
-        .then(function() {
           return globalDriver.wait(function() {
             return globalDriver.executeScript(function() {
-              return typeof window.subscribeSuccess !== 'undefined';
+              // Firefox 47 and Marionette Quirk
+              if ('wrappedJSObject' in window) {
+                return typeof window.wrappedJSObject.subscribeSuccess !== 'undefined';
+              } else {
+                return typeof window.subscribeSuccess !== 'undefined';
+              }
             });
           });
         })
         .then(function() {
           return globalDriver.executeScript(function() {
-            if (!window.subscribeSuccess) {
-              return window.subscribeError;
+            if ('wrappedJSObject' in window) {
+              if (!window.wrappedJSObject.subscribeSuccess) {
+                return window.wrappedJSObject.subscribeError;
+              }
+            } else {
+              if (!window.subscribeSuccess) {
+                return window.subscribeError;
+              }
             }
 
             return null;
@@ -125,7 +142,11 @@ suite('selenium', function() {
           }
 
           return globalDriver.executeScript(function() {
-            return window.testSubscription;
+            if ('wrappedJSObject' in window) {
+              return window.wrappedJSObject.testSubscription;
+            } else {
+              return window.testSubscription;
+            }
           });
         })
         .then(function(subscription) {
@@ -133,6 +154,7 @@ suite('selenium', function() {
             throw new Error('No subscription found.');
           }
 
+          subscription = JSON.parse(subscription);
           // console.log('Push Application Server - Register: ' + obj.endpoint);
           // console.log('Push Application Server - Send notification to ' + obj.endpoint);
 
@@ -149,10 +171,14 @@ suite('selenium', function() {
               vapid: vapid,
             });
           } else {
+            if (!subscription.keys) {
+                throw new Error('Require subscription.keys not found.');
+            }
+
             promise = webPush.sendNotification(subscription.endpoint, {
               payload: pushPayload,
-              userPublicKey: subscription.key,
-              userAuth: subscription.auth,
+              userPublicKey: subscription.keys.p256dh,
+              userAuth: subscription.keys.auth,
               vapid: vapid,
             });
           }
@@ -183,69 +209,85 @@ suite('selenium', function() {
     });
   }
 
-  var firefoxBrowsersToTest = [
-    {
-      id: 'firefox',
-      name: 'Firefox Stable'
+  seleniumAssistant.printAvailableBrowserInfo();
+
+  const availableBrowsers = seleniumAssistant.getAvailableBrowsers();
+  availableBrowsers.forEach(function(browser) {
+    if (browser.getSeleniumBrowserId() !== 'chrome' &&
+      browser.getSeleniumBrowserId() !== 'firefox') {
+        return;
     }
-    // 'firefox-beta',
-    // 'firefox-aurora'
-  ];
 
-  var chromeBrowsersToTest = [
-    {
-      id: 'chrome',
-      name: 'Chrome Stable'
-    },
-    {
-      id: 'chrome-beta',
-      name: 'Chrome Beta'
-    },
-    /**{
-      id: 'chromium',
-      name: 'Latest Chromium Build'
-    }**/
-  ];
+    suite('Selenium ' + browser.getPrettyName(), function() {
 
-  var browserDrivers = [];
-  firefoxBrowsersToTest.forEach(function(browserInfo) {
-    browserInfo.getBrowserDriver = function() {
-      return firefoxBrowsers.getBrowserDriver(browserInfo.id);
-    }
-    browserDrivers.push(browserInfo);
+      setup(function() {
+        globalServer = null;
+
+        return del(testDirectory);
+      });
+
+      teardown(function() {
+        this.timeout(10000);
+
+        return seleniumAssistant.killWebDriver(globalDriver)
+        .catch(function(err) {
+          console.log('Error killing web driver: ', err);
+        })
+        .then(function() {
+          globalDriver = null;
+
+          return del(testDirectory)
+          .catch(function(err) {
+            console.warn('Unable to delete test directory, going to wait 2 ' +
+              'seconds and try again');
+            // Add a timeout so that if the browser
+            // changes any files in the test directory
+            // it doesn't cause del to throw an error
+            // (i.e. del checks files in directory, deletes them
+            // while another process adds a file, then del fails
+            // to remove a non-empty directory).
+            return new Promise(function(resolve) {
+              setTimeout(resolve, 2000);
+            });
+          })
+          .then(function() {
+            return del(testDirectory)
+          });
+        })
+        .then(function() {
+          if (globalServer) {
+            globalServer.close();
+            globalServer = null;
+          }
+        });
+      });
+
+      test('send/receive notification without payload with ' + browser.getPrettyName(), function() {
+        this.timeout(PUSH_TEST_TIMEOUT);
+        return runTest(browser);
+      });
+
+      test('send/receive notification with payload with ' + browser.getPrettyName(), function() {
+        this.timeout(PUSH_TEST_TIMEOUT);
+        return runTest(browser, {
+          payload: 'marco'
+        });
+      });
+
+      test('send/receive notification with vapid with ' + browser.getPrettyName(), function() {
+        this.timeout(PUSH_TEST_TIMEOUT);
+        return runTest(browser, {
+          vapid: VAPID_PARAM
+        });
+      });
+
+      test('send/receive notification with payload & vapid with ' + browser.getPrettyName(), function() {
+        this.timeout(PUSH_TEST_TIMEOUT);
+        return runTest(browser, {
+          payload: 'marco',
+          vapid: VAPID_PARAM,
+        });
+      });
+    });
   });
-
-  if (process.env.TRAVIS_OS_NAME !== 'osx') {
-    chromeBrowsersToTest.forEach(function(browserInfo) {
-      browserInfo.getBrowserDriver = function() {
-        return chromeBrowsers.getBrowserDriver(browserInfo.id, 'http://127.0.0.1:' + globalServer.port);
-      }
-      browserDrivers.push(browserInfo);
-    });
-  }
-
-  browserDrivers.forEach(function(browserInfo) {
-    test('send/receive notification without payload with ' + browserInfo.name, function() {
-      return runTest(browserInfo.getBrowserDriver);
-    });
-
-    test('send/receive notification with payload with ' + browserInfo.name, function() {
-      return runTest(browserInfo.getBrowserDriver, {
-        payload: 'marco'
-      });
-    });
-
-    test('send/receive notification with vapid with ' + browserInfo.name, function() {
-      return runTest(browserInfo.getBrowserDriver, {
-        vapid: VAPID_PARAM
-      });
-    });
-
-    test('send/receive notification with payload & vapid with ' + browserInfo.name, function() {
-      return runTest(browserInfo.getBrowserDriver, {
-        payload: 'marco',
-        vapid: VAPID_PARAM,
-      });
-    });
-  });
-});
+})();
