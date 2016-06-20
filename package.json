@@ -40,7 +40,7 @@
   "devDependencies": {
     "dmg": "^0.1.0",
     "eslint": "^2.3.0",
-    "fs-extra": "^0.28.0",
+    "fs-extra": "^0.30.0",
     "istanbul": "^0.4.2",
     "mocha": "^2.4.5",
     "portfinder": "^1.0.2",
