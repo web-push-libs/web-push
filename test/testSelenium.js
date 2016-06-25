@@ -36,16 +36,6 @@
     options = options ? options : {};
 
     if (browser.getSeleniumBrowserId() === 'firefox' &&
-      browser.getVersionNumber() < 47) {
-      // There are a range of issues with Marionette and notification permission
-      // acceptance, so tests will only work in 49+
-      console.log('');
-      console.warn(chalk.red('Skipping test since version is < 47'));
-      console.log('');
-      return;
-    }
-
-    if (browser.getSeleniumBrowserId() === 'firefox' &&
       process.env.TRAVIS === 'true') {
       console.log('');
       console.warn(chalk.red(
