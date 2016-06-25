@@ -115,8 +115,6 @@ function sendNotification(endpoint, params) {
         }
       }
 
-      const isGCM = endpoint.indexOf('https://android.googleapis.com/gcm/send') === 0;
-
       var urlParts = url.parse(endpoint);
       var options = {
         hostname: urlParts.hostname,
@@ -143,26 +141,13 @@ function sendNotification(endpoint, params) {
         requestPayload = encrypted.cipherText;
       }
 
+      var isGCM = endpoint.indexOf('https://android.googleapis.com/gcm/send') === 0;
       if (isGCM) {
         if (!gcmAPIKey) {
           console.warn('Attempt to send push notification to GCM endpoint, but no GCM key is defined'.bold.red);
         }
 
-        var endpointSections = endpoint.split('/');
-        var subscriptionId = endpointSections[endpointSections.length - 1];
-
-        var gcmObj = {
-          registration_ids: [ subscriptionId ],
-        };
-        if (requestPayload) {
-          gcmObj['raw_data'] = requestPayload.toString('base64');
-        }
-        requestPayload = JSON.stringify(gcmObj);
-
-        options.path = options.path.substring(0, options.path.length - subscriptionId.length - 1);
-
         options.headers['Authorization'] = 'key=' + gcmAPIKey;
-        options.headers['Content-Type'] = 'application/json';
       }
 
       if (vapid && !isGCM) {
@@ -188,7 +173,7 @@ function sendNotification(endpoint, params) {
         options.headers['Authorization'] = 'Bearer ' + jwt;
         var key = 'p256ecdsa=' + urlBase64.encode(vapid.publicKey);
         if (options.headers['Crypto-Key']) {
-          options.headers['Crypto-Key'] += ',' + key;
+          options.headers['Crypto-Key'] += ';' + key;
         } else {
           options.headers['Crypto-Key'] = key;
         }
@@ -204,7 +189,7 @@ function sendNotification(endpoint, params) {
         options.headers['Content-Length'] = requestPayload.length;
       }
 
-      var expectedStatusCode = isGCM ? 200 : 201;
+      var expectedStatusCode = 201;
       var pushRequest = https.request(options, function(pushResponse) {
         var body = "";
 
