@@ -27,13 +27,7 @@
   })
   .then(function(subscription) {
     window.subscribeSuccess = true;
-    var key = subscription.getKey ? subscription.getKey('p256dh') : '';
-    var auth = subscription.getKey ? subscription.getKey('auth') : '';
-    window.testSubscription = {
-      endpoint: subscription.endpoint,
-      key: key ? btoa(String.fromCharCode.apply(null, new Uint8Array(key))) : '',
-      auth: auth ? btoa(String.fromCharCode.apply(null, new Uint8Array(auth))) : '',
-    };
+    window.testSubscription = JSON.stringify(subscription);
   })
   .catch(function(err) {
     window.subscribeSuccess = false;
