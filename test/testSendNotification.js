@@ -49,25 +49,25 @@ suite('sendNotification', function() {
       });
 
       req.on('end', function() {
-        assert.equal(req.headers['content-length'], body.length, 'Content-Length header correct');
+        try {
+          assert.equal(req.headers['content-length'], body.length, 'Content-Length header correct');
 
-        if (typeof TTL !== 'undefined') {
-          assert.equal(req.headers['ttl'], TTL, 'TTL header correct');
-        }
+          if (typeof TTL !== 'undefined') {
+            assert.equal(req.headers['ttl'], TTL, 'TTL header correct');
+          }
 
-        if (typeof message !== 'undefined') {
-          assert(body.length > 0);
+          if (typeof message !== 'undefined') {
+            assert(body.length > 0);
 
-          assert.equal(req.headers['encryption'].indexOf('keyid=p256dh;salt='), 0, 'Encryption header correct');
-          var salt = req.headers['encryption'].substring('keyid=p256dh;salt='.length);
+            assert.equal(req.headers['encryption'].indexOf('keyid=p256dh;salt='), 0, 'Encryption header correct');
+            var salt = req.headers['encryption'].substring('keyid=p256dh;salt='.length);
 
-          if (!isGCM) {
             assert.equal(req.headers['content-type'], 'application/octet-stream', 'Content-Type header correct');
 
-            var keys = req.headers['crypto-key'].split(',');
+            var keys = req.headers['crypto-key'].split(';');
             var appServerPublicKey = keys.find(function(key) {
-              return key.indexOf('keyid=p256dh;dh=') === 0;
-            }).substring('keyid=p256dh;dh='.length);
+              return key.indexOf('dh=') === 0;
+            }).substring('dh='.length);
 
             assert.equal(req.headers['content-encoding'], 'aesgcm', 'Content-Encoding header correct');
 
@@ -80,61 +80,45 @@ suite('sendNotification', function() {
               authSecret: urlBase64.encode(userAuth),
               padSize: 2,
             });
-          } else {
-            assert.equal(req.headers['crypto-key'].indexOf('keyid=p256dh;dh='), 0, 'Crypto-Key header correct');
-            assert.equal(req.headers['content-encoding'], 'aesgcm', 'Content-Encoding header correct');
-            var appServerPublicKey = req.headers['crypto-key'].substring('keyid=p256dh;dh='.length);
 
-            ece.saveKey('webpushKey', userCurve, 'P-256');
-
-            var raw_data = urlBase64.decode(JSON.parse(body).raw_data);
-
-            var decrypted = ece.decrypt(raw_data, {
-              keyid: 'webpushKey',
-              dh: appServerPublicKey,
-              salt: salt,
-              authSecret: urlBase64.encode(userAuth),
-              padSize: 2,
-            });
+            assert(decrypted.equals(new Buffer(message)), "Cipher text correctly decoded");
           }
 
-          assert(decrypted.equals(new Buffer(message)), "Cipher text correctly decoded");
+          if (vapid) {
+            var keys = req.headers['crypto-key'].split(';');
+            var vapidKey = keys.find(function(key) {
+              return key.indexOf('p256ecdsa=') === 0;
+            });
+
+            assert.equal(vapidKey.indexOf('p256ecdsa='), 0, 'Crypto-Key header correct');
+            var appServerVapidPublicKey = urlBase64.decode(vapidKey.substring('p256ecdsa='.length));
+
+            assert(appServerVapidPublicKey.equals(vapidKeys.publicKey));
+
+            var authorizationHeader = req.headers['authorization'];
+            assert.equal(authorizationHeader.indexOf('Bearer '), 0, 'Authorization header correct');
+            var jwt = authorizationHeader.substring('Bearer '.length);
+            //assert(jws.verify(jwt, 'ES256', appServerVapidPublicKey)), 'JWT valid');
+            var decoded = jws.decode(jwt);
+            assert.equal(decoded.header.typ, 'JWT');
+            assert.equal(decoded.header.alg, 'ES256');
+            assert.equal(decoded.payload.aud, 'https://www.mozilla.org/');
+            assert(decoded.payload.exp > Date.now() / 1000);
+            assert.equal(decoded.payload.sub, 'mailto:mozilla@example.org');
+          }
+
+          if (isGCM) {
+            assert.equal(req.headers['authorization'], 'key=my_gcm_key', 'Authorization header correct');
+          }
+
+          res.writeHead(statusCode ? statusCode : 201);
+
+          res.end(statusCode !== 404 ? 'ok' : 'not found');
+        } catch (err) {
+          console.error(err);
+          res.writeHead(500);
+          res.end();
         }
-
-        if (vapid) {
-          var keys = req.headers['crypto-key'].split(',');
-          var vapidKey = keys.find(function(key) {
-            return key.indexOf('p256ecdsa=') === 0;
-          });
-
-          assert.equal(vapidKey.indexOf('p256ecdsa='), 0, 'Crypto-Key header correct');
-          var appServerVapidPublicKey = urlBase64.decode(vapidKey.substring('p256ecdsa='.length));
-
-          assert(appServerVapidPublicKey.equals(vapidKeys.publicKey));
-
-          var authorizationHeader = req.headers['authorization'];
-          assert.equal(authorizationHeader.indexOf('Bearer '), 0, 'Authorization header correct');
-          var jwt = authorizationHeader.substring('Bearer '.length);
-          //assert(jws.verify(jwt, 'ES256', appServerVapidPublicKey)), 'JWT valid');
-          var decoded = jws.decode(jwt);
-          assert.equal(decoded.header.typ, 'JWT');
-          assert.equal(decoded.header.alg, 'ES256');
-          assert.equal(decoded.payload.aud, 'https://www.mozilla.org/');
-          assert(decoded.payload.exp > Date.now() / 1000);
-          assert.equal(decoded.payload.sub, 'mailto:mozilla@example.org');
-        }
-
-        if (isGCM) {
-          assert.equal(JSON.stringify(JSON.parse(body).registration_ids), '["someSubscriptionID"]');
-          assert.equal(req.headers['authorization'], 'key=my_gcm_key', 'Authorization header correct');
-          assert.equal(req.headers['content-type'], 'application/json', 'Content-Type header correct');
-          assert.equal(req.headers['content-length'], body.length, 'Content-Length header correct');
-        }
-
-        res.writeHead(statusCode ? statusCode : 201);
-
-        res.end(statusCode !== 404 ? 'ok' : 'not found');
-
         server.close();
       });
     });
@@ -334,7 +318,7 @@ suite('sendNotification', function() {
 
     webPush.setGCMAPIKey('my_gcm_key');
 
-    return startServer(undefined, undefined, 200, true)
+    return startServer(undefined, undefined, undefined, true)
     .then(function() {
       return webPush.sendNotification('https://android.googleapis.com/gcm/send/someSubscriptionID');
     })
@@ -356,7 +340,7 @@ suite('sendNotification', function() {
 
     webPush.setGCMAPIKey('my_gcm_key');
 
-    return startServer('hello', undefined, 200, true)
+    return startServer('hello', undefined, undefined, true)
     .then(function() {
       return webPush.sendNotification('https://android.googleapis.com/gcm/send/someSubscriptionID', {
         userPublicKey: urlBase64.encode(userPublicKey),
@@ -498,7 +482,7 @@ suite('sendNotification', function() {
 
     webPush.setGCMAPIKey('my_gcm_key');
 
-    return startServer(undefined, undefined, 200, true)
+    return startServer(undefined, undefined, undefined, true)
     .then(function() {
       return webPush.sendNotification('https://android.googleapis.com/gcm/send/someSubscriptionID', {
         vapid: {
