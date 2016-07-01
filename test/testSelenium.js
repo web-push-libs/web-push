@@ -7,6 +7,7 @@
     return;
   }
 
+  const urlBase64 = require('urlsafe-base64');
   const seleniumAssistant = require('selenium-assistant');
   const webdriver = require('selenium-webdriver');
   const seleniumFirefox = require('selenium-webdriver/firefox');
@@ -23,7 +24,6 @@
 
   const PUSH_TEST_TIMEOUT = 120 * 1000;
   const VAPID_PARAM = {
-    audience: 'https://www.mozilla.org/',
     subject: 'mailto:web-push@mozilla.org',
     privateKey: new Buffer('H6tqEMswzHOFlPHFi2JPfDQRiKN32ZJIwvSPWZl1VTA=', 'base64'),
     publicKey: new Buffer('BIx6khu9Z/5lBwNEXYNEOQiL70IKYDpDxsTyoiCb82puQ/V4c/NFdyrBFpWdsz3mikmV6sWARNuhRbbbLTMOmB0=', 'base64'),
@@ -50,6 +50,7 @@
     .then(function(server) {
       globalServer = server;
       testServerURL = 'http://127.0.0.1:' + server.port;
+
       if (browser.getSeleniumBrowserId() === 'firefox') {
         // This is based off of: https://bugzilla.mozilla.org/show_bug.cgi?id=1275521
         // Unfortunately it doesn't seem to work :(
@@ -87,6 +88,11 @@
     })
     .then(function(driver) {
       globalDriver = driver;
+
+      if (options.vapid) {
+        testServerURL += '?vapid=' + urlBase64.encode(options.vapid.publicKey);
+      }
+
       // Tests will likely expect a native promise with then and catch
       // Not the web driver promise of then and thenCatch
       return new Promise(function(resolve, reject) {
@@ -128,6 +134,7 @@
         })
         .then(function(subscribeError) {
           if (subscribeError) {
+            console.log('subscribeError: ', subscribeError);
             throw subscribeError;
           }
 

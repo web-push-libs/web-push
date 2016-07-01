@@ -37,6 +37,46 @@ function generateVAPIDKeys() {
   };
 }
 
+function getVapidHeaders(vapid) {
+  if (!vapid.audience) {
+    throw new Error('No audience set in vapid.audience');
+  }
+
+  if (!vapid.subject) {
+    throw new Error('No subject set in vapid.subject');
+  }
+
+  if (!vapid.publicKey) {
+    throw new Error('No key set vapid.publicKey');
+  }
+
+  if (!vapid.privateKey) {
+    throw new Error('No key set in vapid.privateKey');
+  }
+
+  var header = {
+    typ: 'JWT',
+    alg: 'ES256'
+  };
+
+  var jwtPayload = {
+    aud: vapid.audience,
+    exp: Math.floor(Date.now() / 1000) + 86400,
+    sub: vapid.subject,
+  };
+
+  var jwt = jws.sign({
+    header: header,
+    payload: jwtPayload,
+    privateKey: toPEM(vapid.privateKey),
+  });
+
+  return {
+    Authorization: 'Bearer ' + jwt,
+    'Crypto-Key': 'p256ecdsa=' + urlBase64.encode(vapid.publicKey)
+  };
+}
+
 function WebPushError(message, statusCode, headers, body) {
   Error.captureStackTrace(this, this.constructor);
 
@@ -152,30 +192,15 @@ function sendNotification(endpoint, params) {
 
       if (vapid && !isGCM) {
         // VAPID isn't supported by GCM.
+        vapid.audience = urlParts.protocol + '//' + urlParts.hostname;
 
-        var header = {
-          typ: 'JWT',
-          alg: 'ES256'
-        };
+        const vapidHeaders = getVapidHeaders(vapid);
 
-        var jwtPayload = {
-          aud: vapid.audience,
-          exp: Math.floor(Date.now() / 1000) + 86400,
-          sub: vapid.subject,
-        };
-
-        var jwt = jws.sign({
-          header: header,
-          payload: jwtPayload,
-          privateKey: toPEM(vapid.privateKey),
-        });
-
-        options.headers['Authorization'] = 'Bearer ' + jwt;
-        var key = 'p256ecdsa=' + urlBase64.encode(vapid.publicKey);
+        options.headers['Authorization'] = vapidHeaders.Authorization;
         if (options.headers['Crypto-Key']) {
-          options.headers['Crypto-Key'] += ';' + key;
+          options.headers['Crypto-Key'] += ';' + vapidHeaders['Crypto-Key'];
         } else {
-          options.headers['Crypto-Key'] = key;
+          options.headers['Crypto-Key'] = vapidHeaders['Crypto-Key'];
         }
       }
 

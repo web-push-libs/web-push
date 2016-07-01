@@ -16,7 +16,9 @@ function createServer(options, webPush) {
   var server = http.createServer(function(req, res) {
     try {
       if (req.method === 'GET') {
-        if (req.url === '/') {
+        // Ignore query parameters which are used to inject application keys
+        var urlParts = req.url.split('?');
+        if (urlParts[0] === '/') {
           req.url = '/index.html';
         }
 
