@@ -23,7 +23,6 @@ Send a Push notification to an endpoint. *params* contains optional parameters:
 Note that, in order to encrypt the *payload*, *userPublicKey* and *userAuth* are required.
 
 The properties of the *vapid* objects are:
-- *audience*, the origin of the application server;
 - *subject*, a contact URI for the application server (either 'mailto:' or 'https:');
 - *privateKey*;
 - *publicKey*.

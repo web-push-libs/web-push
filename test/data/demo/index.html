@@ -5,7 +5,22 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
+  <h1>Test Page</h1>
+
 <script type="text/javascript">
+function base64UrlToUint8Array(base64UrlData) {
+  const padding = '='.repeat((4 - base64UrlData.length % 4) % 4);
+  const base64 = (base64UrlData + padding)
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/');
+  const rawData = atob(base64);
+  const buffer = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    buffer[i] = rawData.charCodeAt(i);
+  }
+  return buffer;
+}
+
 (function() {
   if (!('serviceWorker' in navigator)) {
     return;
@@ -23,9 +38,21 @@
     }
     reg.active.postMessage('setup', [channel.port2]);
 
-    return reg.pushManager.subscribe({ userVisibleOnly: true });
+    var subscribeOptions = { userVisibleOnly: true };
+    // Figure out the vapid key
+    var searchParam = window.location.search;
+    vapidRegex = searchParam.match(/vapid=(.[^&]*)/);
+    if (vapidRegex) {
+      // Convert the base 64 encoded string
+      subscribeOptions.applicationServerKey = base64UrlToUint8Array(vapidRegex[1]);
+    }
+
+    console.log(subscribeOptions);
+
+    return reg.pushManager.subscribe(subscribeOptions);
   })
   .then(function(subscription) {
+    console.log(JSON.stringify(subscription));
     window.subscribeSuccess = true;
     window.testSubscription = JSON.stringify(subscription);
   })

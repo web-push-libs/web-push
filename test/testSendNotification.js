@@ -102,7 +102,7 @@ suite('sendNotification', function() {
             var decoded = jws.decode(jwt);
             assert.equal(decoded.header.typ, 'JWT');
             assert.equal(decoded.header.alg, 'ES256');
-            assert.equal(decoded.payload.aud, 'https://www.mozilla.org/');
+            assert.equal(decoded.payload.aud, 'https://127.0.0.1');
             assert(decoded.payload.exp > Date.now() / 1000);
             assert.equal(decoded.payload.sub, 'mailto:mozilla@example.org');
           }
@@ -456,7 +456,6 @@ suite('sendNotification', function() {
         userAuth: urlBase64.encode(userAuth),
         payload: 'hello',
         vapid: {
-          audience: 'https://www.mozilla.org/',
           subject: 'mailto:mozilla@example.org',
           privateKey: vapidKeys.privateKey,
           publicKey: vapidKeys.publicKey,
@@ -486,7 +485,6 @@ suite('sendNotification', function() {
     .then(function() {
       return webPush.sendNotification('https://android.googleapis.com/gcm/send/someSubscriptionID', {
         vapid: {
-          audience: 'https://www.mozilla.org/',
           subject: 'mailto:mozilla@example.org',
           privateKey: vapidKeys.privateKey,
           publicKey: vapidKeys.publicKey,
