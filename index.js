@@ -92,6 +92,10 @@ require('util').inherits(WebPushError, Error);
 var gcmAPIKey = '';
 
 function setGCMAPIKey(apiKey) {
+  if (!apiKey || typeof apiKey !== 'string') {
+    throw new Error('The GCM API Key should be a non-emtpy string.');
+  }
+
   gcmAPIKey = apiKey;
 }
 

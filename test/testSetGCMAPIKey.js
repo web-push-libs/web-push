@@ -6,7 +6,15 @@ suite('setGCMAPIKey', function() {
     assert(webPush.setGCMAPIKey);
   });
 
-  test('call', function() {
-    webPush.setGCMAPIKey('hello');
-  })
+  test('non-empty string', function() {
+    assert.doesNotThrow(function() { webPush.setGCMAPIKey('AIzaSyAwmdX6KKd4hPfIcGU2SOfj9vuRDW6u-wo') });
+  });
+
+  test('empty string', function() {
+    assert.throws(function() { webPush.setGCMAPIKey('') }, Error);
+  });
+
+  test('non string', function() {
+    assert.throws(function() { webPush.setGCMAPIKey(42) }, Error);
+  });
 });
