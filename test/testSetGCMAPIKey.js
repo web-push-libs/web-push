@@ -7,14 +7,14 @@ suite('setGCMAPIKey', function() {
   });
 
   test('non-empty string', function() {
-    assert.doesNotThrow(() => webPush.setGCMAPIKey('AIzaSyAwmdX6KKd4hPfIcGU2SOfj9vuRDW6u-wo'));
+    assert.doesNotThrow(function() { webPush.setGCMAPIKey('AIzaSyAwmdX6KKd4hPfIcGU2SOfj9vuRDW6u-wo') });
   });
 
   test('empty string', function() {
-    assert.throws(() => webPush.setGCMAPIKey(''), Error);
+    assert.throws(function() { webPush.setGCMAPIKey('') }, Error);
   });
 
   test('non string', function() {
-    assert.throws(() => webPush.setGCMAPIKey(42), Error);
+    assert.throws(function() { webPush.setGCMAPIKey(42) }, Error);
   });
 });
