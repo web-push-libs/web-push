@@ -194,7 +194,9 @@
         })
         .then(function() {
           var expectedTitle = options.payload ? options.payload : 'no payload';
-          return globalDriver.wait(webdriver.until.titleIs(expectedTitle, 60000));
+          return globalDriver.wait(function() {
+            return webdriver.until.titleIs(expectedTitle, 60000);
+          });
         })
         .then(function() {
           resolve();
@@ -216,6 +218,7 @@
     }
 
     suite('Selenium ' + browser.getPrettyName(), function() {
+      this.retries(3);
 
       setup(function() {
         globalServer = null;
