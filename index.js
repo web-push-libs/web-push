@@ -131,6 +131,8 @@ function sendNotification(endpoint, params) {
 
   return new Promise(function(resolve, reject) {
     try {
+      var curGCMAPIKey = gcmAPIKey;
+
       if (args.length === 0) {
         throw new Error('sendNotification requires at least one argument, the endpoint URL.');
       } else if (params && typeof params === 'object') {
@@ -139,6 +141,9 @@ function sendNotification(endpoint, params) {
         var userAuth = params.userAuth;
         var payload = params.payload;
         var vapid = params.vapid;
+        if (params.gcmAPIKey) {
+          curGCMAPIKey = params.gcmAPIKey;
+        }
       } else if (args.length !== 1) {
         throw new Error('You are using the old, deprecated, interface of the `sendNotification` function.');
       }
@@ -187,11 +192,11 @@ function sendNotification(endpoint, params) {
 
       var isGCM = endpoint.indexOf('https://android.googleapis.com/gcm/send') === 0;
       if (isGCM) {
-        if (!gcmAPIKey) {
+        if (!curGCMAPIKey) {
           console.warn('Attempt to send push notification to GCM endpoint, but no GCM key is defined'.bold.red);
         }
 
-        options.headers['Authorization'] = 'key=' + gcmAPIKey;
+        options.headers['Authorization'] = 'key=' + curGCMAPIKey;
       }
 
       if (vapid && !isGCM) {
