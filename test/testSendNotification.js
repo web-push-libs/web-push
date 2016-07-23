@@ -356,6 +356,34 @@ suite('sendNotification', function() {
     });
   });
 
+  test('send/receive string with GCM (overriding the GCM API key)', function() {
+    var httpsrequest = https.request;
+    https.request = function(options, listener) {
+      options.hostname = '127.0.0.1';
+      options.port = serverPort;
+      options.path = '/';
+      return httpsrequest.call(https, options, listener);
+    }
+
+    webPush.setGCMAPIKey('another_gcm_api_key');
+
+    return startServer('hello', undefined, undefined, true)
+    .then(function() {
+      return webPush.sendNotification('https://android.googleapis.com/gcm/send/someSubscriptionID', {
+        userPublicKey: urlBase64.encode(userPublicKey),
+        userAuth: urlBase64.encode(userAuth),
+        payload: 'hello',
+        gcmAPIKey: 'my_gcm_key',
+      });
+    })
+    .then(function(body) {
+      assert(true, 'sendNotification promise resolved');
+      assert.equal(body, 'ok');
+    }, function() {
+      assert(false, 'sendNotification promise rejected');
+    });
+  });
+
   test('0 arguments', function() {
     return webPush.sendNotification()
     .then(function() {
