@@ -1,6 +1,6 @@
 {
   "name": "web-push",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "Web Push library for Node.js",
   "main": "index.js",
   "scripts": {
