@@ -1,3 +1,7 @@
+'use strict';
+
+/* eslint global-require:0 */
+
 if (typeof Promise === 'undefined') {
   global.Promise = require('bluebird');
 }
@@ -14,8 +18,7 @@ if (!Buffer.prototype.equals) {
   require('buffer-equals-polyfill');
 }
 
-var crypto = require('crypto');
-
+const crypto = require('crypto');
 if (!crypto.createECDH) {
   crypto.createECDH = require('create-ecdh');
 }

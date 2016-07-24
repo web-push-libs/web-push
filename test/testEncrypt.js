@@ -1,8 +1,10 @@
-var assert    = require('assert');
-var crypto    = require('crypto');
-var webPush   = require('../index');
-var ece       = require('http_ece');
-var urlBase64 = require('urlsafe-base64');
+'use strict';
+
+const assert = require('assert');
+const crypto = require('crypto');
+const webPush = require('../src/index');
+const ece = require('http_ece');
+const urlBase64 = require('urlsafe-base64');
 
 suite('encrypt', function() {
   test('is defined', function() {
@@ -10,15 +12,12 @@ suite('encrypt', function() {
   });
 
   function encryptDecrypt(thing) {
-    var userCurve = crypto.createECDH('prime256v1');
+    const userCurve = crypto.createECDH('prime256v1');
 
-    var userPublicKey = urlBase64.encode(userCurve.generateKeys());
-    var userPrivateKey = userCurve.getPrivateKey();
-    var userAuth = urlBase64.encode(crypto.randomBytes(16));
+    const userPublicKey = urlBase64.encode(userCurve.generateKeys());
+    const userAuth = urlBase64.encode(crypto.randomBytes(16));
 
-    var encrypted = webPush.encrypt(userPublicKey, userAuth, thing);
-
-    var sharedSecret = userCurve.computeSecret(encrypted.localPublicKey);
+    const encrypted = webPush.encrypt(userPublicKey, userAuth, thing);
 
     ece.saveKey('webpushKey', userCurve, 'P-256');
 
@@ -27,7 +26,7 @@ suite('encrypt', function() {
       dh: urlBase64.encode(encrypted.localPublicKey),
       salt: encrypted.salt,
       authSecret: userAuth,
-      padSize: 2,
+      padSize: 2
     });
   }
 
