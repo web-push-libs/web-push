@@ -1,38 +1,33 @@
-var http = require('http');
-var portfinder = require('portfinder');
-var fs = require('fs');
-var path = require('path');
+'use strict';
 
-function createServer(options, webPush) {
-  var demoPath = 'test/data/demo';
-  var pushPayload = null;
-  var vapid = null;
+const http = require('http');
+const portfinder = require('portfinder');
+const fs = require('fs');
+const path = require('path');
 
-  if (options) {
-    pushPayload = options.payload;
-    vapid = options.vapid;
-  }
+function createServer() {
+  const demoPath = 'test/data/demo';
 
-  var server = http.createServer(function(req, res) {
+  const server = http.createServer(function(req, res) {
     try {
       if (req.method === 'GET') {
         // Ignore query parameters which are used to inject application keys
-        var urlParts = req.url.split('?');
+        const urlParts = req.url.split('?');
         if (urlParts[0] === '/') {
           req.url = '/index.html';
         }
 
         if (!fs.existsSync(demoPath + req.url)) {
           res.writeHead(404);
-          res.end(data);
+          res.end();
           return;
         }
 
-        var data = fs.readFileSync(demoPath + req.url);
+        const data = fs.readFileSync(demoPath + req.url);
 
         res.writeHead(200, {
           'Content-Length': data.length,
-          'Content-Type': path.extname(req.url) === '.html' ? 'text/html' : 'application/javascript',
+          'Content-Type': path.extname(req.url) === '.html' ? 'text/html' : 'application/javascript'
         });
         res.end(data);
       } else {
@@ -54,11 +49,11 @@ function createServer(options, webPush) {
     server.listen(server.port);
   });
 
-  return new Promise(function(resolve, reject) {
+  return new Promise(function(resolve) {
     server.on('listening', function() {
       resolve(server);
     });
   });
-};
+}
 
 module.exports = createServer;

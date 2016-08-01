@@ -1,6 +1,7 @@
-var assert    = require('assert');
-var crypto    = require('crypto');
-var webPush   = require('../index');
+'use strict';
+
+const assert = require('assert');
+const webPush = require('../src/index');
 
 suite('encrypt', function() {
   test('is defined', function() {
@@ -8,7 +9,7 @@ suite('encrypt', function() {
   });
 
   test('generate keys', function() {
-    var keys = webPush.generateVAPIDKeys();
+    const keys = webPush.generateVAPIDKeys();
     assert(keys.privateKey);
     assert(keys.publicKey);
   });

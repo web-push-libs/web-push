@@ -1,8 +1,10 @@
-var net = require('net');
+'use strict';
+
+const net = require('net');
 
 module.exports = function(port) {
-  return new Promise(function(resolve, reject) {
-    var socket = new net.Socket();
+  return new Promise(function(resolve) {
+    const socket = new net.Socket();
 
     socket.on('connect', function() {
       socket.end();
@@ -14,7 +16,7 @@ module.exports = function(port) {
     });
 
     socket.connect({
-      port: port,
+      port: port
     });
   });
 };

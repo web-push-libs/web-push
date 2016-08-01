@@ -1,5 +1,7 @@
-var port;
-var pushMessage;
+'use strict';
+
+let port;
+let pushMessage;
 
 self.addEventListener('push', function(event) {
   pushMessage = event.data ? event.data.text() : 'no payload';
@@ -10,7 +12,7 @@ self.addEventListener('push', function(event) {
 
   event.waitUntil(self.registration.showNotification('Web Push Demo', {
     body: 'Notification!',
-    tag: 'push',
+    tag: 'push'
   }));
 });
 
@@ -21,4 +23,4 @@ self.onmessage = function(e) {
     // Push message arrived before the page finished loading.
     port.postMessage(pushMessage);
   }
-}
+};
