@@ -108,25 +108,14 @@
         .then(function() {
           return globalDriver.wait(function() {
             return globalDriver.executeScript(function() {
-              // Firefox 47 and Marionette Quirk
-              if ('wrappedJSObject' in window) {
-                return typeof window.wrappedJSObject.subscribeSuccess !== 'undefined';
-              } else {
-                return typeof window.subscribeSuccess !== 'undefined';
-              }
+              return typeof window.subscribeSuccess !== 'undefined';
             });
           });
         })
         .then(function() {
           return globalDriver.executeScript(function() {
-            if ('wrappedJSObject' in window) {
-              if (!window.wrappedJSObject.subscribeSuccess) {
-                return window.wrappedJSObject.subscribeError;
-              }
-            } else {
-              if (!window.subscribeSuccess) {
-                return window.subscribeError;
-              }
+            if (!window.subscribeSuccess) {
+              return window.subscribeError;
             }
 
             return null;
@@ -139,11 +128,7 @@
           }
 
           return globalDriver.executeScript(function() {
-            if ('wrappedJSObject' in window) {
-              return window.wrappedJSObject.testSubscription;
-            } else {
-              return window.testSubscription;
-            }
+            return window.testSubscription;
           });
         })
         .then(function(subscription) {
