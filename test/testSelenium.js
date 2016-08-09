@@ -1,12 +1,13 @@
 'use strict';
 
 (function() {
-  var invalidNodeVersions = /0.(10|12).(\d+)/;
+  const invalidNodeVersions = /0.(10|12).(\d+)/;
   if (process.versions.node.match(invalidNodeVersions)) {
     console.log('Skipping downloading browsers as selenium tests can\'t run on ' + process.versions.node);
     return;
   }
 
+  /* eslint-disable global-require */
   const urlBase64 = require('urlsafe-base64');
   const seleniumAssistant = require('selenium-assistant');
   const webdriver = require('selenium-webdriver');
@@ -16,9 +17,9 @@
   const fs = require('fs');
   const del = require('del');
   const chalk = require('chalk');
-  const webPush = require('../index');
+  const webPush = require('../src/index');
   const createServer = require('./helpers/create-server');
-  const isPortOpen = require('./helpers/port-open');
+  /* eslint-enable global-require */
 
   webPush.setGCMAPIKey('AIzaSyAwmdX6KKd4hPfIcGU2SOfj9vuRDW6u-wo');
 
@@ -26,14 +27,16 @@
   const VAPID_PARAM = {
     subject: 'mailto:web-push@mozilla.org',
     privateKey: new Buffer('H6tqEMswzHOFlPHFi2JPfDQRiKN32ZJIwvSPWZl1VTA=', 'base64'),
-    publicKey: new Buffer('BIx6khu9Z/5lBwNEXYNEOQiL70IKYDpDxsTyoiCb82puQ/V4c/NFdyrBFpWdsz3mikmV6sWARNuhRbbbLTMOmB0=', 'base64'),
+    publicKey: new Buffer('BIx6khu9Z/5lBwNEXYNEOQiL70IKYDpDxsTyoiCb82puQ/V4c/NFdyrBFpWdsz3mikmV6sWARNuhRbbbLTMOmB0=', 'base64')
   };
   const testDirectory = './test/output/';
 
-  let globalServer, globalDriver, testServerURL;
+  let globalServer;
+  let globalDriver;
+  let testServerURL;
 
   function runTest(browser, options) {
-    options = options ? options : {};
+    options = options || {};
 
     if (browser.getSeleniumBrowserId() === 'firefox' &&
       process.env.TRAVIS === 'true') {
@@ -43,7 +46,7 @@
         'they don\'t currently work.'
       ));
       console.log('');
-      return;
+      return Promise.resolve();
     }
 
     return createServer(options, webPush)
@@ -81,8 +84,8 @@
         // NOTE: The Default part of this path might be Chrome specific.
         fs.writeFileSync(tempPreferenceDir + '/Default/Preferences', JSON.stringify(chromeOperaPreferences));
 
-        const options = browser.getSeleniumOptions();
-        options.addArguments('user-data-dir=' + tempPreferenceDir + '/');
+        const seleniumOptions = browser.getSeleniumOptions();
+        seleniumOptions.addArguments('user-data-dir=' + tempPreferenceDir + '/');
       }
       return browser.getSeleniumDriver();
     })
@@ -137,12 +140,10 @@
           }
 
           subscription = JSON.parse(subscription);
-          // console.log('Push Application Server - Register: ' + obj.endpoint);
-          // console.log('Push Application Server - Send notification to ' + obj.endpoint);
 
-          var promise;
-          var pushPayload = null;
-          var vapid = null;
+          let promise;
+          let pushPayload = null;
+          let vapid = null;
           if (options) {
             pushPayload = options.payload;
             vapid = options.vapid;
@@ -150,35 +151,33 @@
 
           if (!pushPayload) {
             promise = webPush.sendNotification(subscription.endpoint, {
-              vapid: vapid,
+              vapid: vapid
             });
           } else {
             if (!subscription.keys) {
-                throw new Error('Require subscription.keys not found.');
+              throw new Error('Require subscription.keys not found.');
             }
 
             promise = webPush.sendNotification(subscription.endpoint, {
               payload: pushPayload,
               userPublicKey: subscription.keys.p256dh,
               userAuth: subscription.keys.auth,
-              vapid: vapid,
+              vapid: vapid
             });
           }
 
           return promise
           .then(function(response) {
             if (response.length > 0) {
-              var data = JSON.parse(response);
+              const data = JSON.parse(response);
               if (typeof data.failure !== 'undefined' && data.failure > 0) {
                 throw new Error('Bad GCM Response: ' + response);
               }
             }
-
-            //console.log('Push Application Server - Notification sent to ' + obj.endpoint);
           });
         })
         .then(function() {
-          var expectedTitle = options.payload ? options.payload : 'no payload';
+          const expectedTitle = options.payload ? options.payload : 'no payload';
           return globalDriver.wait(function() {
             return webdriver.until.titleIs(expectedTitle, 60000);
           });
@@ -199,7 +198,7 @@
   availableBrowsers.forEach(function(browser) {
     if (browser.getSeleniumBrowserId() !== 'chrome' &&
       browser.getSeleniumBrowserId() !== 'firefox') {
-        return;
+      return;
     }
 
     suite('Selenium ' + browser.getPrettyName(), function() {
@@ -222,7 +221,7 @@
           globalDriver = null;
 
           return del(testDirectory)
-          .catch(function(err) {
+          .catch(function() {
             console.warn('Unable to delete test directory, going to wait 2 ' +
               'seconds and try again');
             // Add a timeout so that if the browser
@@ -236,7 +235,7 @@
             });
           })
           .then(function() {
-            return del(testDirectory)
+            return del(testDirectory);
           });
         })
         .then(function() {
@@ -270,7 +269,7 @@
         this.timeout(PUSH_TEST_TIMEOUT);
         return runTest(browser, {
           payload: 'marco',
-          vapid: VAPID_PARAM,
+          vapid: VAPID_PARAM
         });
       });
     });
