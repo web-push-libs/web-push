@@ -39,10 +39,25 @@
     options = options || {};
 
     if (browser.getSeleniumBrowserId() === 'firefox' &&
+      browser.getVersionNumber() <= 48 &&
       process.env.TRAVIS === 'true') {
       console.log('');
       console.warn(chalk.red(
         'Running on Travis so skipping firefox tests as ' +
+        'they don\'t currently work.'
+      ));
+      console.log('');
+      return Promise.resolve();
+    }
+
+    // Works locally, but on Travis breaks. Probably best to wait for next
+    // ChromeDriver release.
+    if (browser.getSeleniumBrowserId() === 'chrome' &&
+      browser.getVersionNumber() === 54 &&
+      process.env.TRAVIS === 'true') {
+      console.log('');
+      console.warn(chalk.red(
+        'Running on Travis so skipping Chrome V54 tests as ' +
         'they don\'t currently work.'
       ));
       console.log('');
@@ -87,6 +102,7 @@
         const seleniumOptions = browser.getSeleniumOptions();
         seleniumOptions.addArguments('user-data-dir=' + tempPreferenceDir + '/');
       }
+
       return browser.getSeleniumDriver();
     })
     .then(function(driver) {
@@ -96,97 +112,87 @@
         testServerURL += '?vapid=' + urlBase64.encode(options.vapid.publicKey);
       }
 
-      // Tests will likely expect a native promise with then and catch
-      // Not the web driver promise of then and thenCatch
-      return new Promise(function(resolve, reject) {
-        globalDriver.get(testServerURL)
-        .then(function() {
+      return globalDriver.get(testServerURL)
+      .then(function() {
+        return globalDriver.executeScript(function() {
+          return typeof navigator.serviceWorker !== 'undefined';
+        });
+      })
+      .then(function(serviceWorkerSupported) {
+        assert(serviceWorkerSupported);
+      })
+      .then(function() {
+        return globalDriver.wait(function() {
           return globalDriver.executeScript(function() {
-            return typeof navigator.serviceWorker !== 'undefined';
+            return typeof window.subscribeSuccess !== 'undefined';
           });
-        })
-        .then(function(serviceWorkerSupported) {
-          assert(serviceWorkerSupported);
-        })
-        .then(function() {
-          return globalDriver.wait(function() {
-            return globalDriver.executeScript(function() {
-              return typeof window.subscribeSuccess !== 'undefined';
-            });
+        });
+      })
+      .then(function() {
+        return globalDriver.executeScript(function() {
+          if (!window.subscribeSuccess) {
+            return window.subscribeError;
+          }
+
+          return null;
+        });
+      })
+      .then(function(subscribeError) {
+        if (subscribeError) {
+          console.log('subscribeError: ', subscribeError);
+          throw subscribeError;
+        }
+
+        return globalDriver.executeScript(function() {
+          return window.testSubscription;
+        });
+      })
+      .then(function(subscription) {
+        if (!subscription) {
+          throw new Error('No subscription found.');
+        }
+
+        subscription = JSON.parse(subscription);
+
+        let promise;
+        let pushPayload = null;
+        let vapid = null;
+        if (options) {
+          pushPayload = options.payload;
+          vapid = options.vapid;
+        }
+
+        if (!pushPayload) {
+          promise = webPush.sendNotification(subscription.endpoint, {
+            vapid: vapid
           });
-        })
-        .then(function() {
-          return globalDriver.executeScript(function() {
-            if (!window.subscribeSuccess) {
-              return window.subscribeError;
+        } else {
+          if (!subscription.keys) {
+            throw new Error('Require subscription.keys not found.');
+          }
+
+          promise = webPush.sendNotification(subscription.endpoint, {
+            payload: pushPayload,
+            userPublicKey: subscription.keys.p256dh,
+            userAuth: subscription.keys.auth,
+            vapid: vapid
+          });
+        }
+
+        return promise
+        .then(function(response) {
+          if (response.length > 0) {
+            const data = JSON.parse(response);
+            if (typeof data.failure !== 'undefined' && data.failure > 0) {
+              throw new Error('Bad GCM Response: ' + response);
             }
-
-            return null;
-          });
-        })
-        .then(function(subscribeError) {
-          if (subscribeError) {
-            console.log('subscribeError: ', subscribeError);
-            throw subscribeError;
           }
-
-          return globalDriver.executeScript(function() {
-            return window.testSubscription;
-          });
-        })
-        .then(function(subscription) {
-          if (!subscription) {
-            throw new Error('No subscription found.');
-          }
-
-          subscription = JSON.parse(subscription);
-
-          let promise;
-          let pushPayload = null;
-          let vapid = null;
-          if (options) {
-            pushPayload = options.payload;
-            vapid = options.vapid;
-          }
-
-          if (!pushPayload) {
-            promise = webPush.sendNotification(subscription.endpoint, {
-              vapid: vapid
-            });
-          } else {
-            if (!subscription.keys) {
-              throw new Error('Require subscription.keys not found.');
-            }
-
-            promise = webPush.sendNotification(subscription.endpoint, {
-              payload: pushPayload,
-              userPublicKey: subscription.keys.p256dh,
-              userAuth: subscription.keys.auth,
-              vapid: vapid
-            });
-          }
-
-          return promise
-          .then(function(response) {
-            if (response.length > 0) {
-              const data = JSON.parse(response);
-              if (typeof data.failure !== 'undefined' && data.failure > 0) {
-                throw new Error('Bad GCM Response: ' + response);
-              }
-            }
-          });
-        })
-        .then(function() {
-          const expectedTitle = options.payload ? options.payload : 'no payload';
-          return globalDriver.wait(function() {
-            return webdriver.until.titleIs(expectedTitle, 60000);
-          });
-        })
-        .then(function() {
-          resolve();
-        })
-        .thenCatch(function(err) {
-          reject(err);
+        });
+      })
+      .then(function() {
+        const expectedTitle = options.payload ? options.payload : 'no payload';
+        return globalDriver.wait(function() {
+          return webdriver.until.titleIs(expectedTitle, 60000);
         });
       });
     });
