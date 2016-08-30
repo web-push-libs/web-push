@@ -14,6 +14,12 @@ suite('setGCMAPIKey', function() {
     });
   });
 
+  test('reset GCM API Key with null', function() {
+    assert.doesNotThrow(function() {
+      webPush.setGCMAPIKey(null);
+    });
+  });
+
   test('empty string', function() {
     assert.throws(function() {
       webPush.setGCMAPIKey('');
@@ -23,6 +29,12 @@ suite('setGCMAPIKey', function() {
   test('non string', function() {
     assert.throws(function() {
       webPush.setGCMAPIKey(42);
+    }, Error);
+  });
+
+  test('undefined valud', function() {
+    assert.throws(function() {
+      webPush.setGCMAPIKey();
     }, Error);
   });
 });

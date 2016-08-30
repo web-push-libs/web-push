@@ -21,8 +21,6 @@
   const createServer = require('./helpers/create-server');
   /* eslint-enable global-require */
 
-  webPush.setGCMAPIKey('AIzaSyAwmdX6KKd4hPfIcGU2SOfj9vuRDW6u-wo');
-
   const PUSH_TEST_TIMEOUT = 120 * 1000;
   const VAPID_PARAM = {
     subject: 'mailto:web-push@mozilla.org',
@@ -30,6 +28,13 @@
     publicKey: new Buffer('BIx6khu9Z/5lBwNEXYNEOQiL70IKYDpDxsTyoiCb82puQ/V4c/NFdyrBFpWdsz3mikmV6sWARNuhRbbbLTMOmB0=', 'base64')
   };
   const testDirectory = './test/output/';
+
+  webPush.setGCMAPIKey('AIzaSyAwmdX6KKd4hPfIcGU2SOfj9vuRDW6u-wo');
+  webPush.setVapidDetails(
+    VAPID_PARAM.subject,
+    VAPID_PARAM.publicKey,
+    VAPID_PARAM.privateKey
+  );
 
   let globalServer;
   let globalDriver;
@@ -44,20 +49,6 @@
       console.log('');
       console.warn(chalk.red(
         'Running on Travis so skipping firefox tests as ' +
-        'they don\'t currently work.'
-      ));
-      console.log('');
-      return Promise.resolve();
-    }
-
-    // Works locally, but on Travis breaks. Probably best to wait for next
-    // ChromeDriver release.
-    if (browser.getSeleniumBrowserId() === 'chrome' &&
-      browser.getVersionNumber() === 54 &&
-      process.env.TRAVIS === 'true') {
-      console.log('');
-      console.warn(chalk.red(
-        'Running on Travis so skipping Chrome V54 tests as ' +
         'they don\'t currently work.'
       ));
       console.log('');
@@ -163,7 +154,7 @@
         }
 
         if (!pushPayload) {
-          promise = webPush.sendNotification(subscription.endpoint, {
+          promise = webPush.sendNotification(subscription, null, {
             vapid: vapid
           });
         } else {
@@ -171,10 +162,7 @@
             throw new Error('Require subscription.keys not found.');
           }
 
-          promise = webPush.sendNotification(subscription.endpoint, {
-            payload: pushPayload,
-            userPublicKey: subscription.keys.p256dh,
-            userAuth: subscription.keys.auth,
+          promise = webPush.sendNotification(subscription, pushPayload, {
             vapid: vapid
           });
         }
@@ -208,7 +196,9 @@
     }
 
     suite('Selenium ' + browser.getPrettyName(), function() {
-      this.retries(3);
+      if (process.env.TRAVIS) {
+        this.retries(3);
+      }
 
       setup(function() {
         globalServer = null;
