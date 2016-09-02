@@ -7,16 +7,16 @@ const argv = require('minimist')(process.argv.slice(2));
 
 const usage = 'Use: web-push --endpoint=<url> --key=<browser key> [--auth=<auth secret>] [--ttl=<seconds>] [--payload=<message>] [--vapid-audience] [--vapid-subject] [--vapid-pvtkey] [--vapid-pubkey]';
 
-if (!argv['endpoint'] || !argv['key']) {
+if (!argv.endpoint || !argv.key) {
   console.log(usage);
   process.exit(1);
 }
 
-const endpoint = argv['endpoint'];
-const key = argv['key'];
-const ttl = argv['ttl'] || 0;
-const payload = argv['payload'] || '';
-const auth = argv['auth'] || null;
+const endpoint = argv.endpoint;
+const key = argv.key;
+const ttl = argv.ttl || 0;
+const payload = argv.payload || '';
+const auth = argv.auth || null;
 const vapidAudience = argv['vapid-audience'] || null;
 const vapidSubject = argv['vapid-subject'] || null;
 const vapidPubKey = argv['vapid-pubkey'] || null;
@@ -38,7 +38,7 @@ function getKeys() {
   return webPush.generateVAPIDKeys();
 }
 
-var params = {
+let params = {
   TTL: ttl,
   payload,
   userPublicKey: key
@@ -49,12 +49,12 @@ if (vapidAudience && vapidSubject) {
     audience: vapidAudience,
     subject: `mailto:${vapidSubject}`,
     privateKey: vapidKeys.privateKey,
-    publicKey: vapidKeys.publicKey,
+    publicKey: vapidKeys.publicKey
   };
-  params['vapid'] = vapid;
+  params.vapid = vapid;
 }
 if (auth) {
-  params['userAuth'] = auth;
+  params.userAuth = auth;
 }
 webPush.sendNotification(endpoint, params).then(() => {
   console.log('Push message sent.');
