@@ -29,5 +29,9 @@
   return Promise.all(promises)
   .then(function() {
     console.log('Download complete.');
+  })
+  .catch(function(err) {
+    console.error('Unable to download browsers and Geckodriver.', err);
+    process.exit(1);
   });
 })();
