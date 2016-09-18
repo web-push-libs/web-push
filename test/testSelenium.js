@@ -55,6 +55,18 @@
       return Promise.resolve();
     }
 
+    if (browser.getSeleniumBrowserId() === 'firefox' &&
+      process.platform === 'darwin' &&
+      process.env.TRAVIS === 'true') {
+      console.log('');
+      console.warn(chalk.red(
+        'Running on Travis OS X so skipping firefox tests as ' +
+        'they don\'t currently work.'
+      ));
+      console.log('');
+      return Promise.resolve();
+    }
+
     return createServer(options, webPush)
     .then(function(server) {
       globalServer = server;
