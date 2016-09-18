@@ -4,7 +4,6 @@ const crypto = require('crypto');
 const ece = require('http_ece');
 const urlBase64 = require('urlsafe-base64');
 
-// New standard, Firefox 46+ and Chrome 50+.
 const encrypt = function(userPublicKey, userAuth, payload) {
   if (!userPublicKey) {
     throw new Error('No user public key provided for encryption.');
