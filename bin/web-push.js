@@ -66,7 +66,3 @@ webPush.sendNotification(endpoint, params).then(() => {
 }).then(() => {
   process.exit(0);
 });
-<<<<<<< HEAD
-=======
-
->>>>>>> master
