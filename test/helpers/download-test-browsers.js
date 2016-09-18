@@ -17,7 +17,6 @@
   }
 
   const promises = [
-    seleniumAssistant.downloadFirefoxDriver(),
     seleniumAssistant.downloadBrowser('firefox', 'stable', forceDownload),
     seleniumAssistant.downloadBrowser('firefox', 'beta', forceDownload),
     seleniumAssistant.downloadBrowser('firefox', 'unstable', forceDownload),
@@ -31,7 +30,7 @@
     console.log('Download complete.');
   })
   .catch(function(err) {
-    console.error('Unable to download browsers and Geckodriver.', err);
+    console.error('Unable to download browsers.', err);
     process.exit(1);
   });
 })();

@@ -20,6 +20,9 @@
   const webPush = require('../src/index');
   const createServer = require('./helpers/create-server');
   const which = require('which');
+
+  // We need geckodriver on the path
+  require('geckodriver');
   /* eslint-enable global-require */
 
   const PUSH_TEST_TIMEOUT = 120 * 1000;
