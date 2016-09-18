@@ -19,6 +19,7 @@
   const chalk = require('chalk');
   const webPush = require('../src/index');
   const createServer = require('./helpers/create-server');
+  const which = require('which');
   /* eslint-enable global-require */
 
   const PUSH_TEST_TIMEOUT = 120 * 1000;
@@ -53,6 +54,25 @@
       ));
       console.log('');
       return Promise.resolve();
+    }
+
+    if (browser.getSeleniumBrowserId() === 'firefox' &&
+      process.env.TRAVIS === 'true') {
+      try {
+        which.sync('geckodriver');
+      } catch (err) {
+        // We can't find geckodriver so skip firefox tests on PRs which
+        // don't have the GH_TOKEN
+        if (process.env.TRAVIS_PULL_REQUEST !== false) {
+          console.log('');
+          console.warn(chalk.red(
+            'Running on Travis OS X so skipping firefox tests as ' +
+            'they don\'t currently work.'
+          ));
+          console.log('');
+          return Promise.resolve();
+        }
+      }
     }
 
     return createServer(options, webPush)
