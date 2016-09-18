@@ -19,6 +19,7 @@ const key = argv.key;
 const ttl = argv.ttl || 0;
 const payload = argv.payload || '';
 const auth = argv.auth || null;
+
 const vapidAudience = argv['vapid-audience'] || null;
 const vapidSubject = argv['vapid-subject'] || null;
 const vapidPubKey = argv['vapid-pubkey'] || null;
