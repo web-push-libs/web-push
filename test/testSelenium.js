@@ -19,9 +19,12 @@
   const chalk = require('chalk');
   const webPush = require('../src/index');
   const createServer = require('./helpers/create-server');
-  /* eslint-enable global-require */
+  const which = require('which');
 
-  webPush.setGCMAPIKey('AIzaSyAwmdX6KKd4hPfIcGU2SOfj9vuRDW6u-wo');
+  // We need geckodriver on the path
+  require('geckodriver');
+  require('chromedriver');
+  /* eslint-enable global-require */
 
   const PUSH_TEST_TIMEOUT = 120 * 1000;
   const VAPID_PARAM = {
@@ -30,6 +33,8 @@
     publicKey: new Buffer('BIx6khu9Z/5lBwNEXYNEOQiL70IKYDpDxsTyoiCb82puQ/V4c/NFdyrBFpWdsz3mikmV6sWARNuhRbbbLTMOmB0=', 'base64')
   };
   const testDirectory = './test/output/';
+
+  webPush.setGCMAPIKey('AIzaSyAwmdX6KKd4hPfIcGU2SOfj9vuRDW6u-wo');
 
   let globalServer;
   let globalDriver;
@@ -50,18 +55,23 @@
       return Promise.resolve();
     }
 
-    // Works locally, but on Travis breaks. Probably best to wait for next
-    // ChromeDriver release.
-    if (browser.getSeleniumBrowserId() === 'chrome' &&
-      browser.getVersionNumber() === 54 &&
+    if (browser.getSeleniumBrowserId() === 'firefox' &&
       process.env.TRAVIS === 'true') {
-      console.log('');
-      console.warn(chalk.red(
-        'Running on Travis so skipping Chrome V54 tests as ' +
-        'they don\'t currently work.'
-      ));
-      console.log('');
-      return Promise.resolve();
+      try {
+        which.sync('geckodriver');
+      } catch (err) {
+        // We can't find geckodriver so skip firefox tests on PRs which
+        // don't have the GH_TOKEN
+        if (process.env.TRAVIS_PULL_REQUEST !== false) {
+          console.log('');
+          console.warn(chalk.red(
+            'Running on Travis OS X so skipping firefox tests as ' +
+            'they don\'t currently work.'
+          ));
+          console.log('');
+          return Promise.resolve();
+        }
+      }
     }
 
     return createServer(options, webPush)
@@ -163,19 +173,16 @@
         }
 
         if (!pushPayload) {
-          promise = webPush.sendNotification(subscription.endpoint, {
-            vapid: vapid
+          promise = webPush.sendNotification(subscription, null, {
+            vapidDetails: vapid
           });
         } else {
           if (!subscription.keys) {
             throw new Error('Require subscription.keys not found.');
           }
 
-          promise = webPush.sendNotification(subscription.endpoint, {
-            payload: pushPayload,
-            userPublicKey: subscription.keys.p256dh,
-            userAuth: subscription.keys.auth,
-            vapid: vapid
+          promise = webPush.sendNotification(subscription, pushPayload, {
+            vapidDetails: vapid
           });
         }
 
@@ -208,7 +215,9 @@
     }
 
     suite('Selenium ' + browser.getPrettyName(), function() {
-      this.retries(3);
+      if (process.env.TRAVIS) {
+        this.retries(3);
+      }
 
       setup(function() {
         globalServer = null;

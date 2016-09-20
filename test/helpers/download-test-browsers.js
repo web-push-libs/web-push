@@ -17,38 +17,20 @@
   }
 
   const promises = [
-    seleniumAssistant.downloadFirefoxDriver()
-    .catch(function(err) {
-      console.error('Firefox Driver Download Error: ', err);
-    }),
-    seleniumAssistant.downloadBrowser('firefox', 'stable', forceDownload)
-    .catch(function(err) {
-      console.error('Firefox Stable Download Error: ', err);
-    }),
-    seleniumAssistant.downloadBrowser('firefox', 'beta', forceDownload)
-    .catch(function(err) {
-      console.error('Firefox Beta Download Error: ', err);
-    }),
-    seleniumAssistant.downloadBrowser('firefox', 'unstable', forceDownload)
-    .catch(function(err) {
-      console.error('Firefox Unstable Download Error: ', err);
-    }),
-    seleniumAssistant.downloadBrowser('chrome', 'stable', forceDownload)
-    .catch(function(err) {
-      console.error('Chrome Stable Download Error: ', err);
-    }),
-    seleniumAssistant.downloadBrowser('chrome', 'beta', forceDownload)
-    .catch(function(err) {
-      console.error('Chrome Beta Download Error: ', err);
-    }),
+    seleniumAssistant.downloadBrowser('firefox', 'stable', forceDownload),
+    seleniumAssistant.downloadBrowser('firefox', 'beta', forceDownload),
+    seleniumAssistant.downloadBrowser('firefox', 'unstable', forceDownload),
+    seleniumAssistant.downloadBrowser('chrome', 'stable', forceDownload),
+    seleniumAssistant.downloadBrowser('chrome', 'beta', forceDownload),
     seleniumAssistant.downloadBrowser('chrome', 'unstable', forceDownload)
-    .catch(function(err) {
-      console.error('Chrome Unstable Download Error: ', err);
-    })
   ];
 
   return Promise.all(promises)
   .then(function() {
     console.log('Download complete.');
+  })
+  .catch(function(err) {
+    console.error('Unable to download browsers.', err);
+    process.exit(1);
   });
 })();
