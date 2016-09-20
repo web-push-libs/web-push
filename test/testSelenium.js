@@ -8,7 +8,6 @@
   }
 
   /* eslint-disable global-require */
-  const urlBase64 = require('urlsafe-base64');
   const seleniumAssistant = require('selenium-assistant');
   const webdriver = require('selenium-webdriver');
   const seleniumFirefox = require('selenium-webdriver/firefox');
@@ -26,11 +25,13 @@
   require('chromedriver');
   /* eslint-enable global-require */
 
+  const vapidKeys = webPush.generateVAPIDKeys();
+
   const PUSH_TEST_TIMEOUT = 120 * 1000;
   const VAPID_PARAM = {
     subject: 'mailto:web-push@mozilla.org',
-    privateKey: new Buffer('H6tqEMswzHOFlPHFi2JPfDQRiKN32ZJIwvSPWZl1VTA=', 'base64'),
-    publicKey: new Buffer('BIx6khu9Z/5lBwNEXYNEOQiL70IKYDpDxsTyoiCb82puQ/V4c/NFdyrBFpWdsz3mikmV6sWARNuhRbbbLTMOmB0=', 'base64')
+    privateKey: vapidKeys.privateKey,
+    publicKey: vapidKeys.publicKey
   };
   const testDirectory = './test/output/';
 
@@ -119,7 +120,7 @@
       globalDriver = driver;
 
       if (options.vapid) {
-        testServerURL += '?vapid=' + urlBase64.encode(options.vapid.publicKey);
+        testServerURL += '?vapid=' + options.vapid.publicKey;
       }
 
       return globalDriver.get(testServerURL)

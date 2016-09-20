@@ -1,14 +1,15 @@
 'use strict';
 
 const assert = require('assert');
+const urlBase64 = require('urlsafe-base64');
 const webPush = require('../src/index');
 const vapidHelper = require('../src/vapid-helper');
 
 const VALID_AUDIENCE = 'https://example.com';
 const VALID_SUBJECT_MAILTO = 'mailto: example@example.com';
 const VALID_SUBJECT_URL = 'https://exampe.com/contact';
-const VALID_PUBLIC_KEY = new Buffer(65);
-const VALID_PRIVATE_KEY = new Buffer(32);
+const VALID_PUBLIC_KEY = urlBase64.encode(new Buffer(65));
+const VALID_PRIVATE_KEY = urlBase64.encode(new Buffer(32));
 const VALID_EXPIRATION = Math.floor(Date.now() / 1000) + (60 * 60 * 12);
 
 suite('Test Vapid Helpers', function() {
@@ -21,11 +22,11 @@ suite('Test Vapid Helpers', function() {
     assert(keys.privateKey);
     assert(keys.publicKey);
 
-    assert.equal(keys.privateKey instanceof Buffer, true);
-    assert.equal(keys.publicKey instanceof Buffer, true);
+    assert.equal(typeof keys.privateKey, 'string');
+    assert.equal(typeof keys.publicKey, 'string');
 
-    assert.equal(keys.privateKey.length, 32);
-    assert.equal(keys.publicKey.length, 65);
+    assert.equal(urlBase64.decode(keys.privateKey).length, 32);
+    assert.equal(urlBase64.decode(keys.publicKey).length, 65);
   });
 
   test('generate new vapid keys between calls', function() {

@@ -32,8 +32,8 @@ function generateVAPIDKeys() {
   curve.generateKeys();
 
   return {
-    publicKey: curve.getPublicKey(),
-    privateKey: curve.getPrivateKey()
+    publicKey: urlBase64.encode(curve.getPublicKey()),
+    privateKey: urlBase64.encode(curve.getPrivateKey())
   };
 }
 
@@ -84,24 +84,30 @@ function getVapidHeaders(audience, subject, publicKey, privateKey, expiration) {
     throw new Error('No key set vapid.publicKey');
   }
 
-  if (!(publicKey instanceof Buffer)) {
-    throw new Error('Vapid public key is not a buffer.');
+  if (typeof publicKey !== 'string') {
+    throw new Error('Vapid public key is must be a URL safe Base 64 ' +
+      'encoded string.');
   }
 
+  publicKey = urlBase64.decode(publicKey);
+
   if (publicKey.length !== 65) {
-    throw new Error('Vapid public key should be 65 bytes long');
+    throw new Error('Vapid public key should be 65 bytes long when decoded.');
   }
 
   if (!privateKey) {
     throw new Error('No key set in vapid.privateKey');
   }
 
-  if (!(privateKey instanceof Buffer)) {
-    throw new Error('Vapid private key is not a buffer');
+  if (typeof privateKey !== 'string') {
+    throw new Error('Vapid private key must be a URL safe Base 64 ' +
+      'encoded string.');
   }
 
+  privateKey = urlBase64.decode(privateKey);
+
   if (privateKey.length !== 32) {
-    throw new Error('Vapid private key should be 32 bytes long');
+    throw new Error('Vapid private key should be 32 bytes long when decoded.');
   }
 
   if (expiration) {
