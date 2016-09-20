@@ -58,6 +58,10 @@ suite('Test Encryption Helpers', function() {
       function() {
         // Invalid auth size
         webPush.encrypt(VALID_PUBLIC_KEY, 'Fake', 'Example');
+      },
+      function() {
+        // Invalid auth size
+        webPush.encrypt(VALID_PUBLIC_KEY, VALID_AUTH, []);
       }
     ];
 

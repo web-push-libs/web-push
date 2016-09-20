@@ -443,6 +443,37 @@ suite('sendNotification', function() {
         message: 'hello'
       }
     }, {
+      testTitle: 'Payload provided with invalid keys',
+      requestOptions: {
+        subscription: {
+          endpoint: true,
+          keys: 'silly example'
+        },
+        message: 'hello'
+      }
+    }, {
+      testTitle: 'Payload provided with only p256dh keys',
+      requestOptions: {
+        subscription: {
+          endpoint: true,
+          keys: {
+            p256dh: urlBase64.encode(userPublicKey)
+          }
+        },
+        message: 'hello'
+      }
+    }, {
+      testTitle: 'Payload provided with only auth keys',
+      requestOptions: {
+        subscription: {
+          endpoint: true,
+          keys: {
+            auth: urlBase64.encode(userAuth)
+          }
+        },
+        message: 'hello'
+      }
+    }, {
       testTitle: 'userPublicKey argument isn\'t a string',
       requestOptions: {
         subscription: {
@@ -509,6 +540,16 @@ suite('sendNotification', function() {
           keys: VALID_KEYS
         },
         message: 'hello'
+      },
+      addEndpoint: true,
+      serverFlags: ['statusCode=404']
+    }, {
+      testTitle: 'rejects when payload isn\'t a string or buffer',
+      requestOptions: {
+        subscription: {
+          keys: VALID_KEYS
+        },
+        message: []
       },
       addEndpoint: true,
       serverFlags: ['statusCode=404']

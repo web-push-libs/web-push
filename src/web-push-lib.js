@@ -116,33 +116,6 @@ WebPushLib.prototype.sendNotification =
       }
     }
 
-    // Test subscription is an Object
-    //
-    // Test subscription has an endpoint string with length
-    //
-    // Test subscription only has endpoint keys and auth / p256dh keys
-    //
-    // Test keys
-    //    if (userPublicKey) {
-    //      if (typeof userPublicKey !== 'string') {
-    //        throw new Error('userPublicKey should be a base64-encoded string.');
-    //      } else if (urlBase64.decode(userPublicKey).length !== 65) {
-    //        throw new Error('userPublicKey should be 65 bytes long.');
-    //      }
-    //    }
-    //
-    //    if (userAuth) {
-    //      if (typeof userAuth !== 'string') {
-    //        throw new Error('userAuth should be a base64-encoded string.');
-    //      } else if (urlBase64.decode(userAuth).length < 16) {
-    //        throw new Error('userAuth should be at least 16 bytes long');
-    //      }
-    //    }
-    //
-    // Test payload is a string
-    //
-    // Test options for gcm api key, vapid details and ttl
-
     if (typeof timeToLive === 'undefined') {
       timeToLive = DEFAULT_TTL;
     }
@@ -156,6 +129,15 @@ WebPushLib.prototype.sendNotification =
     let requestPayload = null;
 
     if (payload) {
+      if (!subscription.keys ||
+        typeof subscription !== 'object' ||
+        !subscription.keys.p256dh ||
+        !subscription.keys.auth) {
+        return Promise.reject(new Error('Unable to send a message with ' +
+          'payload to this subscription since it doesn\'t have the ' +
+          'required encryption keys'));
+      }
+
       try {
         const encrypted = encryptionHelper.encrypt(
           subscription.keys.p256dh, subscription.keys.auth, payload);

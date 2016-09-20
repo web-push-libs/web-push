@@ -39,8 +39,8 @@ function generateVAPIDKeys() {
 
 /**
  * This method takes the required VAPID parameters and returns the required
- * header to added to a Web Push Protocol Request.
- * @param  {string} audience       This must be the origni of the push service.
+ * header to be added to a Web Push Protocol Request.
+ * @param  {string} audience       This must be the origin of the push service.
  * @param  {string} subject        This should be a URL or a 'mailto:' email
  * address.
  * @param  {Buffer} publicKey      The VAPID public key.

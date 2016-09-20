@@ -10,7 +10,11 @@ const encrypt = function(userPublicKey, userAuth, payload) {
   }
 
   if (typeof userPublicKey !== 'string') {
-    throw new Error('User auth must be a string.');
+    throw new Error('The subscription p256dh value must be a string.');
+  }
+
+  if (urlBase64.decode(userPublicKey).length !== 65) {
+    throw new Error('The subscription p256dh value should be 65 bytes long.');
   }
 
   if (!userAuth) {
@@ -18,11 +22,16 @@ const encrypt = function(userPublicKey, userAuth, payload) {
   }
 
   if (typeof userAuth !== 'string') {
-    throw new Error('User auth must be a string.');
+    throw new Error('The subscirption auth key must be a string.');
   }
 
-  if (userAuth.length < 22) {
-    throw new Error('User auth should be 22 bytes or more.');
+  if (urlBase64.decode(userAuth).length < 16) {
+    throw new Error('The subscription auth key should be at least 16 ' +
+      'bytes long');
+  }
+
+  if (typeof payload !== 'string' && !Buffer.isBuffer(payload)) {
+    throw new Error('Payload must be either a string or a Node Buffer.');
   }
 
   if (typeof payload === 'string' || payload instanceof String) {

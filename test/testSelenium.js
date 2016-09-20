@@ -23,6 +23,7 @@
 
   // We need geckodriver on the path
   require('geckodriver');
+  require('chromedriver');
   /* eslint-enable global-require */
 
   const PUSH_TEST_TIMEOUT = 120 * 1000;
