@@ -4,7 +4,7 @@ const assert = require('assert');
 const crypto = require('crypto');
 const https = require('https');
 const fs = require('fs');
-const webPush = require('../src/index');
+const path = require('path');
 const ece = require('http_ece');
 const urlBase64 = require('urlsafe-base64');
 const semver = require('semver');
@@ -15,18 +15,37 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 suite('sendNotification', function() {
   test('is defined', function() {
+    const webPush = require('../src/index');
     assert(webPush.sendNotification);
   });
 
-  let closePromise;
+  let server;
   let serverPort;
+  let requestBody;
+  let requestDetails;
+  let originalHTTPSRequest = https.request;
 
-  afterEach(function() {
-    if (closePromise) {
-      return closePromise;
+  beforeEach(function() {
+    requestBody = null;
+    requestDetails = null;
+
+    // Delete caches of web push libs to start clean between test runs
+    delete require.cache[path.join(__dirname, '..', 'src', 'index.js')];
+    delete require.cache[path.join(__dirname, '..', 'src', 'web-push-lib.js')];
+
+    // Reset https request mock
+    https.request = originalHTTPSRequest;
+
+    let returnPromise = Promise.resolve();
+    if (!server) {
+      returnPromise = startServer();
     }
 
-    return Promise.resolve();
+    return returnPromise;
+  });
+
+  after(function() {
+    return closeServer();
   });
 
   const userCurve = crypto.createECDH('prime256v1');
@@ -34,9 +53,14 @@ suite('sendNotification', function() {
   const userPublicKey = userCurve.generateKeys();
   const userAuth = crypto.randomBytes(16);
 
-  const vapidKeys = webPush.generateVAPIDKeys();
+  const VALID_KEYS = {
+    p256dh: urlBase64.encode(userPublicKey),
+    auth: urlBase64.encode(userAuth)
+  };
 
-  function startServer(message, TTL, statusCode, isGCM, vapid) {
+  const vapidKeys = require('../src/vapid-helper').generateVAPIDKeys();
+
+  function startServer() {
     const pem = fs.readFileSync('test/data/certs/cert.pem');
 
     const options = {
@@ -44,85 +68,23 @@ suite('sendNotification', function() {
       cert: pem
     };
 
-    const server = https.createServer(options, function(req, res) {
-      let body = new Buffer(0);
+    server = https.createServer(options, function(req, res) {
+      requestBody = new Buffer(0);
 
       req.on('data', function(chunk) {
-        body = Buffer.concat([body, chunk]);
+        requestBody = Buffer.concat([requestBody, chunk]);
       });
 
       req.on('end', function() {
-        try {
-          assert.equal(req.headers['content-length'], body.length, 'Content-Length header correct');
+        requestDetails = req;
 
-          if (typeof TTL !== 'undefined') {
-            assert.equal(req.headers.ttl, TTL, 'TTL header correct');
-          }
-
-          if (typeof message !== 'undefined') {
-            assert(body.length > 0);
-
-            assert.equal(req.headers.encryption.indexOf('keyid=p256dh;salt='), 0, 'Encryption header correct');
-            const salt = req.headers.encryption.substring('keyid=p256dh;salt='.length);
-
-            assert.equal(req.headers['content-type'], 'application/octet-stream', 'Content-Type header correct');
-
-            const keys = req.headers['crypto-key'].split(';');
-            const appServerPublicKey = keys.find(function(key) {
-              return key.indexOf('dh=') === 0;
-            }).substring('dh='.length);
-
-            assert.equal(req.headers['content-encoding'], 'aesgcm', 'Content-Encoding header correct');
-
-            ece.saveKey('webpushKey', userCurve, 'P-256');
-
-            const decrypted = ece.decrypt(body, {
-              keyid: 'webpushKey',
-              dh: appServerPublicKey,
-              salt: salt,
-              authSecret: urlBase64.encode(userAuth),
-              padSize: 2
-            });
-
-            assert(decrypted.equals(new Buffer(message)), 'Cipher text correctly decoded');
-          }
-
-          if (vapid) {
-            const keys = req.headers['crypto-key'].split(';');
-            const vapidKey = keys.find(function(key) {
-              return key.indexOf('p256ecdsa=') === 0;
-            });
-
-            assert.equal(vapidKey.indexOf('p256ecdsa='), 0, 'Crypto-Key header correct');
-            const appServerVapidPublicKey = urlBase64.decode(vapidKey.substring('p256ecdsa='.length));
-
-            assert(appServerVapidPublicKey.equals(vapidKeys.publicKey));
-
-            const authorizationHeader = req.headers.authorization;
-            assert.equal(authorizationHeader.indexOf('Bearer '), 0, 'Authorization header correct');
-            const jwt = authorizationHeader.substring('Bearer '.length);
-            // assert(jws.verify(jwt, 'ES256', appServerVapidPublicKey)), 'JWT valid');
-            const decoded = jws.decode(jwt);
-            assert.equal(decoded.header.typ, 'JWT');
-            assert.equal(decoded.header.alg, 'ES256');
-            assert.equal(decoded.payload.aud, 'https://127.0.0.1');
-            assert(decoded.payload.exp > Date.now() / 1000);
-            assert.equal(decoded.payload.sub, 'mailto:mozilla@example.org');
-          }
-
-          if (isGCM) {
-            assert.equal(req.headers.authorization, 'key=my_gcm_key', 'Authorization header correct');
-          }
-
-          res.writeHead(statusCode || 201);
-
-          res.end(statusCode !== 404 ? 'ok' : 'not found');
-        } catch (err) {
-          console.error(err);
-          res.writeHead(500);
+        if (req.url.indexOf('statusCode=404') !== -1) {
+          res.writeHead(404);
           res.end();
+        } else {
+          res.writeHead(201);
+          res.end('ok');
         }
-        server.close();
       });
     });
 
@@ -136,397 +98,519 @@ suite('sendNotification', function() {
       server.listen(serverPort);
     });
 
-    closePromise = new Promise(function(resolve) {
-      server.on('close', resolve);
-    });
-
     return new Promise(function(resolve) {
       server.on('listening', resolve);
     });
   }
 
-  test('send/receive string', function() {
-    return startServer('hello')
-    .then(function() {
-      return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
-        userPublicKey: urlBase64.encode(userPublicKey),
-        userAuth: urlBase64.encode(userAuth),
-        payload: 'hello'
-      });
-    })
-    .then(function(body) {
-      assert(true, 'sendNotification promise resolved');
-      assert.equal(body, 'ok');
-    }, function(e) {
-      assert(false, 'sendNotification promise rejected with: ' + e);
-    });
-  });
+  function closeServer() {
+    serverPort = null;
+    return new Promise(function(resolve) {
+      if (!server) {
+        resolve();
+        return;
+      }
 
-  test('send/receive string (non-urlsafe base64)', function() {
-    return startServer('hello')
-    .then(function() {
-      return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
-        userPublicKey: userPublicKey.toString('base64'),
-        userAuth: userAuth.toString('base64'),
-        payload: 'hello'
+      server.on('close', function() {
+        server = null;
+        resolve();
       });
-    })
-    .then(function(body) {
-      assert(true, 'sendNotification promise resolved');
-      assert.equal(body, 'ok');
-    }, function(e) {
-      assert(false, 'sendNotification promise rejected with: ' + e);
-    });
-  });
-
-  test('send/receive buffer', function() {
-    return startServer('hello')
-    .then(function() {
-      return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
-        userPublicKey: urlBase64.encode(userPublicKey),
-        userAuth: urlBase64.encode(userAuth),
-        payload: new Buffer('hello')
-      });
-    })
-    .then(function() {
-      assert(true, 'sendNotification promise resolved');
-    }, function() {
-      assert(false, 'sendNotification promise rejected');
-    });
-  });
-
-  test('send/receive unicode character', function() {
-    return startServer('😁')
-    .then(function() {
-      return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
-        userPublicKey: urlBase64.encode(userPublicKey),
-        userAuth: urlBase64.encode(userAuth),
-        payload: '😁'
-      });
-    })
-    .then(function() {
-      assert(true, 'sendNotification promise resolved');
-    }, function() {
-      assert(false, 'sendNotification promise rejected');
-    });
-  });
-
-  // This test fails on Node.js v0.12.
-  if (!semver.satisfies(process.version, '0.12')) {
-    test('send/receive empty message', function() {
-      return startServer('')
-      .then(function() {
-        return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
-          userPublicKey: urlBase64.encode(userPublicKey),
-          userAuth: urlBase64.encode(userAuth),
-          payload: ''
-        });
-      })
-      .then(function() {
-        assert(true, 'sendNotification promise resolved');
-      }, function(e) {
-        assert(false, 'sendNotification promise rejected with ' + e);
-      });
+      server.close();
     });
   }
 
-  test('send/receive without message', function() {
-    return startServer()
-    .then(function() {
-      return webPush.sendNotification('https://127.0.0.1:' + serverPort);
-    })
-    .then(function() {
-      assert(true, 'sendNotification promise resolved');
-    }, function() {
-      assert(false, 'sendNotification promise rejected');
-    });
-  });
+  function validateRequest(request) {
+    const options = request.requestOptions;
+    const isGCM = options.subscription.endpoint
+      .indexOf('https://android.googleapis.com/gcm') === 0;
 
-  test('send/receive without message with TTL', function() {
-    return startServer(undefined, 5)
-    .then(function() {
-      return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
-        TTL: 5
+    assert.equal(requestDetails.headers['content-length'], requestBody.length, 'Check Content-Length header');
+
+    if (typeof options.extraOptions !== 'undefined' &&
+      typeof options.extraOptions.TTL !== 'undefined') {
+      assert.equal(requestDetails.headers.ttl, options.extraOptions.TTL, 'Check TTL header');
+    } else if (!isGCM) {
+      assert.equal(requestDetails.headers.ttl, 2419200, 'Check default TTL header');
+    }
+
+    if (typeof message !== 'undefined') {
+      assert(requestBody.length > 0);
+
+      assert.equal(requestDetails.headers.encryption.indexOf('keyid=p256dh;salt='), 0, 'Check Encryption header');
+      const salt = requestDetails.headers.encryption.substring('keyid=p256dh;salt='.length);
+
+      assert.equal(requestDetails.headers['content-type'], 'application/octet-stream', 'Check Content-Type header');
+
+      const keys = requestDetails.headers['crypto-key'].split(';');
+      const appServerPublicKey = keys.find(function(key) {
+        return key.indexOf('dh=') === 0;
+      }).substring('dh='.length);
+
+      assert.equal(requestDetails.headers['content-encoding'], 'aesgcm', 'Check Content-Encoding header');
+
+      ece.saveKey('webpushKey', userCurve, 'P-256');
+
+      const decrypted = ece.decrypt(requestBody, {
+        keyid: 'webpushKey',
+        dh: appServerPublicKey,
+        salt: salt,
+        authSecret: urlBase64.encode(userAuth),
+        padSize: 2
       });
-    })
-    .then(function() {
-      assert(true, 'sendNotification promise resolved');
-    }, function() {
-      assert(false, 'sendNotification promise rejected');
-    });
-  });
 
-  test('send/receive without message with default TTL', function() {
-    return startServer(undefined, 2419200)
-    .then(function() {
-      return webPush.sendNotification('https://127.0.0.1:' + serverPort);
-    })
-    .then(function() {
-      assert(true, 'sendNotification promise resolved');
-    }, function() {
-      assert(false, 'sendNotification promise rejected');
-    });
-  });
+      assert(decrypted.equals(new Buffer(options.message)), 'Check cipher text can be correctly decoded');
+    }
 
-  test('send/receive string with TTL', function() {
-    return startServer('hello', 5)
-    .then(function() {
-      return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
-        TTL: 5,
-        userPublicKey: urlBase64.encode(userPublicKey),
-        userAuth: urlBase64.encode(userAuth),
-        payload: 'hello'
+    if (options.vapid) {
+      const keys = requestDetails.headers['crypto-key'].split(';');
+      const vapidKey = keys.find(function(key) {
+        return key.indexOf('p256ecdsa=') === 0;
       });
-    })
-    .then(function() {
-      assert(true, 'sendNotification promise resolved');
-    }, function() {
-      assert(false, 'sendNotification promise rejected');
-    });
-  });
 
-  test('promise rejected when it can\'t connect to the server', function() {
-    return webPush.sendNotification('https://127.0.0.1:' + serverPort)
-    .then(function() {
-      assert(false, 'sendNotification promise resolved');
-    }, function() {
-      assert(true, 'sendNotification promise rejected');
-    });
-  });
+      assert.equal(vapidKey.indexOf('p256ecdsa='), 0, 'Crypto-Key header correct');
+      const appServerVapidPublicKey = urlBase64.decode(vapidKey.substring('p256ecdsa='.length));
 
-  test('promise rejected when the response status code is unexpected', function() {
-    return startServer(undefined, undefined, 404)
-    .then(function() {
-      return webPush.sendNotification('https://127.0.0.1:' + serverPort);
-    })
-    .then(function() {
-      assert(false, 'sendNotification promise resolved');
-    }, function(err) {
-      assert(err, 'sendNotification promise rejected');
-      assert(err instanceof webPush.WebPushError, 'err is a WebPushError');
-      assert.equal(err.statusCode, 404);
-      assert.equal(err.body, 'not found');
-      assert(err.headers != null, 'response headers are defined');
-    });
-  });
+      assert(appServerVapidPublicKey.equals(vapidKeys.publicKey));
 
-  test('send/receive GCM', function() {
-    const httpsrequest = https.request;
-    https.request = function(options, listener) {
-      options.hostname = '127.0.0.1';
-      options.port = serverPort;
-      options.path = '/';
-      return httpsrequest.call(https, options, listener);
-    };
+      const authorizationHeader = requestDetails.headers.authorization;
+      assert.equal(authorizationHeader.indexOf('WebPush '), 0, 'Check VAPID Authorization header');
+      const jwt = authorizationHeader.substring('WebPush '.length);
+      // assert(jws.verify(jwt, 'ES256', appServerVapidPublicKey)), 'JWT valid');
+      const decoded = jws.decode(jwt);
+      assert.equal(decoded.header.typ, 'JWT');
+      assert.equal(decoded.header.alg, 'ES256');
+      assert.equal(decoded.payload.aud, 'https://127.0.0.1');
+      assert(decoded.payload.exp > Date.now() / 1000);
+      assert.equal(decoded.payload.sub, 'mailto:mozilla@example.org');
+    }
 
-    webPush.setGCMAPIKey('my_gcm_key');
+    if (isGCM) {
+      if (typeof options.extraOptions !== 'undefined' &&
+        typeof options.extraOptions.gcmAPIKey !== 'undefined') {
+        assert.equal(requestDetails.headers.authorization, 'key=' + options.extraOptions.gcmAPIKey, 'Check GCM Authorization header');
+      } else {
+        assert.equal(requestDetails.headers.authorization, 'key=my_gcm_key', 'Check GCM Authorization header');
+      }
+    }
+  }
 
-    return startServer(undefined, undefined, undefined, true)
-    .then(function() {
-      return webPush.sendNotification('https://android.googleapis.com/gcm/send/someSubscriptionID');
-    })
-    .then(function() {
-      assert(true, 'sendNotification promise resolved');
-    }, function() {
-      assert(false, 'sendNotification promise rejected');
-    });
-  });
-
-  test('send/receive string with GCM', function() {
-    const httpsrequest = https.request;
-    https.request = function(options, listener) {
-      options.hostname = '127.0.0.1';
-      options.port = serverPort;
-      options.path = '/';
-      return httpsrequest.call(https, options, listener);
-    };
-
-    webPush.setGCMAPIKey('my_gcm_key');
-
-    return startServer('hello', undefined, undefined, true)
-    .then(function() {
-      return webPush.sendNotification('https://android.googleapis.com/gcm/send/someSubscriptionID', {
-        userPublicKey: urlBase64.encode(userPublicKey),
-        userAuth: urlBase64.encode(userAuth),
-        payload: 'hello'
-      });
-    })
-    .then(function(body) {
-      assert(true, 'sendNotification promise resolved');
-      assert.equal(body, 'ok');
-    }, function() {
-      assert(false, 'sendNotification promise rejected');
-    });
-  });
-
-  test('send/receive string with GCM (overriding the GCM API key)', function() {
-    const httpsrequest = https.request;
-    https.request = function(options, listener) {
-      options.hostname = '127.0.0.1';
-      options.port = serverPort;
-      options.path = '/';
-      return httpsrequest.call(https, options, listener);
-    };
-
-    webPush.setGCMAPIKey('another_gcm_api_key');
-
-    return startServer('hello', undefined, undefined, true)
-    .then(function() {
-      return webPush.sendNotification('https://android.googleapis.com/gcm/send/someSubscriptionID', {
-        userPublicKey: urlBase64.encode(userPublicKey),
-        userAuth: urlBase64.encode(userAuth),
-        payload: 'hello',
-        gcmAPIKey: 'my_gcm_key'
-      });
-    })
-    .then(function(body) {
-      assert(true, 'sendNotification promise resolved');
-      assert.equal(body, 'ok');
-    }, function() {
-      assert(false, 'sendNotification promise rejected');
-    });
-  });
-
-  test('0 arguments', function() {
-    return webPush.sendNotification()
-    .then(function() {
-      assert(false, 'sendNotification promise resolved');
-    }, function() {
-      assert(true, 'sendNotification promise rejected');
-    });
-  });
-
-  test('userPublicKey argument isn\'t a string', function() {
-    return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
-      userPublicKey: userPublicKey,
-      userAuth: urlBase64.encode(userAuth),
-      payload: 'hello'
-    })
-    .then(function() {
-      assert(false, 'sendNotification promise resolved');
-    }, function() {
-      assert(true, 'sendNotification promise rejected');
-    });
-  });
-
-  test('userAuth argument isn\'t a string', function() {
-    return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
-      userPublicKey: urlBase64.encode(userPublicKey),
-      userAuth: userAuth,
-      payload: 'hello'
-    })
-    .then(function() {
-      assert(false, 'sendNotification promise resolved');
-    }, function() {
-      assert(true, 'sendNotification promise rejected');
-    });
-  });
-
-  test('userPublicKey argument is too long', function() {
-    return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
-      userPublicKey: urlBase64.encode(Buffer.concat([userPublicKey, new Buffer(1)])),
-      userAuth: urlBase64.encode(userAuth),
-      payload: 'hello'
-    })
-    .then(function() {
-      assert(false, 'sendNotification promise resolved');
-    }, function() {
-      assert(true, 'sendNotification promise rejected');
-    });
-  });
-
-  test('userPublicKey argument is too short', function() {
-    return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
-      userPublicKey: urlBase64.encode(userPublicKey.slice(1)),
-      userAuth: urlBase64.encode(userAuth),
-      payload: 'hello'
-    })
-    .then(function() {
-      assert(false, 'sendNotification promise resolved');
-    }, function() {
-      assert(true, 'sendNotification promise rejected');
-    });
-  });
-
-  test('userAuth argument is too short', function() {
-    return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
-      userPublicKey: urlBase64.encode(userPublicKey),
-      userAuth: urlBase64.encode(userAuth.slice(1)),
-      payload: 'hello'
-    })
-    .then(function() {
-      assert(false, 'sendNotification promise resolved');
-    }, function() {
-      assert(true, 'sendNotification promise rejected');
-    });
-  });
-
-  test('TTL with old interface', function() {
-    return webPush.sendNotification('https://127.0.0.1:' + serverPort, 5)
-    .then(function() {
-      assert(false, 'sendNotification promise resolved');
-    }, function() {
-      assert(true, 'sendNotification promise rejected');
-    });
-  });
-
-  test('payload with old interface', function() {
-    return webPush.sendNotification('https://127.0.0.1:' + serverPort, 0, urlBase64.encode(userPublicKey), 'hello')
-    .then(function() {
-      assert(false, 'sendNotification promise resolved');
-    }, function() {
-      assert(true, 'sendNotification promise rejected');
-    });
-  });
-
-  test('send notification with message with vapid', function() {
-    return startServer('hello', undefined, undefined, undefined, true)
-    .then(function() {
-      return webPush.sendNotification('https://127.0.0.1:' + serverPort, {
-        userPublicKey: urlBase64.encode(userPublicKey),
-        userAuth: urlBase64.encode(userAuth),
-        payload: 'hello',
-        vapid: {
-          subject: 'mailto:mozilla@example.org',
-          privateKey: vapidKeys.privateKey,
-          publicKey: vapidKeys.publicKey
+  const validRequests = [
+    {
+      testTitle: 'send/receive string',
+      requestOptions: {
+        subscription: {
+          keys: VALID_KEYS
+        },
+        message: 'hello'
+      }
+    },
+    {
+      testTitle: 'send/receive string (non-urlsafe base64)',
+      requestOptions: {
+        subscription: {
+          keys: {
+            p256dh: userPublicKey.toString('base64'),
+            auth: userAuth.toString('base64')
+          }
+        },
+        message: 'hello'
+      }
+    }, {
+      testTitle: 'send/receive buffer',
+      requestOptions: {
+        subscription: {
+          keys: VALID_KEYS
+        },
+        message: new Buffer('hello')
+      }
+    }, {
+      testTitle: 'send/receive unicode character',
+      requestOptions: {
+        subscription: {
+          keys: VALID_KEYS
+        },
+        message: '😁'
+      }
+    }, {
+      testTitle: 'send/receive without message',
+      requestOptions: {
+        subscription: {
+          // The default endpoint will be added by the test
         }
+      }
+    }, {
+      testTitle: 'send/receive without message with TTL',
+      requestOptions: {
+        subscription: {
+          // The default endpoint will be added by the test
+        },
+        extraOptions: {
+          TTL: 5
+        }
+      }
+    }, {
+      testTitle: 'send/receive string with TTL',
+      requestOptions: {
+        subscription: {
+          keys: VALID_KEYS
+        },
+        message: 'hello',
+        extraOptions: {
+          TTL: 5
+        }
+      }
+    }, {
+      testTitle: 'send notification with message with vapid',
+      requestOptions: {
+        subscription: {
+          keys: VALID_KEYS
+        },
+        message: 'hello',
+        extraOptions: {
+          vapidDetails: {
+            subject: 'mailto:mozilla@example.org',
+            privateKey: vapidKeys.privateKey,
+            publicKey: vapidKeys.publicKey
+          }
+        }
+      }
+    }
+  ];
+
+  // TODO: Add test for VAPID override
+
+  // This test fails on Node.js v0.12.
+  if (!semver.satisfies(process.version, '0.12')) {
+    validRequests.push({
+      testTitle: 'send/receive empty message',
+      requestOptions: {
+        subscription: {
+          keys: VALID_KEYS
+        },
+        message: '',
+        extraOptions: {
+          TTL: 5
+        }
+      }
+    });
+  }
+
+  validRequests.forEach(function(validRequest) {
+    test(validRequest.testTitle, function() {
+      // Set the default endpoint if it's not already configured
+      if (!validRequest.requestOptions.subscription.endpoint) {
+        validRequest.requestOptions.subscription.endpoint =
+          'https://127.0.0.1:' + serverPort;
+      }
+
+      const webPush = require('../src/index');
+      return webPush.sendNotification(
+        validRequest.requestOptions.subscription,
+        validRequest.requestOptions.message,
+        validRequest.requestOptions.extraOptions
+      )
+      .then(function(response) {
+        assert.equal(response.body, 'ok');
+      })
+      .then(function() {
+        validateRequest(validRequest);
       });
-    })
-    .then(function(body) {
-      assert(true, 'sendNotification promise resolved');
-      assert.equal(body, 'ok');
-    }, function(e) {
-      assert(false, 'sendNotification promise rejected with ' + e);
     });
   });
 
-  test('send notification if push service is GCM and you want to use VAPID', function() {
-    const httpsrequest = https.request;
-    https.request = function(options, listener) {
-      options.hostname = '127.0.0.1';
-      options.port = serverPort;
-      options.path = '/';
-      return httpsrequest.call(https, options, listener);
-    };
-
-    webPush.setGCMAPIKey('my_gcm_key');
-
-    return startServer(undefined, undefined, undefined, true)
-    .then(function() {
-      return webPush.sendNotification('https://android.googleapis.com/gcm/send/someSubscriptionID', {
-        vapid: {
-          subject: 'mailto:mozilla@example.org',
-          privateKey: vapidKeys.privateKey,
-          publicKey: vapidKeys.publicKey
+  const validGCMRequests = [
+    {
+      testTitle: 'send/receive GCM',
+      requestOptions: {
+        subscription: {
         }
+      }
+    }, {
+      testTitle: 'send/receive string with GCM',
+      requestOptions: {
+        subscription: {
+          keys: VALID_KEYS
+        },
+        message: 'hello'
+      }
+    }, {
+      testTitle: 'send/receive string with GCM (overriding the GCM API key)',
+      requestOptions: {
+        subscription: {
+          keys: VALID_KEYS
+        },
+        message: 'hello',
+        extraOptions: {
+          gcmAPIKey: 'another_gcm_api_key'
+        }
+      }
+    }, {
+      testTitle: 'send notification if push service is GCM and you want to use VAPID',
+      requestOptions: {
+        subscription: {
+        },
+        extraOptions: {
+          vapidDetails: {
+            subject: 'mailto:mozilla@example.org',
+            privateKey: vapidKeys.privateKey,
+            publicKey: vapidKeys.publicKey
+          }
+        }
+      }
+    }
+  ];
+
+  validGCMRequests.forEach(function(validGCMRequest) {
+    test(validGCMRequest.testTitle, function() {
+      // This mocks out the httpsrequest used by web push.
+      // Probably worth switching with proxyquire and sinon.
+      https.request = function(options, listener) {
+        options.hostname = '127.0.0.1';
+        options.port = serverPort;
+        options.path = '/';
+
+        return originalHTTPSRequest.call(https, options, listener);
+      };
+
+      // Set the default endpoint if it's not already configured
+      if (!validGCMRequest.requestOptions.subscription.endpoint) {
+        validGCMRequest.requestOptions.subscription.endpoint =
+          'https://android.googleapis.com/gcm/send/someSubscriptionID';
+      }
+
+      const webPush = require('../src/index');
+      webPush.setGCMAPIKey('my_gcm_key');
+
+      return webPush.sendNotification(
+        validGCMRequest.requestOptions.subscription,
+        validGCMRequest.requestOptions.message,
+        validGCMRequest.requestOptions.extraOptions
+      )
+      .then(function(response) {
+        assert.equal(response.body, 'ok');
+      })
+      .then(function() {
+        validateRequest(validGCMRequest);
       });
-    })
-    .then(function(body) {
-      assert(true, 'sendNotification promise resolved');
-      assert.equal(body, 'ok');
-    }, function() {
-      assert(false, 'sendNotification promise rejected');
+    });
+  });
+
+  const invalidRequests = [
+    {
+      testTitle: '0 arguments',
+      requestOptions: {
+
+      }
+    }, {
+      testTitle: 'No Endpoint',
+      requestOptions: {
+        subscription: {}
+      }
+    }, {
+      testTitle: 'Empty Endpoint',
+      requestOptions: {
+        subscription: {
+          endpoint: ''
+        }
+      }
+    }, {
+      testTitle: 'Array for Endpoint',
+      requestOptions: {
+        subscription: {
+          endpoint: []
+        }
+      }
+    }, {
+      testTitle: 'Object for Endpoint',
+      requestOptions: {
+        subscription: {
+          endpoint: {}
+        }
+      }
+    }, {
+      testTitle: 'Object for Endpoint',
+      requestOptions: {
+        subscription: {
+          endpoint: true
+        }
+      }
+    }, {
+      testTitle: 'Payload provided with no keys',
+      requestOptions: {
+        subscription: {
+          endpoint: true
+        },
+        message: 'hello'
+      }
+    }, {
+      testTitle: 'Payload provided with invalid keys',
+      requestOptions: {
+        subscription: {
+          endpoint: true,
+          keys: 'silly example'
+        },
+        message: 'hello'
+      }
+    }, {
+      testTitle: 'Payload provided with only p256dh keys',
+      requestOptions: {
+        subscription: {
+          endpoint: true,
+          keys: {
+            p256dh: urlBase64.encode(userPublicKey)
+          }
+        },
+        message: 'hello'
+      }
+    }, {
+      testTitle: 'Payload provided with only auth keys',
+      requestOptions: {
+        subscription: {
+          endpoint: true,
+          keys: {
+            auth: urlBase64.encode(userAuth)
+          }
+        },
+        message: 'hello'
+      }
+    }, {
+      testTitle: 'userPublicKey argument isn\'t a string',
+      requestOptions: {
+        subscription: {
+          keys: {
+            p256dh: userPublicKey,
+            auth: urlBase64.encode(userAuth)
+          }
+        },
+        message: 'hello'
+      },
+      addEndpoint: true
+    }, {
+      testTitle: 'userAuth argument isn\'t a string',
+      requestOptions: {
+        subscription: {
+          keys: {
+            p256dh: urlBase64.encode(userPublicKey),
+            auth: userAuth
+          }
+        },
+        message: 'hello'
+      },
+      addEndpoint: true
+    }, {
+      testTitle: 'userPublicKey argument is too long',
+      requestOptions: {
+        subscription: {
+          keys: {
+            p256dh: urlBase64.encode(Buffer.concat([userPublicKey, new Buffer(1)])),
+            auth: urlBase64.encode(userAuth)
+          }
+        },
+        message: 'hello'
+      },
+      addEndpoint: true
+    }, {
+      testTitle: 'userPublicKey argument is too short',
+      requestOptions: {
+        subscription: {
+          keys: {
+            p256dh: urlBase64.encode(userPublicKey.slice(1)),
+            auth: urlBase64.encode(userAuth)
+          }
+        },
+        message: 'hello'
+      },
+      addEndpoint: true
+    }, {
+      testTitle: 'userAuth argument is too short',
+      requestOptions: {
+        subscription: {
+          keys: {
+            p256dh: urlBase64.encode(userPublicKey),
+            auth: urlBase64.encode(userAuth.slice(1))
+          }
+        },
+        message: 'hello'
+      },
+      addEndpoint: true
+    }, {
+      testTitle: 'rejects when the response status code is unexpected',
+      requestOptions: {
+        subscription: {
+          keys: VALID_KEYS
+        },
+        message: 'hello'
+      },
+      addEndpoint: true,
+      serverFlags: ['statusCode=404']
+    }, {
+      testTitle: 'rejects when payload isn\'t a string or buffer',
+      requestOptions: {
+        subscription: {
+          keys: VALID_KEYS
+        },
+        message: []
+      },
+      addEndpoint: true,
+      serverFlags: ['statusCode=404']
+    }, {
+      testTitle: 'send notification with invalid vapid option',
+      requestOptions: {
+        subscription: {
+          keys: VALID_KEYS
+        },
+        message: 'hello',
+        addEndpoint: true,
+        extraOptions: {
+          vapid: {
+            subject: 'mailto:mozilla@example.org',
+            privateKey: vapidKeys.privateKey,
+            publicKey: vapidKeys.publicKey
+          }
+        }
+      }
+    }
+  ];
+
+  invalidRequests.forEach(function(invalidRequest) {
+    test(invalidRequest.testTitle, function() {
+      if (invalidRequest.addEndpoint) {
+        invalidRequest.requestOptions.subscription.endpoint =
+          'https://127.0.0.1:' + serverPort;
+      }
+
+      if (invalidRequest.serverFlags) {
+        invalidRequest.requestOptions.subscription.endpoint += '?' +
+          invalidRequest.serverFlags.join('&');
+      }
+
+      const webPush = require('../src/index');
+      return webPush.sendNotification(
+        invalidRequest.requestOptions.subscription,
+        invalidRequest.requestOptions.message,
+        invalidRequest.requestOptions.extraOptions
+      )
+      .then(function() {
+        throw new Error('Expected promise to reject');
+      }, function() {
+        // NOOP, this error is expected
+      });
+    });
+  });
+
+  test('rejects when it can\'t connect to the server', function() {
+    const currentServerPort = serverPort;
+    return closeServer()
+    .then(function() {
+      const webPush = require('../src/index');
+      return webPush.sendNotification({
+        endpoint: 'https://127.0.0.1:' + currentServerPort
+      })
+      .then(function() {
+        throw new Error('sendNotification should have rejected due to server not running');
+      }, function() {
+        // NOOP
+      });
     });
   });
 });

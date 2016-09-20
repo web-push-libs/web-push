@@ -5,7 +5,9 @@ webPush.setGCMAPIKey(process.env.GCM_API_KEY);
 
 const argv = require('minimist')(process.argv.slice(2));
 
-const usage = 'Use: web-push --endpoint=<url> --key=<browser key> [--auth=<auth secret>] [--ttl=<seconds>] [--payload=<message>] [--vapid-audience] [--vapid-subject] [--vapid-pvtkey] [--vapid-pubkey]';
+const usage = 'Use: web-push --endpoint=<url> --key=<browser key> ' +
+  '[--auth=<auth secret>] [--ttl=<seconds>] [--payload=<message>] ' +
+  '[--vapid-audience] [--vapid-subject] [--vapid-pvtkey] [--vapid-pubkey]';
 
 if (!argv.endpoint || !argv.key) {
   console.log(usage);
@@ -17,6 +19,7 @@ const key = argv.key;
 const ttl = argv.ttl || 0;
 const payload = argv.payload || '';
 const auth = argv.auth || null;
+
 const vapidAudience = argv['vapid-audience'] || null;
 const vapidSubject = argv['vapid-subject'] || null;
 const vapidPubKey = argv['vapid-pubkey'] || null;
@@ -63,4 +66,3 @@ webPush.sendNotification(endpoint, params).then(() => {
 }).then(() => {
   process.exit(0);
 });
-
