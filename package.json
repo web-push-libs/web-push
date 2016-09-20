@@ -30,7 +30,7 @@
   "homepage": "https://github.com/marco-c/web-push#readme",
   "dependencies": {
     "array.prototype.find": "^2.0.0",
-    "asn1.js": "^4.5.2",
+    "asn1.js": "^4.8.1",
     "bluebird": "^3.3.5",
     "buffer-compare-shim": "^1.0.0",
     "buffer-equals-polyfill": "^1.0.0",
