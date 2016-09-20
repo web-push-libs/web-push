@@ -22,7 +22,7 @@ const encrypt = function(userPublicKey, userAuth, payload) {
   }
 
   if (typeof userAuth !== 'string') {
-    throw new Error('The subscirption auth key must be a string.');
+    throw new Error('The subscription auth key must be a string.');
   }
 
   if (urlBase64.decode(userAuth).length < 16) {
