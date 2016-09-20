@@ -32,7 +32,7 @@ suite('setGCMAPIKey', function() {
     }, Error);
   });
 
-  test('undefined valud', function() {
+  test('undefined value', function() {
     assert.throws(function() {
       webPush.setGCMAPIKey();
     }, Error);

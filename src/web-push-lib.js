@@ -103,6 +103,21 @@ WebPushLib.prototype.sendNotification =
     let timeToLive = DEFAULT_TTL;
 
     if (options) {
+      const validOptionKeys = [
+        'gcmAPIKey',
+        'vapidDetails',
+        'TTL'
+      ];
+      const optionKeys = Object.keys(options);
+      for (let i = 0; i < optionKeys.length; i++) {
+        const optionKey = optionKeys[i];
+        if (validOptionKeys.indexOf(optionKey) === -1) {
+          return Promise.reject('\'' + optionKey + '\' is an invalid option. ' +
+            'The valid options are [\'' + validOptionKeys.join('\', \'') +
+            '\'].');
+        }
+      }
+
       if (options.gcmAPIKey) {
         currentGCMAPIKey = options.gcmAPIKey;
       }
@@ -160,6 +175,7 @@ WebPushLib.prototype.sendNotification =
 
     const isGCM = subscription.endpoint.indexOf(
       'https://android.googleapis.com/gcm/send') === 0;
+    // VAPID isn't supported by GCM hence the if, else if.
     if (isGCM) {
       if (!currentGCMAPIKey) {
         console.warn('Attempt to send push notification to GCM endpoint, ' +
@@ -168,7 +184,6 @@ WebPushLib.prototype.sendNotification =
         requestOptions.headers.Authorization = 'key=' + currentGCMAPIKey;
       }
     } else if (currentVapidDetails) {
-      // VAPID isn't supported by GCM.
       const parsedUrl = url.parse(subscription.endpoint);
       const audience = parsedUrl.protocol + '//' +
         parsedUrl.hostname;
@@ -217,7 +232,6 @@ WebPushLib.prototype.sendNotification =
       });
 
       pushRequest.on('error', function(e) {
-        console.error(e);
         reject(e);
       });
 

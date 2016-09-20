@@ -104,6 +104,11 @@ function getVapidHeaders(audience, subject, publicKey, privateKey, expiration) {
     throw new Error('Vapid private key should be 32 bytes long');
   }
 
+  if (expiration) {
+    // TODO: Check if expiration is valid and use it in place of the hard coded
+    // expiration of 24hours.
+  }
+
   const header = {
     typ: 'JWT',
     alg: 'ES256'
@@ -114,10 +119,6 @@ function getVapidHeaders(audience, subject, publicKey, privateKey, expiration) {
     exp: Math.floor(Date.now() / 1000) + 86400,
     sub: subject
   };
-
-  if (expiration) {
-    console.log('expiration', expiration);
-  }
 
   const jwt = jws.sign({
     header: header,

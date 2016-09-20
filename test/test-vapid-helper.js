@@ -4,6 +4,13 @@ const assert = require('assert');
 const webPush = require('../src/index');
 const vapidHelper = require('../src/vapid-helper');
 
+const VALID_AUDIENCE = 'https://example.com';
+const VALID_SUBJECT_MAILTO = 'mailto: example@example.com';
+const VALID_SUBJECT_URL = 'https://exampe.com/contact';
+const VALID_PUBLIC_KEY = new Buffer(65);
+const VALID_PRIVATE_KEY = new Buffer(32);
+const VALID_EXPIRATION = Math.floor(Date.now() / 1000) + (60 * 60 * 12);
+
 suite('Test Vapid Helpers', function() {
   test('is defined', function() {
     assert(webPush.generateVAPIDKeys);
@@ -32,12 +39,6 @@ suite('Test Vapid Helpers', function() {
   });
 
   test('should throw errors on bad input', function() {
-    const VALID_AUDIENCE = 'https://example.com';
-    const VALID_SUBJECT_MAILTO = 'mailto: example@example.com';
-    const VALID_SUBJECT_URL = 'https://exampe.com/contact';
-    const VALID_PUBLIC_KEY = new Buffer(65);
-    const VALID_PRIVATE_KEY = new Buffer(5);
-
     const badInputs = [
       function() {
         // No args
@@ -93,6 +94,32 @@ suite('Test Vapid Helpers', function() {
     });
   });
 
-  // TODO:2 good tests for the vapid headers
-  // TODO: Make sure you can v
+  test('should get valid VAPID headers', function() {
+    const validInputs = [
+      function() {
+        return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_URL,
+          VALID_PUBLIC_KEY, VALID_PRIVATE_KEY);
+      },
+      function() {
+        return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO,
+          VALID_PUBLIC_KEY, VALID_PRIVATE_KEY);
+      },
+      function() {
+        return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_URL,
+          VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, VALID_EXPIRATION);
+      }
+    ];
+
+    validInputs.forEach(function(validInput, index) {
+      try {
+        const headers = validInput();
+        assert(headers.Authorization);
+        assert(headers['Crypto-Key']);
+      } catch (err) {
+        console.warn('Valid input call for getVapidHeaders() threw an ' +
+          'error. [' + index + ']');
+        throw err;
+      }
+    });
+  });
 });

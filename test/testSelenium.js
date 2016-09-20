@@ -35,11 +35,6 @@
   const testDirectory = './test/output/';
 
   webPush.setGCMAPIKey('AIzaSyAwmdX6KKd4hPfIcGU2SOfj9vuRDW6u-wo');
-  webPush.setVapidDetails(
-    VAPID_PARAM.subject,
-    VAPID_PARAM.publicKey,
-    VAPID_PARAM.privateKey
-  );
 
   let globalServer;
   let globalDriver;
@@ -179,7 +174,7 @@
 
         if (!pushPayload) {
           promise = webPush.sendNotification(subscription, null, {
-            vapid: vapid
+            vapidDetails: vapid
           });
         } else {
           if (!subscription.keys) {
@@ -187,7 +182,7 @@
           }
 
           promise = webPush.sendNotification(subscription, pushPayload, {
-            vapid: vapid
+            vapidDetails: vapid
           });
         }
 

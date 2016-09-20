@@ -267,7 +267,7 @@ suite('sendNotification', function() {
         },
         message: 'hello',
         extraOptions: {
-          vapid: {
+          vapidDetails: {
             subject: 'mailto:mozilla@example.org',
             privateKey: vapidKeys.privateKey,
             publicKey: vapidKeys.publicKey
@@ -350,7 +350,7 @@ suite('sendNotification', function() {
         subscription: {
         },
         extraOptions: {
-          vapid: {
+          vapidDetails: {
             subject: 'mailto:mozilla@example.org',
             privateKey: vapidKeys.privateKey,
             publicKey: vapidKeys.publicKey
@@ -553,6 +553,22 @@ suite('sendNotification', function() {
       },
       addEndpoint: true,
       serverFlags: ['statusCode=404']
+    }, {
+      testTitle: 'send notification with invalid vapid option',
+      requestOptions: {
+        subscription: {
+          keys: VALID_KEYS
+        },
+        message: 'hello',
+        addEndpoint: true,
+        extraOptions: {
+          vapid: {
+            subject: 'mailto:mozilla@example.org',
+            privateKey: vapidKeys.privateKey,
+            publicKey: vapidKeys.publicKey
+          }
+        }
+      }
     }
   ];
 
