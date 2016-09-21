@@ -248,7 +248,7 @@ encryption.
         44+
       </td>
       <td>
-        39+<br />*Mobile Only*
+        39+<br /><i>Mobile Only</i>
       </td>
       <td>
 
@@ -271,7 +271,7 @@ encryption.
         44+
       </td>
       <td>
-        39+<br />*Mobile Only*
+        39+<br /><i>Mobile Only</i>
       </td>
       <td>
 
