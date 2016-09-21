@@ -55,35 +55,9 @@ WebPushLib.prototype.setVapidDetails =
       return;
     }
 
-    if (typeof subject !== 'string' || subject.length === 0) {
-      throw new Error('The subject should be a URL or mailto:');
-    }
-
-    if (subject.indexOf('mailto:') !== 0) {
-      // Must be a url if it doesn't have mailto at the start
-      const subjectParseResult = url.parse(subject);
-      if (!subjectParseResult.hostname) {
-        throw new Error('Vapid subject is not a url or mailto url. ' + subject);
-      }
-    }
-
-    if (typeof publicKey !== 'string') {
-      throw new Error('The vapid public key must be a url safe Base 64 ' +
-        'encoded string.');
-    }
-
-    if (urlBase64.decode(publicKey).length !== 65) {
-      throw new Error('The vapid public key must be 65 bytes once decoded.');
-    }
-
-    if (typeof privateKey !== 'string') {
-      throw new Error('The vapid private key must be a url safe Base 64 ' +
-        'encoded string.');
-    }
-
-    if (urlBase64.decode(privateKey).length !== 32) {
-      throw new Error('The vapid private key must be 65 bytes once decoded.');
-    }
+    vapidHelper.validateSubject(subject);
+    vapidHelper.validatePublicKey(publicKey);
+    vapidHelper.validatePrivateKey(privateKey);
 
     vapidDetails = {
       subject: subject,
