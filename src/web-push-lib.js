@@ -227,7 +227,7 @@ WebPushLib.prototype.sendNotification =
               pushResponse.statusCode, pushResponse.headers, responseText));
           } else {
             resolve({
-              status: pushResponse.statusCode,
+              statusCode: pushResponse.statusCode,
               body: responseText,
               headers: pushResponse.headers
             });
