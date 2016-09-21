@@ -322,9 +322,8 @@ examples using this library.
 >  * Java JDK or JRE (http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 
 To run tests:
-```sh
-npm test
-```
+
+    npm test
 
 <p align="center">
   <a href="https://www.npmjs.com/package/web-push">
