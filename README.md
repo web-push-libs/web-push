@@ -30,6 +30,10 @@ Installation is a simple, just install via npm.
 
 # Usage
 
+// TODO: Show how to generate VAPID Keys
+
+// TODO: Simplify to just send to single subscription and remove getUserPushSubscription().
+
 The common use case for this library is an application server using
 a GCM API key and VAPID keys.
 
