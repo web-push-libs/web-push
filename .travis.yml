@@ -32,5 +32,6 @@ install:
 before_script:
   - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sh -e /etc/init.d/xvfb start; fi
 script:
+  - if [[ $NODE_VERSION != "0.10" -a $NODE_VERSION != "0.12" ]]; then $NPM run lint; fi
   - $NPM test
 sudo: required
