@@ -219,21 +219,27 @@ encryption.
         Feature
       </td>
       <td>
+        <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/chrome/chrome.svg" alt="Chrome Logo">
         Chrome
       </td>
       <td>
+        <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/edge/edge.svg" alt="Edge Logo">
         Edge
       </td>
       <td>
+        <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/firefox/firefox.svg" alt="Firefox Logo">
         Firefox
       </td>
       <td>
+        <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/opera/opera_128x128.png" alt="Opera Logo">
         Opera
       </td>
       <td>
+        <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/safari/safari_128x128.png" alt="Safari Logo">
         Safari
       </td>
       <td>
+        <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/samsung-internet/samsung-internet_128x128.png" alt="Samsung Logo">
         Samsung Intenet
       </td>
     </tr>
