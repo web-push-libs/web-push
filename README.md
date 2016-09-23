@@ -216,9 +216,9 @@ encryption.
   <thead>
     <tr>
       <th><strong>Browser</strong></th>
-      <th width="100px"><strong>Push without Payload</strong></th>
-      <th width="100px"><strong>Push with Payload</strong></th>
-      <th width="100px"><strong>VAPID</strong></th>
+      <th width="130px"><strong>Push without Payload</strong></th>
+      <th width="130px"><strong>Push with Payload</strong></th>
+      <th width="130px"><strong>VAPID</strong></th>
       <th><strong>Notes</strong></th>
     </tr>
   </thead>
