@@ -281,7 +281,7 @@ encryption.
       <td>✗</td>
 
       <td>
-        * Push only suppported on Opera for Android.
+        * Opera supports push on Opera for Android **only**.
         <br />
         <br />
         The `gcm_sender_id` is needed to get a push subscription.
