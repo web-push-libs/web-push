@@ -215,11 +215,11 @@ encryption.
 <table>
   <thead>
     <tr>
-      <td><strong>Browser</strong></td>
-      <td><strong>Push without Payload</strong></td>
-      <td><strong>Push with Payload</strong></td>
-      <td><strong>VAPID</strong></td>
-      <td><strong>Notes</strong></td>
+      <th><strong>Browser</strong></th>
+      <th width="100px"><strong>Push without Payload</strong></th>
+      <th width="100px"><strong>Push with Payload</strong></th>
+      <th width="100px"><strong>VAPID</strong></th>
+      <th><strong>Notes</strong></th>
     </tr>
   </thead>
   <tbody>
@@ -227,7 +227,7 @@ encryption.
       <td>Chrome</td>
 
       <!-- Push without payloads support-->
-      <td>✓<br />Since v42</td>
+      <td>✓ v42+</td>
 
       <!-- Push with payload support -->
       <td>✓ v50+</td>
