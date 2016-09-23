@@ -32,9 +32,61 @@ function generateVAPIDKeys() {
   curve.generateKeys();
 
   return {
-    publicKey: curve.getPublicKey(),
-    privateKey: curve.getPrivateKey()
+    publicKey: urlBase64.encode(curve.getPublicKey()),
+    privateKey: urlBase64.encode(curve.getPrivateKey())
   };
+}
+
+function validateSubject(subject) {
+  if (!subject) {
+    throw new Error('No subject set in vapid.subject.');
+  }
+
+  if (typeof subject !== 'string' || subject.length === 0) {
+    throw new Error('The subject value must be a string containing a URL or ' +
+      'mailto: address. ' + subject);
+  }
+
+  if (subject.indexOf('mailto:') !== 0) {
+    const subjectParseResult = url.parse(subject);
+    if (!subjectParseResult.hostname) {
+      throw new Error('Vapid subject is not a url or mailto url. ' + subject);
+    }
+  }
+}
+
+function validatePublicKey(publicKey) {
+  if (!publicKey) {
+    throw new Error('No key set vapid.publicKey');
+  }
+
+  if (typeof publicKey !== 'string') {
+    throw new Error('Vapid public key is must be a URL safe Base 64 ' +
+      'encoded string.');
+  }
+
+  publicKey = urlBase64.decode(publicKey);
+
+  if (publicKey.length !== 65) {
+    throw new Error('Vapid public key should be 65 bytes long when decoded.');
+  }
+}
+
+function validatePrivateKey(privateKey) {
+  if (!privateKey) {
+    throw new Error('No key set in vapid.privateKey');
+  }
+
+  if (typeof privateKey !== 'string') {
+    throw new Error('Vapid private key must be a URL safe Base 64 ' +
+      'encoded string.');
+  }
+
+  privateKey = urlBase64.decode(privateKey);
+
+  if (privateKey.length !== 32) {
+    throw new Error('Vapid private key should be 32 bytes long when decoded.');
+  }
 }
 
 /**
@@ -64,45 +116,13 @@ function getVapidHeaders(audience, subject, publicKey, privateKey, expiration) {
     throw new Error('VAPID audience is not a url. ' + audience);
   }
 
-  if (!subject) {
-    throw new Error('No subject set in vapid.subject.');
-  }
+  validateSubject(subject);
+  validatePublicKey(publicKey);
+  validatePrivateKey(privateKey);
 
-  if (typeof subject !== 'string' || subject.length === 0) {
-    throw new Error('The subject value must be a string containing a URL or ' +
-      'mailto: address. ' + subject);
-  }
+  publicKey = urlBase64.decode(publicKey);
+  privateKey = urlBase64.decode(privateKey);
 
-  if (subject.indexOf('mailto:') !== 0) {
-    const subjectParseResult = url.parse(subject);
-    if (!subjectParseResult.hostname) {
-      throw new Error('Vapid subject is not a url or mailto url. ' + subject);
-    }
-  }
-
-  if (!publicKey) {
-    throw new Error('No key set vapid.publicKey');
-  }
-
-  if (!(publicKey instanceof Buffer)) {
-    throw new Error('Vapid public key is not a buffer.');
-  }
-
-  if (publicKey.length !== 65) {
-    throw new Error('Vapid public key should be 65 bytes long');
-  }
-
-  if (!privateKey) {
-    throw new Error('No key set in vapid.privateKey');
-  }
-
-  if (!(privateKey instanceof Buffer)) {
-    throw new Error('Vapid private key is not a buffer');
-  }
-
-  if (privateKey.length !== 32) {
-    throw new Error('Vapid private key should be 32 bytes long');
-  }
 
   if (expiration) {
     // TODO: Check if expiration is valid and use it in place of the hard coded
@@ -134,5 +154,8 @@ function getVapidHeaders(audience, subject, publicKey, privateKey, expiration) {
 
 module.exports = {
   generateVAPIDKeys: generateVAPIDKeys,
-  getVapidHeaders: getVapidHeaders
+  getVapidHeaders: getVapidHeaders,
+  validateSubject: validateSubject,
+  validatePublicKey: validatePublicKey,
+  validatePrivateKey: validatePrivateKey
 };

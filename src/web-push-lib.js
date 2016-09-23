@@ -55,6 +55,10 @@ WebPushLib.prototype.setVapidDetails =
       return;
     }
 
+    vapidHelper.validateSubject(subject);
+    vapidHelper.validatePublicKey(publicKey);
+    vapidHelper.validatePrivateKey(privateKey);
+
     vapidDetails = {
       subject: subject,
       publicKey: publicKey,
