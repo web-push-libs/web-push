@@ -121,6 +121,10 @@ webpush.sendNotification(
 );
 ```
 
+> **Note:** `sendNotification()` you don't need to define a payload, and this
+method will work without a GCM API Key and / or VAPID keys if the push service
+supports it.
+
 ### Input
 
 **Push Subscription**
@@ -133,19 +137,22 @@ in the browser.
 
 **Payload**
 
-The payload sent with a push message. This must be either a *string* or a
-node [*Buffer*](https://nodejs.org/api/buffer.html).
+The payload is optional, but if set, will be the data sent with a push
+message.
+
+This must be either a *string* or a node
+[*Buffer*](https://nodejs.org/api/buffer.html).
 
 > **Note:** In order to encrypt the *payload*, the *pushSubscription* **must**
 have a *keys* object with *p256dh* and *auth* values.
 
 **Options**
 
-Options is an optional argument that if defined hould be an object with
-any of the following values defined.
+Options is an optional argument that if defined should be an object containing
+any of the following values defined, although none of them are required.
 
-- **gcmAPIKey** can be a GCM API key to be used for this request and this request
-only. This overrides any API key set via `setGCMAPIKey()`.
+- **gcmAPIKey** can be a GCM API key to be used for this request and this
+request only. This overrides any API key set via `setGCMAPIKey()`.
 - **vapidDetails** should be an object with *subject*, *publicKey* and
 *privateKey* values defined. These values should follow the [VAPID Spec](https://tools.ietf.org/html/draft-thomson-webpush-vapid).
 - **TTL** is a value in seconds that describes how long a push message is
