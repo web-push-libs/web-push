@@ -227,8 +227,7 @@ encryption.
       <td>Chrome</td>
 
       <!-- Push without payloads support-->
-      <td>✓</td>
-      <td>Since v42</td>
+      <td>✓ Since v42</td>
 
       <!-- Push with payload support -->
       <td>✓ Since v50</td>
