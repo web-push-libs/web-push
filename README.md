@@ -215,108 +215,127 @@ encryption.
 <table>
   <thead>
     <tr>
-      <td>
-        Feature
-      </td>
-      <td align="center">
-        <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/chrome/chrome_128x128.png" alt="Chrome Logo" style="width=80px; height=80px;">
-        Chrome
-      </td>
-      <td align="center">
-        <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/edge/edge_128x128.png" alt="Edge Logo" style="width=80px; height=80px;">
-        Edge
-      </td>
-      <td align="center">
-        <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/firefox/firefox_128x128.png" alt="Firefox Logo" style="width=80px; height=80px;">
-        Firefox
-      </td>
-      <td align="center">
-        <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/opera/opera_128x128.png" alt="Opera Logo" style="width=80px; height=80px;">
-        Opera
-      </td>
-      <td align="center">
-        <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/safari/safari_128x128.png" alt="Safari Logo" style="width=80px; height=80px;">
-        Safari
-      </td>
-      <td align="center">
-        <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/samsung-internet/samsung-internet_128x128.png" alt="Samsung Logo" style="width=80px; height=80px;">
-        Samsung Intenet
-      </td>
+      <td>Browser</td>
+      <td colspan="2">Push Support (No Payload)</td>
+      <td colspan="2">Push Support (With Payload)</td>
+      <td colspan="2">VAPID Support</td>
+      <td>Notes</td>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>No Payload Push</td>
-      <td>
-        42+
-      </td>
-      <td>
+      <td>Chrome</td>
 
-      </td>
-      <td>
-        44+
-      </td>
-      <td>
-        39+<br /><i>Mobile Only</i>
-      </td>
-      <td>
+      <!-- Push without payloads support-->
+      <td>✓</td>
+      <td>Since v42</td>
 
-      </td>
+      <!-- Push with payload support -->
+      <td>✓</td>
+      <td>Since v50</td>
+
+      <!-- VAPID Support -->
+      <td>✓</td>
+      <td>Since v52</td>
+
+      <td>In v51 and less, gcm_sender_id is needed to get a push subscription.</td>
+    </tr>
+
+    <tr>
+      <td>Edge</td>
+
+      <!-- Push without payloads support-->
+      <td>✗</td>
+      <td></td>
+
+      <!-- Push with payload support -->
+      <td>✗</td>
+      <td></td>
+
+      <!-- VAPID Support -->
+      <td>✗</td>
+      <td></td>
+
+      <td></td>
+    </tr>
+
+    <tr>
+      <td>Chrome</td>
+
+      <!-- Push without payloads support-->
+      <td>✓</td>
+      <td>Since v44</td>
+
+      <!-- Push with payload support -->
+      <td>✓</td>
+      <td>Since v44</td>
+
+      <!-- VAPID Support -->
+      <td>✓</td>
+      <td>Since v46</td>
+
+      <td>In v51 and less, gcm_sender_id is needed to get a push subscription.</td>
+    </tr>
+
+    <tr>
+      <td>Opera</td>
+
+      <!-- Push without payloads support-->
+      <td>✓</td>
+      <td>Since v39*</td>
+
+      <!-- Push with payload support -->
+      <td>✓</td>
+      <td>Since v39*</td>
+
+      <!-- VAPID Support -->
+      <td>✗</td>
+      <td></td>
+
       <td>
-        4.0.10-53+
+        * Push only suppported on Opera for Android.
+        <br />
+        The gcm_sender_id is needed to get a push subscription.
       </td>
     </tr>
+
     <tr>
-      <td>
-        Push with Payload
-      </td>
-      <td>
-        50+
-      </td>
-      <td>
+      <td>Safari</td>
 
-      </td>
-      <td>
-        44+
-      </td>
-      <td>
-        39+<br /><i>Mobile Only</i>
-      </td>
-      <td>
+      <!-- Push without payloads support-->
+      <td>✗</td>
+      <td></td>
 
-      </td>
-      <td>
+      <!-- Push with payload support -->
+      <td>✗</td>
+      <td></td>
 
-      </td>
+      <!-- VAPID Support -->
+      <td>✗</td>
+      <td></td>
+
+      <td></td>
     </tr>
+
     <tr>
-      <td>
-        VAPID
-      </td>
-      <td>
-        52+ *
-      </td>
-      <td>
+      <td>Samsung Internet Browser</td>
 
-      </td>
-      <td>
-        46+
-      </td>
-      <td>
-        *
-      </td>
-      <td>
+      <!-- Push without payloads support-->
+      <td>✓</td>
+      <td>Since v4.0.10-53</td>
 
-      </td>
-      <td>
-        *
-      </td>
+      <!-- Push with payload support -->
+      <td>✗</td>
+      <td></td>
+
+      <!-- VAPID Support -->
+      <td>✗</td>
+      <td></td>
+
+      <td>The gcm_sender_id is needed to get a push subscription</td>
     </tr>
   </tbody>
 </table>
-
-> * These browsers require the `gcm_sender_id` to be set in the web app
-> manifest to work in browser versions before VAPID support.
 
 # Help
 
