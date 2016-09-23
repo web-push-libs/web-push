@@ -227,13 +227,13 @@ encryption.
       <td>Chrome</td>
 
       <!-- Push without payloads support-->
-      <td>✓ Since v42</td>
+      <td>✓<br />Since v42</td>
 
       <!-- Push with payload support -->
-      <td>✓ Since v50</td>
+      <td>✓<br />Since v50</td>
 
       <!-- VAPID Support -->
-      <td>✓ Since v52</td>
+      <td>✓<br />Since v52</td>
 
       <td>In v51 and less, gcm_sender_id is needed to get a push subscription.</td>
     </tr>
@@ -254,28 +254,28 @@ encryption.
     </tr>
 
     <tr>
-      <td>Chrome</td>
+      <td>Firefox</td>
 
       <!-- Push without payloads support-->
-      <td>✓ Since v44</td>
+      <td>✓<br />Since v44</td>
 
       <!-- Push with payload support -->
-      <td>✓ Since v44</td>
+      <td>✓<br />Since v44</td>
 
       <!-- VAPID Support -->
-      <td>✓ Since v46</td>
+      <td>✓<br />Since v46</td>
 
-      <td>In v51 and less, gcm_sender_id is needed to get a push subscription.</td>
+      <td></td>
     </tr>
 
     <tr>
       <td>Opera</td>
 
       <!-- Push without payloads support-->
-      <td>✓ Since v39*</td>
+      <td>✓<br />Since v39*</td>
 
       <!-- Push with payload support -->
-      <td>✓ Since v39*</td>
+      <td>✓<br />Since v39*</td>
 
       <!-- VAPID Support -->
       <td>✗</td>
@@ -306,7 +306,7 @@ encryption.
       <td>Samsung Internet Browser</td>
 
       <!-- Push without payloads support-->
-      <td>✓ Since v4.0.10-53</td>
+      <td>✓<br />Since v4.0.10-53</td>
 
       <!-- Push with payload support -->
       <td>✗</td>
