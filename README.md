@@ -215,11 +215,11 @@ encryption.
 <table>
   <thead>
     <tr>
-      <td>Browser</td>
-      <td colspan="2">Push Support (No Payload)</td>
-      <td colspan="2">Push Support (With Payload)</td>
-      <td colspan="2">VAPID Support</td>
-      <td>Notes</td>
+      <td><strong>Browser</strong></td>
+      <td colspan="2"><strong>Push without Payload</strong></td>
+      <td colspan="2"><strong>Push with Payload</strong></td>
+      <td colspan="2"><strong>VAPID</strong></td>
+      <td><strong>Notes</strong></td>
     </tr>
   </thead>
   <tbody>
