@@ -218,28 +218,28 @@ encryption.
       <td>
         Feature
       </td>
-      <td>
-        <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/chrome/chrome_128x128.png" alt="Chrome Logo">
+      <td align="center">
+        <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/chrome/chrome_128x128.png" alt="Chrome Logo" style="width=80px; height=80px;">
         Chrome
       </td>
-      <td>
-        <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/edge/edge_128x128.png" alt="Edge Logo">
+      <td align="center">
+        <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/edge/edge_128x128.png" alt="Edge Logo" style="width=80px; height=80px;">
         Edge
       </td>
-      <td>
-        <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/firefox/firefox_128x128.png" alt="Firefox Logo">
+      <td align="center">
+        <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/firefox/firefox_128x128.png" alt="Firefox Logo" style="width=80px; height=80px;">
         Firefox
       </td>
-      <td>
-        <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/opera/opera_128x128.png" alt="Opera Logo">
+      <td align="center">
+        <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/opera/opera_128x128.png" alt="Opera Logo" style="width=80px; height=80px;">
         Opera
       </td>
-      <td>
-        <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/safari/safari_128x128.png" alt="Safari Logo">
+      <td align="center">
+        <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/safari/safari_128x128.png" alt="Safari Logo" style="width=80px; height=80px;">
         Safari
       </td>
-      <td>
-        <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/samsung-internet/samsung-internet_128x128.png" alt="Samsung Logo">
+      <td align="center">
+        <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/samsung-internet/samsung-internet_128x128.png" alt="Samsung Logo" style="width=80px; height=80px;">
         Samsung Intenet
       </td>
     </tr>
