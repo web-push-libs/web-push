@@ -272,16 +272,16 @@ encryption.
       <td>Opera</td>
 
       <!-- Push without payloads support-->
-      <td>✓ v39+*</td>
+      <td>✓ v39+ <strong>*</strong></td>
 
       <!-- Push with payload support -->
-      <td>✓ v39+*</td>
+      <td>✓ v39+ <strong>*</strong></td>
 
       <!-- VAPID Support -->
       <td>✗</td>
 
       <td>
-        * Opera supports push on Opera for Android <strong>only</strong>.
+        <strong>*</strong> Opera supports push Android but no on desktop.
         <br />
         <br />
         The `gcm_sender_id` is needed to get a push subscription.
