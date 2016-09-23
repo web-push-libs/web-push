@@ -33,28 +33,30 @@ Installation is a simple, just install via npm.
 The common use case for this library is an application server using
 a GCM API key and VAPID keys.
 
-    const webpush = require('web-push');
+```javascript
+const webpush = require('web-push');
 
-    // VAPID keys should only be generated only once.
-    const vapidKeys = webpush.generateVAPIDKeys();
+// VAPID keys should only be generated only once.
+const vapidKeys = webpush.generateVAPIDKeys();
 
-    webpush.setGCMAPIKey('<Your GCM API Key Here>');
-    webpush.setVapidDetails(
-      'mailto:example@yourdomain.org',
-      vapidKeys.publicKey,
-      vapidKeys.privateKey
-    );
+webpush.setGCMAPIKey('<Your GCM API Key Here>');
+webpush.setVapidDetails(
+  'mailto:example@yourdomain.org',
+  vapidKeys.publicKey,
+  vapidKeys.privateKey
+);
 
-    // This is the same output of calling JSON.stringify on a PushSubscription
-    const pushSubscription = {
-      endpoint: '.....',
-      keys: {
-        auth: '.....',
-        p256dh: '.....'
-      }
-    };
+// This is the same output of calling JSON.stringify on a PushSubscription
+const pushSubscription = {
+  endpoint: '.....',
+  keys: {
+    auth: '.....',
+    p256dh: '.....'
+  }
+};
 
-    webpush.sendNotification(pushSubscription, 'Your Push Payload Text');
+webpush.sendNotification(pushSubscription, 'Your Push Payload Text');
+```
 
 ## Using VAPID Key for applicationServerKey
 
@@ -62,58 +64,62 @@ When using your VAPID key in your web app, you'll need to convert the
 URL safe base64 string in a Uint8Array to pass into the subscribe call,
 which you can do like so:
 
-    function urlBase64ToUint8Array(base64String) {
-      const padding = '='.repeat((4 - base64String.length % 4) % 4);
-      const base64 = (base64String + padding)
-        .replace(/\-/g, '+')
-        .replace(/_/g, '/');
+```javascript
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/');
 
-      const rawData = window.atob(base64);
-      const outputArray = new Uint8Array(rawData.length);
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
 
-      for (let i = 0; i < rawData.length; ++i) {
-        outputArray[i] = rawData.charCodeAt(i);
-      }
-      return outputArray;
-    }
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
 
-    const vapidPublicKey = '<Your Public Key from generateVAPIDKeys()>';
-    const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+const vapidPublicKey = '<Your Public Key from generateVAPIDKeys()>';
+const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
 
-    registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: convertedVapidKey  
-    });
+registration.pushManager.subscribe({
+  userVisibleOnly: true,
+  applicationServerKey: convertedVapidKey  
+});
+```
 
-# API Referance
+# API Reference
 
 ## sendNotification(pushSubscription, payload, options)
 
-    const pushSubscription = {
-      endpoint: '< Push Subscription URL >';
-      keys: {
-        p256dh: '< User Public Encryption Key >',
-        auth: '< User Auth Secret >'
-      }
-    };
+```javascript
+const pushSubscription = {
+  endpoint: '< Push Subscription URL >';
+  keys: {
+    p256dh: '< User Public Encryption Key >',
+    auth: '< User Auth Secret >'
+  }
+};
 
-    const payload = '< Push Payload String >';
+const payload = '< Push Payload String >';
 
-    const options = {
-      gcmAPIKey: '< GCM API Key >',
-      vapidDetails: {
-        subject: '< \'mailto\' Address or URL >',
-        publicKey: '< URL Safe Base64 Encoded Public Key >',
-        privateKey: '< URL Safe Base64 Encoded Private Key >',
-      }
-      TTL: <Number>
-    }
+const options = {
+  gcmAPIKey: '< GCM API Key >',
+  vapidDetails: {
+    subject: '< \'mailto\' Address or URL >',
+    publicKey: '< URL Safe Base64 Encoded Public Key >',
+    privateKey: '< URL Safe Base64 Encoded Private Key >',
+  }
+  TTL: <Number>
+}
 
-    webpush.sendNotification(
-      pushSubscription,
-      payload,
-      options
-    );
+webpush.sendNotification(
+  pushSubscription,
+  payload,
+  options
+);
+```
 
 ### Input
 
@@ -161,10 +167,12 @@ values on the returned object or error.
 
 ## generateVAPIDKeys()
 
-    const vapidKeys = webpush.generateVAPIDKeys();
+```javascript
+const vapidKeys = webpush.generateVAPIDKeys();
 
-    // Prints 2 URL Safe Base64 Encoded Strings
-    console.log(vapidKeys.publicKey, vapidKeys.privateKey);
+// Prints 2 URL Safe Base64 Encoded Strings
+console.log(vapidKeys.publicKey, vapidKeys.privateKey);
+```
 
 ### Input
 
@@ -182,7 +190,9 @@ URL Safe Base64 encoded strings.
 
 ## setGCMAPIKey(apiKey)
 
-    webpush.setGCMAPIKey('Your GCM API Key');
+```javascript
+webpush.setGCMAPIKey('Your GCM API Key');
+```
 
 ### Input
 
@@ -200,21 +210,23 @@ None.
 
 ## encrypt(userPublicKey, userAuth, payload)
 
-    const pushSubscription = {
-      endpoint: 'https://....',
-      keys: {
-        p256dh: '.....',
-        auth: '.....'
-      }
-    };
-    webPush.encrypt(
-      pushSubscription.keys.p256dh,
-      pushSubscription.keys.auth,
-      'My Payload'
-    )
-    .then(encryptionDetails => {
+```javascript
+const pushSubscription = {
+  endpoint: 'https://....',
+  keys: {
+    p256dh: '.....',
+    auth: '.....'
+  }
+};
+webPush.encrypt(
+  pushSubscription.keys.p256dh,
+  pushSubscription.keys.auth,
+  'My Payload'
+)
+.then(encryptionDetails => {
 
-    });
+});
+```
 
 Encrypts the payload according to the [Message Encryption for Web
 Push](https://webpush-wg.github.io/webpush-encryption/) standard.
