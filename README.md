@@ -30,32 +30,31 @@ Installation is a simple, just install via npm.
 
 # Usage
 
-// TODO: Show how to generate VAPID Keys
-
-// TODO: Simplify to just send to single subscription and remove getUserPushSubscription().
-
 The common use case for this library is an application server using
 a GCM API key and VAPID keys.
 
     const webpush = require('web-push');
 
+    // VAPID keys should only be generated only once.
+    const vapidKeys = webpush.generateVAPIDKeys();
+
     webpush.setGCMAPIKey('<Your GCM API Key Here>');
     webpush.setVapidDetails(
       'mailto:example@yourdomain.org',
-      '<Your URL Safe Base64 encoded VAPID Public Key>',
-      '<Your URL Safe Base64 encoded VAPID Private Key>',
+      vapidKeys.publicKey,
+      vapidKeys.privateKey
     );
 
-    const pushSubscriptions = getUserPushsubscriptsion();
-    pushSubscriptions.forEach(pushSubscription => {
-      // A subscription object should take the same format as you get from
-      // the browser when you JSON.stringify() a push subscription.
+    // This is the same output of calling JSON.stringify on a PushSubscription
+    const pushSubscription = {
+      endpoint: '.....',
+      keys: {
+        auth: '.....',
+        p256dh: '.....'
+      }
+    };
 
-      webpush.sendNotification(pushSubscription, 'Your Push Payload Text');
-    });
-
-The VAPID details you can generate for the first time using the
-`generateVAPIDKeys()`.
+    webpush.sendNotification(pushSubscription, 'Your Push Payload Text');
 
 # API Referance
 
