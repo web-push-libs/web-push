@@ -216,9 +216,9 @@ encryption.
   <thead>
     <tr>
       <td><strong>Browser</strong></td>
-      <td colspan="2"><strong>Push without Payload</strong></td>
-      <td colspan="2"><strong>Push with Payload</strong></td>
-      <td colspan="2"><strong>VAPID</strong></td>
+      <td><strong>Push without Payload</strong></td>
+      <td><strong>Push with Payload</strong></td>
+      <td><strong>VAPID</strong></td>
       <td><strong>Notes</strong></td>
     </tr>
   </thead>
@@ -231,12 +231,10 @@ encryption.
       <td>Since v42</td>
 
       <!-- Push with payload support -->
-      <td>✓</td>
-      <td>Since v50</td>
+      <td>✓ Since v50</td>
 
       <!-- VAPID Support -->
-      <td>✓</td>
-      <td>Since v52</td>
+      <td>✓ Since v52</td>
 
       <td>In v51 and less, gcm_sender_id is needed to get a push subscription.</td>
     </tr>
@@ -246,15 +244,12 @@ encryption.
 
       <!-- Push without payloads support-->
       <td>✗</td>
-      <td></td>
 
       <!-- Push with payload support -->
       <td>✗</td>
-      <td></td>
 
       <!-- VAPID Support -->
       <td>✗</td>
-      <td></td>
 
       <td></td>
     </tr>
@@ -263,16 +258,13 @@ encryption.
       <td>Chrome</td>
 
       <!-- Push without payloads support-->
-      <td>✓</td>
-      <td>Since v44</td>
+      <td>✓ Since v44</td>
 
       <!-- Push with payload support -->
-      <td>✓</td>
-      <td>Since v44</td>
+      <td>✓ Since v44</td>
 
       <!-- VAPID Support -->
-      <td>✓</td>
-      <td>Since v46</td>
+      <td>✓ Since v46</td>
 
       <td>In v51 and less, gcm_sender_id is needed to get a push subscription.</td>
     </tr>
@@ -281,16 +273,13 @@ encryption.
       <td>Opera</td>
 
       <!-- Push without payloads support-->
-      <td>✓</td>
-      <td>Since v39*</td>
+      <td>✓ Since v39*</td>
 
       <!-- Push with payload support -->
-      <td>✓</td>
-      <td>Since v39*</td>
+      <td>✓ Since v39*</td>
 
       <!-- VAPID Support -->
       <td>✗</td>
-      <td></td>
 
       <td>
         * Push only suppported on Opera for Android.
@@ -304,15 +293,12 @@ encryption.
 
       <!-- Push without payloads support-->
       <td>✗</td>
-      <td></td>
 
       <!-- Push with payload support -->
       <td>✗</td>
-      <td></td>
 
       <!-- VAPID Support -->
       <td>✗</td>
-      <td></td>
 
       <td></td>
     </tr>
@@ -321,16 +307,13 @@ encryption.
       <td>Samsung Internet Browser</td>
 
       <!-- Push without payloads support-->
-      <td>✓</td>
-      <td>Since v4.0.10-53</td>
+      <td>✓ Since v4.0.10-53</td>
 
       <!-- Push with payload support -->
       <td>✗</td>
-      <td></td>
 
       <!-- VAPID Support -->
       <td>✗</td>
-      <td></td>
 
       <td>The gcm_sender_id is needed to get a push subscription</td>
     </tr>
