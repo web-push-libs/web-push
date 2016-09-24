@@ -1,8 +1,5 @@
 'use strict';
 
-// This loads up shims required for older versions of node.
-require('./shim');
-
 const vapidHelper = require('./vapid-helper.js');
 const encryptionHelper = require('./encryption-helper.js');
 const WebPushLib = require('./web-push-lib.js');
