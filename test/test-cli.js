@@ -1,5 +1,11 @@
 'use strict';
 
+const invalidNodeVersions = /0.(10|12).(\d+)/;
+if (process.versions.node.match(invalidNodeVersions)) {
+  console.log('Skipping CLI tests as they can\'t run on node: ' + process.versions.node);
+  return;
+}
+
 const assert = require('assert');
 const urlBase64 = require('urlsafe-base64');
 const spawn = require('child_process').spawn;
