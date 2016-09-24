@@ -1,10 +1,9 @@
 #! /usr/bin/env node
-const fs = require('fs');
+/* eslint consistent-return:0*/
+
 const webPush = require('../src/index.js');
 
 const printUsageDetails = () => {
-  const spc = '  ';
-
   const actions = [
     {
       name: 'send-notification',
@@ -45,7 +44,7 @@ const generateVapidKeys = returnJson => {
   if (returnJson) {
     outputText = JSON.stringify(vapidKeys);
   } else {
-    const outputLine = '\n=======================================\n'
+    const outputLine = '\n=======================================\n';
     outputText = outputLine + '\n' +
       'Public Key:\n' + vapidKeys.publicKey + '\n\n' +
       'Private Key:\n' + vapidKeys.privateKey + '\n' +
@@ -62,31 +61,31 @@ const sendNotification = args => {
   }
 
   const subscription = {
-    endpoint: argv.endpoint,
+    endpoint: args.endpoint,
     keys: {
-      p256dh: argv.key || null,
-      auth: argv.auth || null
+      p256dh: args.key || null,
+      auth: args.auth || null
     }
   };
 
-  const payload = argv.payload || null;
+  const payload = args.payload || null;
 
   const options = {};
 
-  if (argv.ttl) {
-    options.TTL = argv.ttl;
+  if (args.ttl) {
+    options.TTL = args.ttl;
   }
 
   if (argv['vapid-subject'] || argv['vapid-pubkey'] || argv['vapid-pvtkey']) {
     options.vapidDetails = {
-      subject: argv['vapid-subject'] || null,
-      publicKey: argv['vapid-pubkey'] || null,
-      privateKey: argv['vapid-pvtkey'] || null
-    }
+      subject: args['vapid-subject'] || null,
+      publicKey: args['vapid-pubkey'] || null,
+      privateKey: args['vapid-pvtkey'] || null
+    };
   }
 
-  if (argv['gcm-api-key']) {
-    options.gcmAPIKey = argv['gcm-api-key'];
+  if (args['gcm-api-key']) {
+    options.gcmAPIKey = args['gcm-api-key'];
   }
 
   webPush.sendNotification(subscription, payload, options)
