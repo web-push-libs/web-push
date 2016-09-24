@@ -1,68 +1,108 @@
 #! /usr/bin/env node
 const fs = require('fs');
-const webPush = require('web-push');
-webPush.setGCMAPIKey(process.env.GCM_API_KEY);
+const webPush = require('../src/index.js');
 
-const argv = require('minimist')(process.argv.slice(2));
+const printUsageDetails = () => {
+  const spc = '  ';
 
-const usage = 'Use: web-push --endpoint=<url> --key=<browser key> ' +
-  '[--auth=<auth secret>] [--ttl=<seconds>] [--payload=<message>] ' +
-  '[--vapid-audience] [--vapid-subject] [--vapid-pvtkey] [--vapid-pubkey]';
+  const actions = [
+    {
+      name: 'send-notification',
+      options: [
+        '--endpoint=<url>',
+        '[--key=<browser key>]',
+        '[--auth=<auth secret>]',
+        '[--payload=<message>]',
+        '[--ttl=<seconds>]',
+        '[--vapid-subject]',
+        '[--vapid-pubkey]',
+        '[--vapid-pvtkey]'
+      ]
+    }, {
+      name: 'generate-vapid-keys',
+      options: [
+        '[--json]'
+      ]
+    }
+  ];
 
-if (!argv.endpoint || !argv.key) {
+  let usage = '\nUsage: \n\n';
+  actions.forEach(action => {
+    usage += '  web-push ' + action.name;
+    usage += ' ' + action.options.join(' ');
+    usage += '\n\n';
+  });
+
   console.log(usage);
   process.exit(1);
-}
+};
 
-const endpoint = argv.endpoint;
-const key = argv.key;
-const ttl = argv.ttl || 0;
-const payload = argv.payload || '';
-const auth = argv.auth || null;
+const generateVapidKeys = returnJson => {
+  const vapidKeys = webPush.generateVAPIDKeys();
 
-const vapidAudience = argv['vapid-audience'] || null;
-const vapidSubject = argv['vapid-subject'] || null;
-const vapidPubKey = argv['vapid-pubkey'] || null;
-const vapidPvtKey = argv['vapid-pvtkey'] || null;
-
-function getKeys() {
-  if (vapidPubKey && vapidPvtKey) {
-    const publicKey = fs.readFileSync(vapidPubKey);
-    const privateKey = fs.readFileSync(vapidPvtKey);
-
-    if (publicKey && privateKey) {
-      return {
-        privateKey,
-        publicKey
-      };
-    }
+  let outputText;
+  if (returnJson) {
+    outputText = JSON.stringify(vapidKeys);
+  } else {
+    const outputLine = '\n=======================================\n'
+    outputText = outputLine + '\n' +
+      'Public Key:\n' + vapidKeys.publicKey + '\n\n' +
+      'Private Key:\n' + vapidKeys.privateKey + '\n' +
+      outputLine;
   }
 
-  return webPush.generateVAPIDKeys();
-}
-
-let params = {
-  TTL: ttl,
-  payload,
-  userPublicKey: key
-};
-if (vapidAudience && vapidSubject) {
-  const vapidKeys = getKeys();
-  const vapid = {
-    audience: vapidAudience,
-    subject: `mailto:${vapidSubject}`,
-    privateKey: vapidKeys.privateKey,
-    publicKey: vapidKeys.publicKey
-  };
-  params.vapid = vapid;
-}
-if (auth) {
-  params.userAuth = auth;
-}
-webPush.sendNotification(endpoint, params).then(() => {
-  console.log('Push message sent.');
-}, (err) => {
-  console.log('Error sending push message: ', err);
-}).then(() => {
+  console.log(outputText);
   process.exit(0);
-});
+};
+
+const sendNotification = args => {
+  webPush.setGCMAPIKey(process.env.GCM_API_KEY);
+
+  const subscription = {
+    endpoint: argv.endpoint,
+    keys: {
+      p256dh: argv.key || null,
+      auth: argv.auth || null
+    }
+  };
+
+  const payload = argv.payload || null;
+
+  const options = {
+    TTL: argv.ttl || 0,
+    vapid: {
+      subject: argv['vapid-subject'] || null,
+      publicKey: argv['vapid-pubkey'] || null,
+      privateKey: argv['vapid-pvtkey'] || null
+    }
+  };
+
+  webPush.sendNotification(subscription, payload, options)
+  .then(() => {
+    console.log('Push message sent.');
+  }, err => {
+    console.log('Error sending push message: ');
+    console.log(err);
+  })
+  .then(() => {
+    process.exit(0);
+  });
+};
+
+const action = process.argv[2];
+const argv = require('minimist')(process.argv.slice(3));
+switch (action) {
+  case 'send-notification':
+    if (!argv.endpoint || !argv.key) {
+      return printUsageDetails();
+    }
+
+    sendNotification(argv);
+    break;
+  case 'generate-vapid-keys':
+    generateVapidKeys(argv.json || false);
+    break;
+  default:
+    printUsageDetails();
+    break;
+}
