@@ -13,7 +13,7 @@
 
   const cliPath = 'src/cli.js';
 
-  suite('Test Encryption Helpers', function() {
+  suite('Test CLI', function() {
     test('no args run', function() {
       return new Promise(function(resolve) {
         const webpushCLISpawn = spawn('node', [
