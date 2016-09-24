@@ -1,12 +1,6 @@
 'use strict';
 
 (function() {
-  const invalidNodeVersions = /0.(10|12).(\d+)/;
-  if (process.versions.node.match(invalidNodeVersions)) {
-    console.log('Skipping downloading browsers as selenium tests can\'t run on ' + process.versions.node);
-    return null;
-  }
-
   /* eslint-disable global-require*/
   const seleniumAssistant = require('selenium-assistant');
   /* eslint-enable global-require*/
