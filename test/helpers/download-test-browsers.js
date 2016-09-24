@@ -1,30 +1,26 @@
 'use strict';
 
-(function() {
-  /* eslint-disable global-require*/
-  const seleniumAssistant = require('selenium-assistant');
-  /* eslint-enable global-require*/
+const seleniumAssistant = require('selenium-assistant');
 
-  let forceDownload = false;
-  if (process.env.TRAVIS) {
-    forceDownload = true;
-  }
+let forceDownload = false;
+if (process.env.TRAVIS) {
+  forceDownload = true;
+}
 
-  const promises = [
-    seleniumAssistant.downloadBrowser('firefox', 'stable', forceDownload),
-    seleniumAssistant.downloadBrowser('firefox', 'beta', forceDownload),
-    seleniumAssistant.downloadBrowser('firefox', 'unstable', forceDownload),
-    seleniumAssistant.downloadBrowser('chrome', 'stable', forceDownload),
-    seleniumAssistant.downloadBrowser('chrome', 'beta', forceDownload),
-    seleniumAssistant.downloadBrowser('chrome', 'unstable', forceDownload)
-  ];
+const promises = [
+  seleniumAssistant.downloadBrowser('firefox', 'stable', forceDownload),
+  seleniumAssistant.downloadBrowser('firefox', 'beta', forceDownload),
+  seleniumAssistant.downloadBrowser('firefox', 'unstable', forceDownload),
+  seleniumAssistant.downloadBrowser('chrome', 'stable', forceDownload),
+  seleniumAssistant.downloadBrowser('chrome', 'beta', forceDownload),
+  seleniumAssistant.downloadBrowser('chrome', 'unstable', forceDownload)
+];
 
-  return Promise.all(promises)
-  .then(function() {
-    console.log('Download complete.');
-  })
-  .catch(function(err) {
-    console.error('Unable to download browsers.', err);
-    process.exit(1);
-  });
-})();
+Promise.all(promises)
+.then(function() {
+  console.log('Download complete.');
+})
+.catch(function(err) {
+  console.error('Unable to download browsers.', err);
+  process.exit(1);
+});
