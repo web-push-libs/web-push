@@ -89,6 +89,24 @@ registration.pushManager.subscribe({
 });
 ```
 
+## Command Line
+
+You can install `web-push` globally and use it for send notifications and / or
+generating VAPID keys.
+
+Install like so:
+
+    npm install web-push -g
+
+Then you can run the following commands:
+
+    Usage:
+
+      web-push send-notification --endpoint=<url> [--key=<browser key>] [--auth=<auth secret>] [--payload=<message>] [--ttl=<seconds>] [--vapid-subject=<vapid subject>] [--vapid-pubkey=<public key url base64>] [--vapid-pvtkey=<private key url base64>] [--gcm-api-key=<api key>]
+
+      web-push generate-vapid-keys [--json]
+
+
 # API Reference
 
 ## sendNotification(pushSubscription, payload, options)
