@@ -7,7 +7,6 @@ const fs = require('fs');
 const path = require('path');
 const ece = require('http_ece');
 const urlBase64 = require('urlsafe-base64');
-const semver = require('semver');
 const portfinder = require('portfinder');
 const jws = require('jws');
 
@@ -274,14 +273,7 @@ suite('sendNotification', function() {
           }
         }
       }
-    }
-  ];
-
-  // TODO: Add test for VAPID override
-
-  // This test fails on Node.js v0.12.
-  if (!semver.satisfies(process.version, '0.12')) {
-    validRequests.push({
+    }, {
       testTitle: 'send/receive empty message',
       requestOptions: {
         subscription: {
@@ -292,8 +284,10 @@ suite('sendNotification', function() {
           TTL: 5
         }
       }
-    });
-  }
+    }
+  ];
+
+  // TODO: Add test for VAPID override
 
   validRequests.forEach(function(validRequest) {
     test(validRequest.testTitle, function() {

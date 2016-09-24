@@ -15,8 +15,6 @@ env:
     - DISPLAY=$(if [[ $TRAVIS_OS_NAME == "linux" ]]; then echo ':99.0'; fi)
     - MOZ_XVFB=$(if [[ $TRAVIS_OS_NAME == "linux" ]]; then echo 1; fi)
   matrix:
-    - NODE_VERSION="0.10"
-    - NODE_VERSION="0.12"
     - NODE_VERSION="4"
     - NODE_VERSION="stable"
 before_install:
@@ -32,6 +30,5 @@ install:
 before_script:
   - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sh -e /etc/init.d/xvfb start; fi
 script:
-  - if [[ $NODE_VERSION != "0.10" && $NODE_VERSION != "0.12" ]]; then $NPM run lint; fi
   - $NPM test
 sudo: required
