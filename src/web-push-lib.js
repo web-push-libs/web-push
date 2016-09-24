@@ -113,7 +113,7 @@ WebPushLib.prototype.sendNotification =
         'TTL'
       ];
       const optionKeys = Object.keys(options);
-      for (let i = 0; i < optionKeys.length; i++) {
+      for (let i = 0; i < optionKeys.length; i += 1) {
         const optionKey = optionKeys[i];
         if (validOptionKeys.indexOf(optionKey) === -1) {
           return Promise.reject('\'' + optionKey + '\' is an invalid option. ' +
@@ -227,7 +227,7 @@ WebPushLib.prototype.sendNotification =
               pushResponse.statusCode, pushResponse.headers, responseText));
           } else {
             resolve({
-              status: pushResponse.statusCode,
+              statusCode: pushResponse.statusCode,
               body: responseText,
               headers: pushResponse.headers
             });
