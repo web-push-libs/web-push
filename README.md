@@ -91,8 +91,8 @@ registration.pushManager.subscribe({
 
 ## Command Line
 
-You can install `web-push` globally and use it for send notifications and / or
-generating VAPID keys.
+You can install `web-push` globally and use it for sending notifications
+and / or generating VAPID keys.
 
 Install like so:
 
