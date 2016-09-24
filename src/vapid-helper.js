@@ -39,7 +39,7 @@ function generateVAPIDKeys() {
 
 function validateSubject(subject) {
   if (!subject) {
-    throw new Error('No subject set in vapid.subject.');
+    throw new Error('No subject set in vapidDetails.subject.');
   }
 
   if (typeof subject !== 'string' || subject.length === 0) {
@@ -57,7 +57,7 @@ function validateSubject(subject) {
 
 function validatePublicKey(publicKey) {
   if (!publicKey) {
-    throw new Error('No key set vapid.publicKey');
+    throw new Error('No key set vapidDetails.publicKey');
   }
 
   if (typeof publicKey !== 'string') {
@@ -74,7 +74,7 @@ function validatePublicKey(publicKey) {
 
 function validatePrivateKey(privateKey) {
   if (!privateKey) {
-    throw new Error('No key set in vapid.privateKey');
+    throw new Error('No key set in vapidDetails.privateKey');
   }
 
   if (typeof privateKey !== 'string') {
@@ -103,7 +103,7 @@ function validatePrivateKey(privateKey) {
  */
 function getVapidHeaders(audience, subject, publicKey, privateKey, expiration) {
   if (!audience) {
-    throw new Error('No audience set in vapid.audience.');
+    throw new Error('No audience could be generated for VAPID.');
   }
 
   if (typeof audience !== 'string' || audience.length === 0) {

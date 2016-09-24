@@ -4,7 +4,7 @@
   "description": "Web Push library for Node.js",
   "main": "src/index.js",
   "bin": {
-    "web-push": "bin/web-push.js"
+    "web-push": "src/cli.js"
   },
   "scripts": {
     "download-browser": "node --harmony ./test/helpers/download-test-browsers.js",

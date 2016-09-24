@@ -14,9 +14,10 @@ const printUsageDetails = () => {
         '[--auth=<auth secret>]',
         '[--payload=<message>]',
         '[--ttl=<seconds>]',
-        '[--vapid-subject]',
-        '[--vapid-pubkey]',
-        '[--vapid-pvtkey]'
+        '[--vapid-subject=<vapid subject>]',
+        '[--vapid-pubkey=<public key url base64>]',
+        '[--vapid-pvtkey=<private key url base64>]',
+        '[--gcm-api-key=<api key>]'
       ]
     }, {
       name: 'generate-vapid-keys',
@@ -56,7 +57,9 @@ const generateVapidKeys = returnJson => {
 };
 
 const sendNotification = args => {
-  webPush.setGCMAPIKey(process.env.GCM_API_KEY);
+  if (process.env.GCM_API_KEY) {
+    webPush.setGCMAPIKey(process.env.GCM_API_KEY);
+  }
 
   const subscription = {
     endpoint: argv.endpoint,
@@ -68,14 +71,23 @@ const sendNotification = args => {
 
   const payload = argv.payload || null;
 
-  const options = {
-    TTL: argv.ttl || 0,
-    vapid: {
+  const options = {};
+
+  if (argv.ttl) {
+    options.TTL = argv.ttl;
+  }
+
+  if (argv['vapid-subject'] || argv['vapid-pubkey'] || argv['vapid-pvtkey']) {
+    options.vapidDetails = {
       subject: argv['vapid-subject'] || null,
       publicKey: argv['vapid-pubkey'] || null,
       privateKey: argv['vapid-pvtkey'] || null
     }
-  };
+  }
+
+  if (argv['gcm-api-key']) {
+    options.gcmAPIKey = argv['gcm-api-key'];
+  }
 
   webPush.sendNotification(subscription, payload, options)
   .then(() => {
@@ -93,7 +105,7 @@ const action = process.argv[2];
 const argv = require('minimist')(process.argv.slice(3));
 switch (action) {
   case 'send-notification':
-    if (!argv.endpoint || !argv.key) {
+    if (!argv.endpoint) {
       return printUsageDetails();
     }
 
