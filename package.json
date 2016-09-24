@@ -9,7 +9,7 @@
   "scripts": {
     "download-browser": "node --harmony ./test/helpers/download-test-browsers.js",
     "lint": "node ./node_modules/eslint/bin/eslint --ignore-path .gitignore '.'",
-    "pretest": "npm run download-browser",
+    "pretest": "npm run lint && npm run download-browser",
     "test": "node --harmony node_modules/.bin/istanbul cover node_modules/.bin/_mocha -- --ui tdd test/test*"
   },
   "repository": {
