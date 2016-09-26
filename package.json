@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/marco-c/web-push.git"
+    "url": "git+https://github.com/web-push-libs/web-push.git"
   },
   "keywords": [
     "web push",
