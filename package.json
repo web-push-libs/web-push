@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/marco-c/web-push.git"
+    "url": "git+https://github.com/web-push-libs/web-push.git"
   },
   "keywords": [
     "web push",
@@ -25,9 +25,9 @@
   "author": "Marco Castelluccio",
   "license": "MPL-2.0",
   "bugs": {
-    "url": "https://github.com/marco-c/web-push/issues"
+    "url": "https://github.com/web-push-libs/web-push/issues"
   },
-  "homepage": "https://github.com/marco-c/web-push#readme",
+  "homepage": "https://github.com/web-push-libs/web-push#readme",
   "dependencies": {
     "asn1.js": "^4.8.1",
     "http_ece": "^0.5.1",
