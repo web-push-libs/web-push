@@ -113,7 +113,7 @@ Then you can run the following commands:
 
 ```javascript
 const pushSubscription = {
-  endpoint: '< Push Subscription URL >';
+  endpoint: '< Push Subscription URL >',
   keys: {
     p256dh: '< User Public Encryption Key >',
     auth: '< User Auth Secret >'
@@ -127,8 +127,8 @@ const options = {
   vapidDetails: {
     subject: '< \'mailto\' Address or URL >',
     publicKey: '< URL Safe Base64 Encoded Public Key >',
-    privateKey: '< URL Safe Base64 Encoded Private Key >',
-  }
+    privateKey: '< URL Safe Base64 Encoded Private Key >'
+  },
   TTL: <Number>
 }
 
