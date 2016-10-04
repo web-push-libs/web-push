@@ -24,7 +24,7 @@ for browsers relying on GCM for message sending / delivery.
 
 # Install
 
-Installation is a simple, just install via npm.
+Installation is simple, just install via npm.
 
     npm install web-push --save
 
@@ -61,7 +61,7 @@ webpush.sendNotification(pushSubscription, 'Your Push Payload Text');
 ## Using VAPID Key for applicationServerKey
 
 When using your VAPID key in your web app, you'll need to convert the
-URL safe base64 string in a Uint8Array to pass into the subscribe call,
+URL safe base64 string in to a Uint8Array to pass into the subscribe call,
 which you can do like so:
 
 ```javascript
