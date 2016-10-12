@@ -234,8 +234,6 @@ WebPushLib.prototype.sendNotification =
     }
 
     return new Promise(function(resolve, reject) {
-      console.log(requestDetails);
-
       const httpsOptions = {};
       const urlParts = url.parse(requestDetails.endpoint);
       httpsOptions.hostname = urlParts.hostname;
@@ -243,8 +241,7 @@ WebPushLib.prototype.sendNotification =
       httpsOptions.path = urlParts.path;
 
       httpsOptions.headers = requestDetails.headers;
-
-      console.log(httpsOptions);
+      httpsOptions.method = requestDetails.method;
 
       const pushRequest = https.request(httpsOptions, function(pushResponse) {
         let responseText = '';
@@ -255,6 +252,7 @@ WebPushLib.prototype.sendNotification =
 
         pushResponse.on('end', function() {
           if (pushResponse.statusCode !== 201) {
+            console.log(responseText);
             reject(new WebPushError('Received unexpected response code',
               pushResponse.statusCode, pushResponse.headers, responseText));
           } else {
