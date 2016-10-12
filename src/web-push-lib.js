@@ -67,8 +67,10 @@ WebPushLib.prototype.setVapidDetails =
   };
 
   /**
-   * To send a push notification call this method with a subscription, optional
-   * payload and any options.
+   * To get the details of a request to trigger a push message, without sending
+   * a push notification call this method.
+   *
+   * This method will throw an error if there is an issue with the input.
    * @param  {PushSubscription} subscription The PushSubscription you wish to
    * send the notification to.
    * @param  {string} [payload]              The payload you wish to send to the
@@ -76,9 +78,8 @@ WebPushLib.prototype.setVapidDetails =
    * @param  {Object} [options]              Options for the GCM API key and
    * vapid keys can be passed in if they are unique for each notification you
    * wish to send.
-   * @return {Promise}                       This method returns a Promise which
-   * resolves if the sending of the notification was successful, otherwise it
-   * rejects.
+   * @return {Object}                       This method returns an Object which
+   * contains 'endpoint', 'method', 'headers' and 'payload'.
    */
 WebPushLib.prototype.generateRequestDetails =
   function(subscription, payload, options) {
@@ -203,7 +204,7 @@ WebPushLib.prototype.generateRequestDetails =
       }
     }
 
-    requestDetails.payload = requestPayload;
+    requestDetails.body = requestPayload;
     requestDetails.endpoint = subscription.endpoint;
 
     return requestDetails;
@@ -269,8 +270,8 @@ WebPushLib.prototype.sendNotification =
         reject(e);
       });
 
-      if (requestDetails.payload) {
-        pushRequest.write(requestDetails.payload);
+      if (requestDetails.body) {
+        pushRequest.write(requestDetails.body);
       }
 
       pushRequest.end();
