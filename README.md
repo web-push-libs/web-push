@@ -293,7 +293,7 @@ const vapidHeaders = vapidHelper.getVapidHeaders(
 );
 ```
 
-The *getVapidHeaders()* method will take in the values needed to create a
+The *getVapidHeaders()* method will take in the values needed to create
 an Authorization and Crypto-Key header.
 
 ### Input
@@ -352,7 +352,7 @@ try {
 
 > **Note:** When calling `generateRequestDetails()` the payload argument
 does not *need* to be defined, passing in null will return no body and
-> exclude any unnesscary headers.
+> exclude any unnecessary headers.
 > Headers related to the GCM API Key and / or VAPID keys will be included
 > if supplied and required.
 
