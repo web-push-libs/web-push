@@ -158,15 +158,14 @@ WebPushLib.prototype.generateRequestDetails =
           'required encryption keys'));
       }
 
-    try {
       const encrypted = encryptionHelper.encrypt(
         subscription.keys.p256dh, subscription.keys.auth, payload);
 
-      requestOptions.headers['Content-Length'] = encrypted.cipherText.length;
-      requestOptions.headers['Content-Type'] = 'application/octet-stream';
-      requestOptions.headers['Content-Encoding'] = 'aesgcm';
-      requestOptions.headers.Encryption = 'salt=' + encrypted.salt;
-      requestOptions.headers['Crypto-Key'] = 'dh=' + urlBase64.encode(encrypted.localPublicKey);
+      requestDetails.headers['Content-Length'] = encrypted.cipherText.length;
+      requestDetails.headers['Content-Type'] = 'application/octet-stream';
+      requestDetails.headers['Content-Encoding'] = 'aesgcm';
+      requestDetails.headers.Encryption = 'salt=' + encrypted.salt;
+      requestDetails.headers['Crypto-Key'] = 'dh=' + urlBase64.encode(encrypted.localPublicKey);
 
       requestPayload = encrypted.cipherText;
     } else {
