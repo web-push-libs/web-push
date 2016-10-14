@@ -293,11 +293,8 @@ const vapidHeaders = vapidHelper.getVapidHeaders(
 );
 ```
 
-Encrypts the payload according to the [Message Encryption for Web
-Push](https://webpush-wg.github.io/webpush-encryption/) standard.
-
-> (*sendNotification* will automatically encrypt the payload for you, so if
-> you use *sendNotification* you don't need to worry about it).
+The *getVapidHeaders()* method will take in the values needed to create a
+an Authorization and Crypto-Key header.
 
 ### Input
 
@@ -353,8 +350,11 @@ try {
 }
 ```
 
-> **Note:** `generateRequestDetails()` you don't need to define a payload,
-and this method will return details without a GCM API Key and / or VAPID keys.
+> **Note:** When calling `generateRequestDetails()` the payload argument
+does not *need* to be defined, passing in null will return no body and
+> exclude any unnesscary headers.
+> Headers related to the GCM API Key and / or VAPID keys will be included
+> if supplied and required.
 
 ### Input
 
@@ -391,7 +391,7 @@ retained by the push service (by default, four weeks);
 
 ### Returns
 
-An object contains all the details needed to make a network request, the
+An object containing all the details needed to make a network request, the
 object will contain:
 
 - *endpoint*, the URL to send the request to;
