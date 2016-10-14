@@ -164,10 +164,8 @@ WebPushLib.prototype.sendNotification =
         requestOptions.headers['Content-Length'] = encrypted.cipherText.length;
         requestOptions.headers['Content-Type'] = 'application/octet-stream';
         requestOptions.headers['Content-Encoding'] = 'aesgcm';
-        requestOptions.headers.Encryption = 'keyid=p256dh;salt=' +
-          encrypted.salt;
-        requestOptions.headers['Crypto-Key'] = 'keyid=p256dh;dh=' +
-          urlBase64.encode(encrypted.localPublicKey);
+        requestOptions.headers.Encryption = 'salt=' + encrypted.salt;
+        requestOptions.headers['Crypto-Key'] = 'dh=' + urlBase64.encode(encrypted.localPublicKey);
 
         requestPayload = encrypted.cipherText;
       } catch (err) {
