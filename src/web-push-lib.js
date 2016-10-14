@@ -66,30 +66,30 @@ WebPushLib.prototype.setVapidDetails =
     };
   };
 
-/**
- * To send a push notification call this method with a subscription, optional
- * payload and any options.
- * @param  {PushSubscription} subscription The PushSubscription you wish to
- * send the notification to.
- * @param  {string} [payload]              The payload you wish to send to the
- * the user.
- * @param  {Object} [options]              Options for the GCM API key and
- * vapid keys can be passed in if they are unique for each notification you
- * wish to send.
- * @return {Promise}                       This method returns a Promise which
- * resolves if the sending of the notification was successful, otherwise it
- * rejects.
- */
-WebPushLib.prototype.sendNotification =
+  /**
+   * To send a push notification call this method with a subscription, optional
+   * payload and any options.
+   * @param  {PushSubscription} subscription The PushSubscription you wish to
+   * send the notification to.
+   * @param  {string} [payload]              The payload you wish to send to the
+   * the user.
+   * @param  {Object} [options]              Options for the GCM API key and
+   * vapid keys can be passed in if they are unique for each notification you
+   * wish to send.
+   * @return {Promise}                       This method returns a Promise which
+   * resolves if the sending of the notification was successful, otherwise it
+   * rejects.
+   */
+WebPushLib.prototype.generateRequestDetails =
   function(subscription, payload, options) {
     if (!subscription || !subscription.endpoint) {
-      return Promise.reject('You must pass in a subscription with at least ' +
+      throw new Error('You must pass in a subscription with at least ' +
         'an endpoint.');
     }
 
     if (typeof subscription.endpoint !== 'string' ||
       subscription.endpoint.length === 0) {
-      return Promise.reject('The subscription endpoint must be a string with ' +
+      throw new Error('The subscription endpoint must be a string with ' +
         'a valid URL.');
     }
 
@@ -97,7 +97,7 @@ WebPushLib.prototype.sendNotification =
       // Validate the subscription keys
       if (!subscription.keys || !subscription.keys.p256dh ||
         !subscription.keys.auth) {
-        return Promise.reject('To send a message with a payload, the ' +
+        throw new Error('To send a message with a payload, the ' +
           'subscription must have \'auth\' and \'p256dh\' keys.');
       }
     }
@@ -116,7 +116,7 @@ WebPushLib.prototype.sendNotification =
       for (let i = 0; i < optionKeys.length; i += 1) {
         const optionKey = optionKeys[i];
         if (validOptionKeys.indexOf(optionKey) === -1) {
-          return Promise.reject('\'' + optionKey + '\' is an invalid option. ' +
+          throw new Error('\'' + optionKey + '\' is an invalid option. ' +
             'The valid options are [\'' + validOptionKeys.join('\', \'') +
             '\'].');
         }
@@ -139,7 +139,7 @@ WebPushLib.prototype.sendNotification =
       timeToLive = DEFAULT_TTL;
     }
 
-    const requestOptions = {
+    const requestDetails = {
       method: 'POST',
       headers: {
         TTL: timeToLive
@@ -152,27 +152,24 @@ WebPushLib.prototype.sendNotification =
         typeof subscription !== 'object' ||
         !subscription.keys.p256dh ||
         !subscription.keys.auth) {
-        return Promise.reject(new Error('Unable to send a message with ' +
+        throw new Error(new Error('Unable to send a message with ' +
           'payload to this subscription since it doesn\'t have the ' +
           'required encryption keys'));
       }
 
-      try {
-        const encrypted = encryptionHelper.encrypt(
-          subscription.keys.p256dh, subscription.keys.auth, payload);
+    try {
+      const encrypted = encryptionHelper.encrypt(
+        subscription.keys.p256dh, subscription.keys.auth, payload);
 
-        requestOptions.headers['Content-Length'] = encrypted.cipherText.length;
-        requestOptions.headers['Content-Type'] = 'application/octet-stream';
-        requestOptions.headers['Content-Encoding'] = 'aesgcm';
-        requestOptions.headers.Encryption = 'salt=' + encrypted.salt;
-        requestOptions.headers['Crypto-Key'] = 'dh=' + urlBase64.encode(encrypted.localPublicKey);
+      requestOptions.headers['Content-Length'] = encrypted.cipherText.length;
+      requestOptions.headers['Content-Type'] = 'application/octet-stream';
+      requestOptions.headers['Content-Encoding'] = 'aesgcm';
+      requestOptions.headers.Encryption = 'salt=' + encrypted.salt;
+      requestOptions.headers['Crypto-Key'] = 'dh=' + urlBase64.encode(encrypted.localPublicKey);
 
-        requestPayload = encrypted.cipherText;
-      } catch (err) {
-        return Promise.reject(err);
-      }
+      requestPayload = encrypted.cipherText;
     } else {
-      requestOptions.headers['Content-Length'] = 0;
+      requestDetails.headers['Content-Length'] = 0;
     }
 
     const isGCM = subscription.endpoint.indexOf(
@@ -183,7 +180,7 @@ WebPushLib.prototype.sendNotification =
         console.warn('Attempt to send push notification to GCM endpoint, ' +
           'but no GCM key is defined'.bold.red);
       } else {
-        requestOptions.headers.Authorization = 'key=' + currentGCMAPIKey;
+        requestDetails.headers.Authorization = 'key=' + currentGCMAPIKey;
       }
     } else if (currentVapidDetails) {
       const parsedUrl = url.parse(subscription.endpoint);
@@ -197,22 +194,59 @@ WebPushLib.prototype.sendNotification =
         currentVapidDetails.privateKey
       );
 
-      requestOptions.headers.Authorization = vapidHeaders.Authorization;
-      if (requestOptions.headers['Crypto-Key']) {
-        requestOptions.headers['Crypto-Key'] += ';' +
+      requestDetails.headers.Authorization = vapidHeaders.Authorization;
+      if (requestDetails.headers['Crypto-Key']) {
+        requestDetails.headers['Crypto-Key'] += ';' +
           vapidHeaders['Crypto-Key'];
       } else {
-        requestOptions.headers['Crypto-Key'] = vapidHeaders['Crypto-Key'];
+        requestDetails.headers['Crypto-Key'] = vapidHeaders['Crypto-Key'];
       }
     }
 
-    return new Promise(function(resolve, reject) {
-      const urlParts = url.parse(subscription.endpoint);
-      requestOptions.hostname = urlParts.hostname;
-      requestOptions.port = urlParts.port;
-      requestOptions.path = urlParts.path;
+    requestDetails.payload = requestPayload;
+    requestDetails.endpoint = subscription.endpoint;
 
-      const pushRequest = https.request(requestOptions, function(pushResponse) {
+    return requestDetails;
+  };
+
+/**
+ * To send a push notification call this method with a subscription, optional
+ * payload and any options.
+ * @param  {PushSubscription} subscription The PushSubscription you wish to
+ * send the notification to.
+ * @param  {string} [payload]              The payload you wish to send to the
+ * the user.
+ * @param  {Object} [options]              Options for the GCM API key and
+ * vapid keys can be passed in if they are unique for each notification you
+ * wish to send.
+ * @return {Promise}                       This method returns a Promise which
+ * resolves if the sending of the notification was successful, otherwise it
+ * rejects.
+ */
+WebPushLib.prototype.sendNotification =
+  function(subscription, payload, options) {
+    let requestDetails;
+    try {
+      requestDetails = this.generateRequestDetails(
+        subscription, payload, options);
+    } catch (err) {
+      return Promise.reject(err);
+    }
+
+    return new Promise(function(resolve, reject) {
+      console.log(requestDetails);
+
+      const httpsOptions = {};
+      const urlParts = url.parse(requestDetails.endpoint);
+      httpsOptions.hostname = urlParts.hostname;
+      httpsOptions.port = urlParts.port;
+      httpsOptions.path = urlParts.path;
+
+      httpsOptions.headers = requestDetails.headers;
+
+      console.log(httpsOptions);
+
+      const pushRequest = https.request(httpsOptions, function(pushResponse) {
         let responseText = '';
 
         pushResponse.on('data', function(chunk) {
@@ -237,8 +271,8 @@ WebPushLib.prototype.sendNotification =
         reject(e);
       });
 
-      if (requestPayload) {
-        pushRequest.write(requestPayload);
+      if (requestDetails.payload) {
+        pushRequest.write(requestDetails.payload);
       }
 
       pushRequest.end();
