@@ -276,6 +276,131 @@ encryption.
 - *salt*: A string representing the salt used to encrypt the payload.
 - *cipherText*: The encrypted payload as a Buffer.
 
+<hr />
+
+## getVapidHeaders(audience, subject, publicKey, privateKey, expiration)
+
+```javascript
+const parsedUrl = url.parse(subscription.endpoint);
+const audience = parsedUrl.protocol + '//' +
+  parsedUrl.hostname;
+
+const vapidHeaders = vapidHelper.getVapidHeaders(
+  audience,
+  'mailto: example@web-push-node.org',
+  vapidDetails.publicKey,
+  vapidDetails.privateKey
+);
+```
+
+The *getVapidHeaders()* method will take in the values needed to create
+an Authorization and Crypto-Key header.
+
+### Input
+
+The `getVapidHeaders()` method expects the following input:
+
+- *audience*: the origin of the **push service**.
+- *subject*: the mailto or URL for your application.
+- *publicKey*: the VAPID public key.
+- *privateKey*: the VAPID private key.
+
+### Returns
+
+This method returns an object with the following fields:
+
+- *localPublicKey*: The public key matched the private key used during
+encryption.
+- *salt*: A string representing the salt used to encrypt the payload.
+- *cipherText*: The encrypted payload as a Buffer.
+
+<hr />
+
+## generateRequestDetails(pushSubscription, payload, options)
+
+```javascript
+const pushSubscription = {
+  endpoint: '< Push Subscription URL >';
+  keys: {
+    p256dh: '< User Public Encryption Key >',
+    auth: '< User Auth Secret >'
+  }
+};
+
+const payload = '< Push Payload String >';
+
+const options = {
+  gcmAPIKey: '< GCM API Key >',
+  vapidDetails: {
+    subject: '< \'mailto\' Address or URL >',
+    publicKey: '< URL Safe Base64 Encoded Public Key >',
+    privateKey: '< URL Safe Base64 Encoded Private Key >',
+  }
+  TTL: <Number>
+}
+
+try {
+  const details = webpush.generateRequestDetails(
+    pushSubscription,
+    payload,
+    options
+  );
+} catch (err) {
+  console.error(err);
+}
+```
+
+> **Note:** When calling `generateRequestDetails()` the payload argument
+does not *need* to be defined, passing in null will return no body and
+> exclude any unnecessary headers.
+> Headers related to the GCM API Key and / or VAPID keys will be included
+> if supplied and required.
+
+### Input
+
+**Push Subscription**
+
+The first argument must be an object containing the details for a push
+subscription.
+
+The expected format is the same output as JSON.stringify'ing a PushSubscription
+in the browser.
+
+**Payload**
+
+The payload is optional, but if set, will be encrypted and a [*Buffer*](https://nodejs.org/api/buffer.html)
+ will be returned via the `payload` parameter.
+
+This argument must be either a *string* or a node
+[*Buffer*](https://nodejs.org/api/buffer.html).
+
+> **Note:** In order to encrypt the *payload*, the *pushSubscription* **must**
+have a *keys* object with *p256dh* and *auth* values.
+
+**Options**
+
+Options is an optional argument that if defined should be an object containing
+any of the following values defined, although none of them are required.
+
+- **gcmAPIKey** can be a GCM API key to be used for this request and this
+request only. This overrides any API key set via `setGCMAPIKey()`.
+- **vapidDetails** should be an object with *subject*, *publicKey* and
+*privateKey* values defined. These values should follow the [VAPID Spec](https://tools.ietf.org/html/draft-thomson-webpush-vapid).
+- **TTL** is a value in seconds that describes how long a push message is
+retained by the push service (by default, four weeks);
+
+### Returns
+
+An object containing all the details needed to make a network request, the
+object will contain:
+
+- *endpoint*, the URL to send the request to;
+- *method*, this will be 'POST';
+- *headers*, the headers to add to the request;
+- *body*, the body of the request (As a Node Buffer).
+
+<hr />
+
 # Browser Support
 
 <table>

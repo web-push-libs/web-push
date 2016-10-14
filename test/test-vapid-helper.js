@@ -15,6 +15,7 @@ const VALID_EXPIRATION = Math.floor(Date.now() / 1000) + (60 * 60 * 12);
 suite('Test Vapid Helpers', function() {
   test('is defined', function() {
     assert(webPush.generateVAPIDKeys);
+    assert(webPush.getVapidHeaders);
   });
 
   test('generate vapid keys', function() {

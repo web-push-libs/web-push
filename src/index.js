@@ -8,8 +8,10 @@ const webPush = new WebPushLib();
 
 module.exports = {
   encrypt: encryptionHelper.encrypt,
+  getVapidHeaders: vapidHelper.getVapidHeaders,
   generateVAPIDKeys: vapidHelper.generateVAPIDKeys,
   setGCMAPIKey: webPush.setGCMAPIKey,
   setVapidDetails: webPush.setVapidDetails,
+  generateRequestDetails: webPush.generateRequestDetails,
   sendNotification: webPush.sendNotification
 };
