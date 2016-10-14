@@ -11,7 +11,7 @@
     "vars-on-top": 0,
     "no-use-before-define": 0,
     "space-before-function-paren": 0,
-    "max-len": [1, 80, 4, {"ignoreComments": true, "ignoreUrls": true}],
+    "max-len": [1, 120, 2, {"ignoreComments": true, "ignoreUrls": true}],
     "no-param-reassign": 0,
     "quote-props": 0,
     "wrap-iife": [2, "inside"],
