@@ -106,9 +106,11 @@ WebPushLib.prototype.generateRequestDetails =
     let currentGCMAPIKey = gcmAPIKey;
     let currentVapidDetails = vapidDetails;
     let timeToLive = DEFAULT_TTL;
+    let extraHeaders = {};
 
     if (options) {
       const validOptionKeys = [
+        'headers',
         'gcmAPIKey',
         'vapidDetails',
         'TTL'
@@ -120,6 +122,20 @@ WebPushLib.prototype.generateRequestDetails =
           throw new Error('\'' + optionKey + '\' is an invalid option. ' +
             'The valid options are [\'' + validOptionKeys.join('\', \'') +
             '\'].');
+        }
+      }
+
+      if (options.headers) {
+        extraHeaders = options.headers;
+        let duplicates = Object.keys(extraHeaders)
+            .filter(function (header) {
+              return typeof options[header] !== 'undefined';
+            });
+
+        if (duplicates.length > 0) {
+          throw new Error('Duplicated headers defined [' +
+            duplicates.join(',') + ']. Please either define the header in the' +
+            'top level options OR in the \'headers\' key.');
         }
       }
 
@@ -146,6 +162,9 @@ WebPushLib.prototype.generateRequestDetails =
         TTL: timeToLive
       }
     };
+    Object.keys(extraHeaders).forEach(function (header) {
+      requestDetails.headers[header] = extraHeaders[header];
+    });
     let requestPayload = null;
 
     if (payload) {

@@ -184,6 +184,21 @@ suite('Test Generate Request Details', function() {
           }
         }
       }
+    }, {
+      testTitle: 'duplicated headers',
+      requestOptions: {
+        subscription: {
+          keys: VALID_KEYS
+        },
+        message: 'hello',
+        addEndpoint: true,
+        extraOptions: {
+          TTL: 100,
+          headers: {
+            'TTL': 900
+          }
+        }
+      }
     }
   ];
 
@@ -207,5 +222,25 @@ suite('Test Generate Request Details', function() {
         );
       });
     });
+  });
+
+  test('Extra headers', function() {
+    let subscription = { endpoint: 'https://127.0.0.1:8080' };
+    let message;
+    let extraOptions = {
+      TTL: 100,
+      headers: {
+        'Topic': 'topic',
+        'Urgency': 'urgency'
+      }
+    };
+    let details = webPush.generateRequestDetails(
+      subscription,
+      message,
+      extraOptions
+    );
+    assert.equal(details.headers.TTL, extraOptions.TTL);
+    assert.equal(details.headers.Topic, extraOptions.headers.Topic);
+    assert.equal(details.headers.Urgency, extraOptions.headers.Urgency);
   });
 });
