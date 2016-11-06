@@ -191,6 +191,14 @@ suite('sendNotification', function() {
         assert.equal(requestDetails.headers.authorization, 'key=my_gcm_key', 'Check GCM Authorization header');
       }
     }
+
+    const extraHeaders = options.extraOptions && options.extraOptions.headers;
+    if (extraHeaders) {
+      Object.keys(extraHeaders).forEach(function (header) {
+        const normalizedName = header.toLowerCase();
+        assert.equal(requestDetails.headers[normalizedName], extraHeaders[header], 'Check presence of header ' + header);
+      });
+    }
   }
 
   const validRequests = [
@@ -282,6 +290,19 @@ suite('sendNotification', function() {
         message: '',
         extraOptions: {
           TTL: 5
+        }
+      }
+    }, {
+      testTitle: 'send/receive extra headers',
+      requestOptions: {
+        subscription: {
+          // The default endpoint will be added by the test
+        },
+        extraOptions: {
+          headers: {
+            Extra: 'extra',
+            'extra-2': 'extra-2'
+          }
         }
       }
     }
