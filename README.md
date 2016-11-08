@@ -480,7 +480,7 @@ object will contain:
       <td>✗</td>
 
       <td>
-        <strong>*</strong> Opera supports push Android but no on desktop.
+        <strong>*</strong> Opera supports push on Android but not on desktop.
         <br />
         <br />
         The `gcm_sender_id` is needed to get a push subscription.
