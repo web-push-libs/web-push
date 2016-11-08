@@ -177,7 +177,7 @@ request only. This overrides any API key set via `setGCMAPIKey()`.
 - **vapidDetails** should be an object with *subject*, *publicKey* and
 *privateKey* values defined. These values should follow the [VAPID Spec](https://tools.ietf.org/html/draft-thomson-webpush-vapid).
 - **TTL** is a value in seconds that describes how long a push message is
-retained by the push service (by default, four weeks);
+retained by the push service (by default, four weeks).
 - **headers** is an object with all the extra headers you want to add to the request.
 
 ### Returns
@@ -340,7 +340,10 @@ const options = {
     publicKey: '< URL Safe Base64 Encoded Public Key >',
     privateKey: '< URL Safe Base64 Encoded Private Key >',
   }
-  TTL: <Number>
+  TTL: <Number>,
+  headers: {
+    '< header name >': '< header value >'
+  }
 }
 
 try {
@@ -391,7 +394,8 @@ request only. This overrides any API key set via `setGCMAPIKey()`.
 - **vapidDetails** should be an object with *subject*, *publicKey* and
 *privateKey* values defined. These values should follow the [VAPID Spec](https://tools.ietf.org/html/draft-thomson-webpush-vapid).
 - **TTL** is a value in seconds that describes how long a push message is
-retained by the push service (by default, four weeks);
+retained by the push service (by default, four weeks).
+- **headers** is an object with all the extra headers you want to add to the request.
 
 ### Returns
 
