@@ -7,6 +7,17 @@
 *Node Version*: <4.2 | 6.0 | ...>
 *web-push Version*: <1.0.0>
 
+> Please select any browsers that you are experiencing problems with:
+
+- [ ] Google Chrome
+- [ ] Firefox
+- [ ] Opera for Android
+- [ ] Samsung Internet Browser
+- [ ] Other
+
+> Have you tried different versions of these browsers? I.e. Google Chrome
+> Beta and Firefox Beta? Did they produce the same result?
+
 # Problem
 
 > Please explain what behaviour you are seeing.
