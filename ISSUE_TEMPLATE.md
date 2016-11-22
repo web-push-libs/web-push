@@ -1,3 +1,6 @@
+**NOTE**: Please test in a least two browsers (i.e. Chrome and Firefox). This
+helps with diagnosing problems quicker.
+
 # Setup
 
 > Please provide the following details, the more info you can provide the
@@ -9,14 +12,14 @@
 
 > Please select any browsers that you are experiencing problems with:
 
-- [ ] Google Chrome
+- [ ] Chrome
 - [ ] Firefox
 - [ ] Opera for Android
 - [ ] Samsung Internet Browser
 - [ ] Other
 
-> Have you tried different versions of these browsers? I.e. Google Chrome
-> Beta and Firefox Beta? Did they produce the same result?
+> Please list the browsers you are have tested this, including the version
+> of the browser (i.e. Chrome Beta, Firefox Beta etc).
 
 # Problem
 
@@ -25,6 +28,12 @@
 # Expected
 
 > Please explain what you expected to happen
+
+# Features Used
+
+- [ ] VAPID Support
+- [ ] GCM API Key
+- [ ] Sending with Payload
 
 # Example / Reproduce Case
 
