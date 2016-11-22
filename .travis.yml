@@ -16,6 +16,7 @@ env:
     - MOZ_XVFB=$(if [[ $TRAVIS_OS_NAME == "linux" ]]; then echo 1; fi)
   matrix:
     - NODE_VERSION="4"
+    - NODE_VERSION="6"
     - NODE_VERSION="stable"
 before_install:
   - rm -rf ~/.nvm
