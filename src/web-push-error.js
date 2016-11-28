@@ -1,6 +1,6 @@
 'use strict';
 
-function WebPushError(message, statusCode, headers, body) {
+function WebPushError(message, statusCode, headers, body, endpoint) {
   Error.captureStackTrace(this, this.constructor);
 
   this.name = this.constructor.name;
@@ -8,6 +8,7 @@ function WebPushError(message, statusCode, headers, body) {
   this.statusCode = statusCode;
   this.headers = headers;
   this.body = body;
+  this.endpoint = endpoint;
 }
 
 require('util').inherits(WebPushError, Error);
