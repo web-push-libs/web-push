@@ -124,7 +124,7 @@ function getVapidHeaders(audience, subject, publicKey, privateKey, expiration) {
   privateKey = urlBase64.decode(privateKey);
 
   const DEFAULT_EXPIRATION = Math.floor(Date.now() / 1000) + 43200;
-  
+
   if (expiration) {
     // TODO: Check if expiration is valid and use it in place of the hard coded
     // expiration of 24hours.
@@ -135,8 +135,6 @@ function getVapidHeaders(audience, subject, publicKey, privateKey, expiration) {
     alg: 'ES256'
   };
 
-  
-  
   const jwtPayload = {
     aud: audience,
     exp: DEFAULT_EXPIRATION,
