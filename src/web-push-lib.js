@@ -32,7 +32,7 @@ WebPushLib.prototype.setGCMAPIKey = function(apiKey) {
 
   if (typeof apiKey === 'undefined' || typeof apiKey !== 'string' ||
     apiKey.length === 0) {
-    throw new Error('The GCM API Key should be a non-emtpy string or null.');
+    throw new Error('The GCM API Key should be a non-empty string or null.');
   }
 
   gcmAPIKey = apiKey;
