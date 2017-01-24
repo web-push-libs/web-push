@@ -113,7 +113,8 @@ WebPushLib.prototype.generateRequestDetails =
         'headers',
         'gcmAPIKey',
         'vapidDetails',
-        'TTL'
+        'TTL',
+        'agent'
       ];
       const optionKeys = Object.keys(options);
       for (let i = 0; i < optionKeys.length; i += 1) {
@@ -261,6 +262,11 @@ WebPushLib.prototype.sendNotification =
 
       httpsOptions.headers = requestDetails.headers;
       httpsOptions.method = requestDetails.method;
+      
+      if (options.agent) {
+        // Adds proxyAgent from options to https call (https://nodejs.org/api/https.html#https_https_request_options_callback)
+        httpsOptions.agent = options.agent;
+      }
 
       const pushRequest = https.request(httpsOptions, function(pushResponse) {
         let responseText = '';
