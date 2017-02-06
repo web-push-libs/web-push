@@ -509,7 +509,7 @@ object will contain:
       <td>✓ v4.0.10-53+</td>
 
       <!-- Push with payload support -->
-      <td>✗</td>
+      <td>✓ v5.0.30-40+</td>
 
       <!-- VAPID Support -->
       <td>✗</td>
