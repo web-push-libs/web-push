@@ -197,7 +197,7 @@ WebPushLib.prototype.generateRequestDetails =
     if (isGCM) {
       if (!currentGCMAPIKey) {
         console.warn('Attempt to send push notification to GCM endpoint, ' +
-          'but no GCM key is defined'.bold.red);
+          'but no GCM key is defined');
       } else {
         requestDetails.headers.Authorization = 'key=' + currentGCMAPIKey;
       }
