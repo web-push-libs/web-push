@@ -205,7 +205,7 @@ WebPushLib.prototype.generateRequestDetails =
     } else if (currentVapidDetails) {
       const parsedUrl = url.parse(subscription.endpoint);
       const audience = parsedUrl.protocol + '//' +
-        parsedUrl.hostname;
+        parsedUrl.host;
 
       const vapidHeaders = vapidHelper.getVapidHeaders(
         audience,
