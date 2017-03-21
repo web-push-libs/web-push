@@ -412,111 +412,111 @@ object will contain:
 # Browser Support
 
 <table>
-  <thead>
-    <tr>
-      <th><strong>Browser</strong></th>
-      <th width="130px"><strong>Push without Payload</strong></th>
-      <th width="130px"><strong>Push with Payload</strong></th>
-      <th width="130px"><strong>VAPID</strong></th>
-      <th><strong>Notes</strong></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Chrome</td>
+<thead>
+<tr>
+<th><strong>Browser</strong></th>
+<th width="130px"><strong>Push without Payload</strong></th>
+<th width="130px"><strong>Push with Payload</strong></th>
+<th width="130px"><strong>VAPID</strong></th>
+<th><strong>Notes</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chrome</td>
 
-      <!-- Push without payloads support-->
-      <td>✓ v42+</td>
+<!-- Push without payloads support-->
+<td>✓ v42+</td>
 
-      <!-- Push with payload support -->
-      <td>✓ v50+</td>
+<!-- Push with payload support -->
+<td>✓ v50+</td>
 
-      <!-- VAPID Support -->
-      <td>✓ v52+</td>
+<!-- VAPID Support -->
+<td>✓ v52+</td>
 
-      <td>In v51 and less, the `gcm_sender_id` is needed to get a push subscription.</td>
-    </tr>
+<td>In v51 and less, the `gcm_sender_id` is needed to get a push subscription.</td>
+</tr>
 
-    <tr>
-      <td>Edge</td>
+<tr>
+<td>Edge</td>
 
-      <!-- Push without payloads support-->
-      <td>✗</td>
+<!-- Push without payloads support-->
+<td>✗</td>
 
-      <!-- Push with payload support -->
-      <td>✗</td>
+<!-- Push with payload support -->
+<td>✗</td>
 
-      <!-- VAPID Support -->
-      <td>✗</td>
+<!-- VAPID Support -->
+<td>✗</td>
 
-      <td></td>
-    </tr>
+<td></td>
+</tr>
 
-    <tr>
-      <td>Firefox</td>
+<tr>
+<td>Firefox</td>
 
-      <!-- Push without payloads support-->
-      <td>✓ v44+</td>
+<!-- Push without payloads support-->
+<td>✓ v44+</td>
 
-      <!-- Push with payload support -->
-      <td>✓ v44+</td>
+<!-- Push with payload support -->
+<td>✓ v44+</td>
 
-      <!-- VAPID Support -->
-      <td>✓ v46+</td>
+<!-- VAPID Support -->
+<td>✓ v46+</td>
 
-      <td></td>
-    </tr>
+<td></td>
+</tr>
 
-    <tr>
-      <td>Opera</td>
+<tr>
+<td>Opera</td>
 
-      <!-- Push without payloads support-->
-      <td>✓ v39+ <strong>*</strong></td>
+<!-- Push without payloads support-->
+<td>✓ v39+ <strong>*</strong></td>
 
-      <!-- Push with payload support -->
-      <td>✓ v39+ <strong>*</strong></td>
+<!-- Push with payload support -->
+<td>✓ v39+ <strong>*</strong></td>
 
-      <!-- VAPID Support -->
-      <td>✗</td>
+<!-- VAPID Support -->
+<td>✗</td>
 
-      <td>
-        <strong>*</strong> Opera supports push on Android but not on desktop.
-        <br />
-        <br />
-        The `gcm_sender_id` is needed to get a push subscription.
-      </td>
-    </tr>
+<td>
+  <strong>*</strong> Opera supports push on Android but not on desktop.
+  <br />
+  <br />
+  The `gcm_sender_id` is needed to get a push subscription.
+</td>
+</tr>
 
-    <tr>
-      <td>Safari</td>
+<tr>
+<td>Safari</td>
 
-      <!-- Push without payloads support-->
-      <td>✗</td>
+<!-- Push without payloads support-->
+<td>✗</td>
 
-      <!-- Push with payload support -->
-      <td>✗</td>
+<!-- Push with payload support -->
+<td>✗</td>
 
-      <!-- VAPID Support -->
-      <td>✗</td>
+<!-- VAPID Support -->
+<td>✗</td>
 
-      <td></td>
-    </tr>
+<td></td>
+</tr>
 
-    <tr>
-      <td>Samsung Internet Browser</td>
+<tr>
+<td>Samsung Internet Browser</td>
 
-      <!-- Push without payloads support-->
-      <td>✓ v4.0.10-53+</td>
+<!-- Push without payloads support-->
+<td>✓ v4.0.10-53+</td>
 
-      <!-- Push with payload support -->
-      <td>✓ v5.0.30-40+</td>
+<!-- Push with payload support -->
+<td>✓ v5.0.30-40+</td>
 
-      <!-- VAPID Support -->
-      <td>✗</td>
+<!-- VAPID Support -->
+<td>✗</td>
 
-      <td>The `gcm_sender_id` is needed to get a push subscription.</td>
-    </tr>
-  </tbody>
+<td>The `gcm_sender_id` is needed to get a push subscription.</td>
+</tr>
+</tbody>
 </table>
 
 # Help
