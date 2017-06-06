@@ -2,7 +2,7 @@
 
 const urlBase64 = require('urlsafe-base64');
 const url = require('url');
-const https = require('https');
+const request = require('request-promise-native');
 
 const WebPushError = require('./web-push-error.js');
 const vapidHelper = require('./vapid-helper.js');
@@ -254,45 +254,32 @@ WebPushLib.prototype.sendNotification =
     }
 
     return new Promise(function(resolve, reject) {
-      const httpsOptions = {};
-      const urlParts = url.parse(requestDetails.endpoint);
-      httpsOptions.hostname = urlParts.hostname;
-      httpsOptions.port = urlParts.port;
-      httpsOptions.path = urlParts.path;
-
-      httpsOptions.headers = requestDetails.headers;
-      httpsOptions.method = requestDetails.method;
-
-      const pushRequest = https.request(httpsOptions, function(pushResponse) {
-        let responseText = '';
-
-        pushResponse.on('data', function(chunk) {
-          responseText += chunk;
-        });
-
-        pushResponse.on('end', function() {
-          if (pushResponse.statusCode !== 201) {
-            reject(new WebPushError('Received unexpected response code',
-              pushResponse.statusCode, pushResponse.headers, responseText, requestDetails.endpoint));
-          } else {
-            resolve({
-              statusCode: pushResponse.statusCode,
-              body: responseText,
-              headers: pushResponse.headers
-            });
-          }
-        });
-      });
-
-      pushRequest.on('error', function(e) {
-        reject(e);
-      });
+      const httpsOptions = {
+        uri: requestDetails.endpoint,
+        headers: requestDetails.headers,
+        method: requestDetails.method,
+        resolveWithFullResponse: true
+      };
 
       if (requestDetails.body) {
-        pushRequest.write(requestDetails.body);
+        httpsOptions.method = 'POST';
+        httpsOptions.body = requestDetails.body;
       }
 
-      pushRequest.end();
+      return request(httpsOptions)
+        .then((pushResponse) => {
+          if (pushResponse.statusCode !== 201) {
+            return reject(new WebPushError('Received unexpected response code',
+              pushResponse.statusCode, pushResponse.headers, pushResponse.body, subscription.endpoint));
+          }
+
+          return resolve({
+            statusCode: pushResponse.statusCode,
+            body: pushResponse.body,
+            headers: pushResponse.headers
+          });
+        })
+        .catch(reject);
     });
   };
 
