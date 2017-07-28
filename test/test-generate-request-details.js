@@ -4,6 +4,7 @@ const assert = require('assert');
 const urlBase64 = require('urlsafe-base64');
 const webPush = require('../src/index');
 const crypto = require('crypto');
+const jws = require('jws');
 
 suite('Test Generate Request Details', function() {
   test('is defined', function() {
@@ -242,5 +243,27 @@ suite('Test Generate Request Details', function() {
     assert.equal(details.headers.TTL, extraOptions.TTL);
     assert.equal(details.headers.Topic, extraOptions.headers.Topic);
     assert.equal(details.headers.Urgency, extraOptions.headers.Urgency);
+  });
+
+  test('Audience contains port', function() {
+    const subscription = {
+      endpoint: 'http://example.com:4242/life-universe-and-everything'
+    };
+
+    const extraOptions = {
+      vapidDetails: {
+        subject: 'mailto:example@example.com',
+        publicKey: vapidKeys.publicKey,
+        privateKey: vapidKeys.privateKey
+      }
+    };
+
+    const message = undefined;
+    const requestDetails = webPush.generateRequestDetails(subscription, message, extraOptions);
+    const authHeader = requestDetails.headers.Authorization;
+    const audience = jws.decode(authHeader.slice(8)).payload.aud;
+
+    assert.ok(audience, 'Audience does not exist');
+    assert.equal(audience, 'http://example.com:4242', 'Audience does not contain expected value');
   });
 });
