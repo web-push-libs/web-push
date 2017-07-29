@@ -85,6 +85,18 @@ suite('Test Vapid Helpers', function() {
       },
       function() {
         vapidHelper.getVapidHeaders(VALID_AUDIENCE, { something: 'else' }, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY);
+      },
+      function () {
+        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, 'This is not valid expiration');
+      },
+      function () {
+        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, { message: 'Expiration should be a number' });
+      },
+      function () {
+        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, 'true');
+      },
+      function () {
+        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, '-12213');
       }
     ];
 
@@ -109,6 +121,12 @@ suite('Test Vapid Helpers', function() {
       function() {
         return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_URL,
           VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, VALID_EXPIRATION);
+      },
+      function() {
+        return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_URL, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, 0);
+      },
+      function () {
+        return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_URL, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, Math.floor(Date.now() / 1000) + (5 * 60 * 60));
       }
     ];
 
