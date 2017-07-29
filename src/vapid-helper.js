@@ -205,5 +205,6 @@ module.exports = {
   getVapidHeaders: getVapidHeaders,
   validateSubject: validateSubject,
   validatePublicKey: validatePublicKey,
-  validatePrivateKey: validatePrivateKey
+  validatePrivateKey: validatePrivateKey,
+  validateExpiration: validateExpiration
 };
