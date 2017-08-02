@@ -258,12 +258,17 @@ suite('Test Generate Request Details', function() {
       }
     };
 
-    const message = undefined;
-    const requestDetails = webPush.generateRequestDetails(subscription, message, extraOptions);
+    const requestDetails = webPush.generateRequestDetails(subscription, null, extraOptions);
     const authHeader = requestDetails.headers.Authorization;
-    const audience = jws.decode(authHeader.slice(8)).payload.aud;
 
-    assert.ok(audience, 'Audience does not exist');
-    assert.equal(audience, 'http://example.com:4242', 'Audience does not contain expected value');
+    // Get the Encoded JWT Token from the Authorization Header
+    // and decoded it using `jws.decode`
+    // to get the value of audience in jwt payload
+    const jwtContents = authHeader.match(/WebPush\s(.*)/)[1];
+    const decodedContents = jws.decode(jwtContents);
+    const audience = decodedContents.payload.aud;
+
+    assert.ok(audience, 'Audience exists');
+    assert.equal(audience, 'http://example.com:4242', 'Audience contains expected value with port');
   });
 });
