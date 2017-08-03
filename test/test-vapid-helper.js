@@ -87,16 +87,20 @@ suite('Test Vapid Helpers', function() {
         vapidHelper.getVapidHeaders(VALID_AUDIENCE, { something: 'else' }, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY);
       },
       function () {
-        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, 'This is not valid expiration');
+        // String with text, is not accepted as a valid expiration value
+        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, 'Not valid expiration: Must be a number, this is a string with text');
       },
       function () {
-        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, { message: 'Expiration should be a number' });
+        // Object is not accepted as a valid expiration value
+        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, { message: 'Not valid expiration: Must be a number, this is an object' });
       },
       function () {
-        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, 'true');
+        // Boolean is not accepted as a valid expiration value
+        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, true);
       },
       function () {
-        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, '-12213');
+        // String is not accepted as a valid expiration value
+        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, '12213');
       }
     ];
 
@@ -123,10 +127,16 @@ suite('Test Vapid Helpers', function() {
           VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, VALID_EXPIRATION);
       },
       function() {
-        return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_URL, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, 0);
+        // 0 is a valid value for `expiration`
+        // since the the `expiration` value isn't checked for minimum
+        const secondsFromEpoch = 0;
+        return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_URL, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, secondsFromEpoch);
       },
       function () {
-        return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_URL, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, Math.floor(Date.now() / 1000) + (5 * 60 * 60));
+        // Valid value for `secondsFromEpoch` passed in to
+        // `vapidHelper.getVapidHeaders` function
+        const secondsFromEpoch = Math.floor(Date.now() / 1000) + (5 * 60 * 60);
+        return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_URL, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, secondsFromEpoch);
       }
     ];
 

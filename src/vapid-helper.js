@@ -10,6 +10,8 @@ const url = require('url');
  * DEFAULT_EXPIRATION is set to seconds in 12 hours
  */
 const DEFAULT_EXPIRATION_SECONDS = 12 * 60 * 60;
+
+// Maximum expiration is 24 hours according. (See VAPID spec)
 const MAX_EXPIRATION_SECONDS = 24 * 60 * 60;
 
 const ECPrivateKeyASN = asn1.define('ECPrivateKey', function() {
@@ -96,44 +98,40 @@ function validatePrivateKey(privateKey) {
 }
 
 /**
- * Calculates the total expiration by adding
- * value of Date.now() with the seconds passed
+ * Given the number of seconds calculates
+ * the expiration in the future by adding the passed `numSeconds`
+ * with the current seconds from Unix Epoch
  *
- * @param {Number} numSeconds Number of seconds to calculate expiration
- * @return {Number} expiration in seconds
+ * @param {Number} numSeconds Number of seconds to be added
+ * @return {Number} Future expiration in seconds
  */
-function calculateExpiration(numSeconds) {
-  return Math.floor(Date.now() / 1000) + numSeconds;
+function getFutureExpirationTimestamp(numSeconds) {
+  const futureExp = new Date();
+  futureExp.setSeconds(futureExp.getSeconds() + numSeconds);
+  return Math.floor(futureExp.getTime() / 1000);
 }
 
 /**
- * Validates the Expiration based on the VAPID Spec
+ * Validates the Expiration Header based on the VAPID Spec
+ * Throws error of type `Error` if the expiration is not validated
  *
- * `expiration` is not validated with a `minimum` value,
- * since the time at validation is going to be different
- * than at the time of creation of the custom expiration value
+ * @param {Number} expiration Expiration seconds from Epoch to be validated
  */
 function validateExpiration(expiration) {
-  if (!expiration) {
-    throw new Error('No expiration value provided in `expiration`');
+  if (!Number.isInteger(expiration)) {
+    throw new Error('`expiration` value must be a number');
   }
 
-  expiration = Number.parseInt(expiration, 10);
-
-  if (isNaN(expiration) || typeof expiration !== 'number') {
-    throw new Error('Invalid expiration value passed, expiration must be `Number`');
+  if (expiration < 0) {
+    throw new Error('`expiration` must be a positive integer');
   }
 
   // Roughly checks the time of expiration, since the max expiration can be ahead
   // of the time than at the moment the expiration was generated
-  const maxExpiration = calculateExpiration(MAX_EXPIRATION_SECONDS);
+  const maxExpiration = getFutureExpirationTimestamp(MAX_EXPIRATION_SECONDS);
 
-  if (expiration > maxExpiration) {
-    throw new Error('`expiration` is greater than maximum of 24 hours');
-  }
-
-  if (expiration < 0) {
-    throw new Error('`expiration` must be positive integer');
+  if (expiration >= maxExpiration) {
+    throw new Error('`expiration` value is greater than maximum of 24 hours');
   }
 }
 
@@ -174,7 +172,7 @@ function getVapidHeaders(audience, subject, publicKey, privateKey, expiration) {
   if (expiration) {
     validateExpiration(expiration);
   } else {
-    expiration = calculateExpiration(DEFAULT_EXPIRATION_SECONDS);
+    expiration = getFutureExpirationTimestamp(DEFAULT_EXPIRATION_SECONDS);
   }
 
   const header = {
@@ -202,6 +200,7 @@ function getVapidHeaders(audience, subject, publicKey, privateKey, expiration) {
 
 module.exports = {
   generateVAPIDKeys: generateVAPIDKeys,
+  getFutureExpirationTimestamp: getFutureExpirationTimestamp,
   getVapidHeaders: getVapidHeaders,
   validateSubject: validateSubject,
   validatePublicKey: validatePublicKey,
