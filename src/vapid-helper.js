@@ -128,9 +128,9 @@ function validateExpiration(expiration) {
 
   // Roughly checks the time of expiration, since the max expiration can be ahead
   // of the time than at the moment the expiration was generated
-  const maxExpiration = getFutureExpirationTimestamp(MAX_EXPIRATION_SECONDS);
+  const maxExpirationTimestamp = getFutureExpirationTimestamp(MAX_EXPIRATION_SECONDS);
 
-  if (expiration >= maxExpiration) {
+  if (expiration >= maxExpirationTimestamp) {
     throw new Error('`expiration` value is greater than maximum of 24 hours');
   }
 }

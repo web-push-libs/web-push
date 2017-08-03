@@ -101,6 +101,11 @@ suite('Test Vapid Helpers', function() {
       function () {
         // String is not accepted as a valid expiration value
         vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, '12213');
+      },
+      function () {
+        // Invalid `expiration` as it exceeds 24 hours in duration
+        const invalidExpiration = Math.floor(Date.now() / 1000) + (25 * 60 * 60);
+        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, invalidExpiration);
       }
     ];
 
