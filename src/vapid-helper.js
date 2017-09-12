@@ -6,6 +6,14 @@ const asn1 = require('asn1.js');
 const jws = require('jws');
 const url = require('url');
 
+/**
+ * DEFAULT_EXPIRATION is set to seconds in 12 hours
+ */
+const DEFAULT_EXPIRATION_SECONDS = 12 * 60 * 60;
+
+// Maximum expiration is 24 hours according. (See VAPID spec)
+const MAX_EXPIRATION_SECONDS = 24 * 60 * 60;
+
 const ECPrivateKeyASN = asn1.define('ECPrivateKey', function() {
   this.seq().obj(
     this.key('version').int(),
@@ -90,6 +98,44 @@ function validatePrivateKey(privateKey) {
 }
 
 /**
+ * Given the number of seconds calculates
+ * the expiration in the future by adding the passed `numSeconds`
+ * with the current seconds from Unix Epoch
+ *
+ * @param {Number} numSeconds Number of seconds to be added
+ * @return {Number} Future expiration in seconds
+ */
+function getFutureExpirationTimestamp(numSeconds) {
+  const futureExp = new Date();
+  futureExp.setSeconds(futureExp.getSeconds() + numSeconds);
+  return Math.floor(futureExp.getTime() / 1000);
+}
+
+/**
+ * Validates the Expiration Header based on the VAPID Spec
+ * Throws error of type `Error` if the expiration is not validated
+ *
+ * @param {Number} expiration Expiration seconds from Epoch to be validated
+ */
+function validateExpiration(expiration) {
+  if (!Number.isInteger(expiration)) {
+    throw new Error('`expiration` value must be a number');
+  }
+
+  if (expiration < 0) {
+    throw new Error('`expiration` must be a positive integer');
+  }
+
+  // Roughly checks the time of expiration, since the max expiration can be ahead
+  // of the time than at the moment the expiration was generated
+  const maxExpirationTimestamp = getFutureExpirationTimestamp(MAX_EXPIRATION_SECONDS);
+
+  if (expiration >= maxExpirationTimestamp) {
+    throw new Error('`expiration` value is greater than maximum of 24 hours');
+  }
+}
+
+/**
  * This method takes the required VAPID parameters and returns the required
  * header to be added to a Web Push Protocol Request.
  * @param  {string} audience       This must be the origin of the push service.
@@ -123,11 +169,10 @@ function getVapidHeaders(audience, subject, publicKey, privateKey, expiration) {
   publicKey = urlBase64.decode(publicKey);
   privateKey = urlBase64.decode(privateKey);
 
-  const DEFAULT_EXPIRATION = Math.floor(Date.now() / 1000) + 43200;
-
   if (expiration) {
-    // TODO: Check if expiration is valid and use it in place of the hard coded
-    // expiration of 24hours.
+    validateExpiration(expiration);
+  } else {
+    expiration = getFutureExpirationTimestamp(DEFAULT_EXPIRATION_SECONDS);
   }
 
   const header = {
@@ -137,7 +182,7 @@ function getVapidHeaders(audience, subject, publicKey, privateKey, expiration) {
 
   const jwtPayload = {
     aud: audience,
-    exp: DEFAULT_EXPIRATION,
+    exp: expiration,
     sub: subject
   };
 
@@ -155,8 +200,10 @@ function getVapidHeaders(audience, subject, publicKey, privateKey, expiration) {
 
 module.exports = {
   generateVAPIDKeys: generateVAPIDKeys,
+  getFutureExpirationTimestamp: getFutureExpirationTimestamp,
   getVapidHeaders: getVapidHeaders,
   validateSubject: validateSubject,
   validatePublicKey: validatePublicKey,
-  validatePrivateKey: validatePrivateKey
+  validatePrivateKey: validatePrivateKey,
+  validateExpiration: validateExpiration
 };

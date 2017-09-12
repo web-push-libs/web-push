@@ -85,6 +85,27 @@ suite('Test Vapid Helpers', function() {
       },
       function() {
         vapidHelper.getVapidHeaders(VALID_AUDIENCE, { something: 'else' }, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY);
+      },
+      function () {
+        // String with text, is not accepted as a valid expiration value
+        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, 'Not valid expiration: Must be a number, this is a string with text');
+      },
+      function () {
+        // Object is not accepted as a valid expiration value
+        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, { message: 'Not valid expiration: Must be a number, this is an object' });
+      },
+      function () {
+        // Boolean is not accepted as a valid expiration value
+        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, true);
+      },
+      function () {
+        // String is not accepted as a valid expiration value
+        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, '12213');
+      },
+      function () {
+        // Invalid `expiration` as it exceeds 24 hours in duration
+        const invalidExpiration = Math.floor(Date.now() / 1000) + (25 * 60 * 60);
+        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, invalidExpiration);
       }
     ];
 
@@ -109,6 +130,18 @@ suite('Test Vapid Helpers', function() {
       function() {
         return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_URL,
           VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, VALID_EXPIRATION);
+      },
+      function() {
+        // 0 is a valid value for `expiration`
+        // since the the `expiration` value isn't checked for minimum
+        const secondsFromEpoch = 0;
+        return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_URL, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, secondsFromEpoch);
+      },
+      function () {
+        // Valid value for `secondsFromEpoch` passed in to
+        // `vapidHelper.getVapidHeaders` function
+        const secondsFromEpoch = Math.floor(Date.now() / 1000) + (5 * 60 * 60);
+        return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_URL, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, secondsFromEpoch);
       }
     ];
 
