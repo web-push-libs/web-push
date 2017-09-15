@@ -8,7 +8,7 @@ if (process.env.TRAVIS) {
   forceDownload = true;
 }
 
-const downloadBrowser = (name, version, attempt) => {
+const downloadBrowser = (name, version, attempt = 0) => {
   return new Promise((resolve, reject) => {
     seleniumAssistant.downloadBrowser(name, version, forceDownload)
     .catch((err) => {
@@ -27,12 +27,12 @@ const downloadBrowser = (name, version, attempt) => {
 }
 
 const promises = [
-  downloadBrowser('firefox', 'stable', 0),
-  downloadBrowser('firefox', 'beta', 0),
-  downloadBrowser('firefox', 'unstable', 0),
-  downloadBrowser('chrome', 'stable', 0),
-  downloadBrowser('chrome', 'beta', 0),
-  downloadBrowser('chrome', 'unstable', 0)
+  downloadBrowser('firefox', 'stable'),
+  downloadBrowser('firefox', 'beta'),
+  downloadBrowser('firefox', 'unstable'),
+  downloadBrowser('chrome', 'stable'),
+  downloadBrowser('chrome', 'beta'),
+  downloadBrowser('chrome', 'unstable')
 ];
 
 Promise.all(promises)
