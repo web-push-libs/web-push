@@ -3,7 +3,7 @@
 const seleniumAssistant = require('selenium-assistant');
 
 const MAX_RETRIES = 3;
-let forceDownload = true;
+let forceDownload = false;
 if (process.env.TRAVIS) {
   forceDownload = true;
 }
