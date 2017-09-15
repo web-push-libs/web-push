@@ -24,7 +24,7 @@ const downloadBrowser = (name, version, attempt = 0) => {
       resolve();
     });
   });
-}
+};
 
 const promises = [
   downloadBrowser('firefox', 'stable'),
