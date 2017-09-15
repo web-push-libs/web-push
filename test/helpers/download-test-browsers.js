@@ -8,7 +8,9 @@ if (process.env.TRAVIS) {
   forceDownload = true;
 }
 
-const downloadBrowser = (name, version, attempt = 0) => {
+const downloadBrowser = (name, version, attempt) => {
+  attempt = attempt || 0;
+
   return new Promise((resolve, reject) => {
     seleniumAssistant.downloadBrowser(name, version, forceDownload)
     .catch((err) => {
