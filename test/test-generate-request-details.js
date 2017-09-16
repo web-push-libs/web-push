@@ -4,6 +4,7 @@ const assert = require('assert');
 const urlBase64 = require('urlsafe-base64');
 const webPush = require('../src/index');
 const crypto = require('crypto');
+const jws = require('jws');
 
 suite('Test Generate Request Details', function() {
   test('is defined', function() {
@@ -242,5 +243,32 @@ suite('Test Generate Request Details', function() {
     assert.equal(details.headers.TTL, extraOptions.TTL);
     assert.equal(details.headers.Topic, extraOptions.headers.Topic);
     assert.equal(details.headers.Urgency, extraOptions.headers.Urgency);
+  });
+
+  test('Audience contains port', function() {
+    const subscription = {
+      endpoint: 'http://example.com:4242/life-universe-and-everything'
+    };
+
+    const extraOptions = {
+      vapidDetails: {
+        subject: 'mailto:example@example.com',
+        publicKey: vapidKeys.publicKey,
+        privateKey: vapidKeys.privateKey
+      }
+    };
+
+    const requestDetails = webPush.generateRequestDetails(subscription, null, extraOptions);
+    const authHeader = requestDetails.headers.Authorization;
+
+    // Get the Encoded JWT Token from the Authorization Header
+    // and decoded it using `jws.decode`
+    // to get the value of audience in jwt payload
+    const jwtContents = authHeader.match(/WebPush\s(.*)/)[1];
+    const decodedContents = jws.decode(jwtContents);
+    const audience = decodedContents.payload.aud;
+
+    assert.ok(audience, 'Audience exists');
+    assert.equal(audience, 'http://example.com:4242', 'Audience contains expected value with port');
   });
 });
