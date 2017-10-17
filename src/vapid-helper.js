@@ -39,9 +39,27 @@ function generateVAPIDKeys() {
   const curve = crypto.createECDH('prime256v1');
   curve.generateKeys();
 
+  let publicKeyBuffer = curve.getPublicKey();
+  let privateKeyBuffer = curve.getPrivateKey();
+
+  // Occassionally the keys will not be padded to the correct lengh resulting
+  // in errors, hence this padding.
+  // See https://github.com/web-push-libs/web-push/issues/295 for history.
+  if (privateKeyBuffer.length < 32) {
+    const padding = new Buffer(32 - privateKeyBuffer.length);
+    padding.fill(0);
+    privateKeyBuffer = Buffer.concat([privateKeyBuffer, padding]);
+  }
+
+  if (publicKeyBuffer.length < 65) {
+    const padding = new Buffer(65 - publicKeyBuffer.length);
+    padding.fill(0);
+    publicKeyBuffer = Buffer.concat([publicKeyBuffer, padding]);
+  }
+
   return {
-    publicKey: urlBase64.encode(curve.getPublicKey()),
-    privateKey: urlBase64.encode(curve.getPrivateKey())
+    publicKey: urlBase64.encode(publicKeyBuffer),
+    privateKey: urlBase64.encode(privateKeyBuffer)
   };
 }
 
