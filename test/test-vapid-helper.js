@@ -18,7 +18,7 @@ suite('Test Vapid Helpers', function() {
     assert(webPush.getVapidHeaders);
   });
 
-  test(`generate vapid keys`, function() {
+  test('generate vapid keys', function() {
     const keys = webPush.generateVAPIDKeys();
     assert(keys.privateKey);
     assert(keys.publicKey);
