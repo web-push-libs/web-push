@@ -50,6 +50,7 @@
     "selenium-assistant": "1.0.0",
     "selenium-webdriver": "3.0.0-beta-2",
     "semver": "^5.1.0",
+    "sinon": "^4.0.1",
     "which": "^1.2.11"
   },
   "engines": {
