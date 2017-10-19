@@ -2,6 +2,8 @@
 
 const assert = require('assert');
 const urlBase64 = require('urlsafe-base64');
+const sinon = require('sinon');
+const crypto = require('crypto');
 const webPush = require('../src/index');
 const vapidHelper = require('../src/vapid-helper');
 
@@ -13,12 +15,42 @@ const VALID_PRIVATE_KEY = urlBase64.encode(new Buffer(32));
 const VALID_EXPIRATION = Math.floor(Date.now() / 1000) + (60 * 60 * 12);
 
 suite('Test Vapid Helpers', function() {
+  const sandbox = sinon.sandbox.create();
+
+  beforeEach(function() {
+    sandbox.restore();
+  });
+
+  after(function() {
+    sandbox.restore();
+  });
+
   test('is defined', function() {
     assert(webPush.generateVAPIDKeys);
     assert(webPush.getVapidHeaders);
   });
 
   test('generate vapid keys', function() {
+    const keys = webPush.generateVAPIDKeys();
+    assert(keys.privateKey);
+    assert(keys.publicKey);
+
+    assert.equal(typeof keys.privateKey, 'string');
+    assert.equal(typeof keys.publicKey, 'string');
+
+    assert.equal(urlBase64.decode(keys.privateKey).length, 32);
+    assert.equal(urlBase64.decode(keys.publicKey).length, 65);
+  });
+
+  test('generate vapid keys with padding', function() {
+    sandbox.stub(crypto, 'createECDH').callsFake(() => {
+      return {
+        generateKeys: () => {},
+        getPublicKey: () => new Buffer(60),
+        getPrivateKey: () => new Buffer(27)
+      };
+    });
+
     const keys = webPush.generateVAPIDKeys();
     assert(keys.privateKey);
     assert(keys.publicKey);
