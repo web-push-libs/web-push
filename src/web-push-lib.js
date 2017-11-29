@@ -271,7 +271,7 @@ WebPushLib.prototype.sendNotification =
         });
 
         pushResponse.on('end', function() {
-          if (pushResponse.statusCode !== 201) {
+          if (pushResponse.statusCode < 200 || pushResponse.statusCode > 299) {
             reject(new WebPushError('Received unexpected response code',
               pushResponse.statusCode, pushResponse.headers, responseText, requestDetails.endpoint));
           } else {
