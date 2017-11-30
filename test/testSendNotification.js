@@ -305,6 +305,24 @@ suite('sendNotification', function() {
           }
         }
       }
+    }, {
+      testTitle: 'server returns 201',
+      requestOptions: {
+        subscription: {
+          keys: VALID_KEYS
+        },
+        message: 'hello'
+      },
+      serverFlags: ['statusCode=201']
+    }, {
+      testTitle: 'server returns 202',
+      requestOptions: {
+        subscription: {
+          keys: VALID_KEYS
+        },
+        message: 'hello'
+      },
+      serverFlags: ['statusCode=202']
     }
   ];
 
@@ -316,6 +334,11 @@ suite('sendNotification', function() {
       if (!validRequest.requestOptions.subscription.endpoint) {
         validRequest.requestOptions.subscription.endpoint =
           'https://127.0.0.1:' + serverPort;
+      }
+
+      if (validRequest.serverFlags) {
+        validRequest.requestOptions.subscription.endpoint += '?' +
+          validRequest.serverFlags.join('&');
       }
 
       const webPush = require('../src/index');
