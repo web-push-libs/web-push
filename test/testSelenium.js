@@ -44,10 +44,7 @@ function runTest(browser, options) {
       // don't have the GH_TOKEN
       if (process.env.TRAVIS_PULL_REQUEST !== false) {
         console.log('');
-        console.warn(chalk.red(
-          'Running on Travis OS X so skipping firefox tests as ' +
-          'they don\'t currently work.'
-        ));
+        console.warn(chalk.red('Running on Travis OS X so skipping firefox tests as they don\'t currently work.'));
         console.log('');
         return Promise.resolve();
       }

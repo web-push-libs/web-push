@@ -152,16 +152,13 @@ suite('Test Vapid Helpers', function() {
   test('should get valid VAPID headers', function() {
     const validInputs = [
       function() {
-        return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_URL,
-          VALID_PUBLIC_KEY, VALID_PRIVATE_KEY);
+        return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_URL, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY);
       },
       function() {
-        return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO,
-          VALID_PUBLIC_KEY, VALID_PRIVATE_KEY);
+        return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY);
       },
       function() {
-        return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_URL,
-          VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, VALID_EXPIRATION);
+        return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_URL, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, VALID_EXPIRATION);
       },
       function() {
         // 0 is a valid value for `expiration`

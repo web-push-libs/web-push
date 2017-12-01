@@ -177,8 +177,7 @@ WebPushLib.prototype.generateRequestDetails =
           'required encryption keys'));
       }
 
-      const encrypted = encryptionHelper.encrypt(
-        subscription.keys.p256dh, subscription.keys.auth, payload);
+      const encrypted = encryptionHelper.encrypt(subscription.keys.p256dh, subscription.keys.auth, payload);
 
       requestDetails.headers['Content-Length'] = encrypted.cipherText.length;
       requestDetails.headers['Content-Type'] = 'application/octet-stream';
@@ -191,8 +190,7 @@ WebPushLib.prototype.generateRequestDetails =
       requestDetails.headers['Content-Length'] = 0;
     }
 
-    const isGCM = subscription.endpoint.indexOf(
-      'https://android.googleapis.com/gcm/send') === 0;
+    const isGCM = subscription.endpoint.indexOf('https://android.googleapis.com/gcm/send') === 0;
     // VAPID isn't supported by GCM hence the if, else if.
     if (isGCM) {
       if (!currentGCMAPIKey) {
@@ -247,8 +245,7 @@ WebPushLib.prototype.sendNotification =
   function(subscription, payload, options) {
     let requestDetails;
     try {
-      requestDetails = this.generateRequestDetails(
-        subscription, payload, options);
+      requestDetails = this.generateRequestDetails(subscription, payload, options);
     } catch (err) {
       return Promise.reject(err);
     }
@@ -272,8 +269,10 @@ WebPushLib.prototype.sendNotification =
 
         pushResponse.on('end', function() {
           if (pushResponse.statusCode < 200 || pushResponse.statusCode > 299) {
-            reject(new WebPushError('Received unexpected response code',
-              pushResponse.statusCode, pushResponse.headers, responseText, requestDetails.endpoint));
+            reject(new WebPushError(
+              'Received unexpected response code',
+              pushResponse.statusCode, pushResponse.headers, responseText, requestDetails.endpoint
+            ));
           } else {
             resolve({
               statusCode: pushResponse.statusCode,

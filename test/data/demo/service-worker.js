@@ -1,3 +1,5 @@
+/* eslint no-restricted-globals: 0 */
+
 'use strict';
 
 let port;
