@@ -35,7 +35,7 @@ let testServerURL;
 function runTest(browser, options) {
   options = options || {};
 
-  if (browser.getSeleniumBrowserId() === 'firefox' &&
+  if (browser.getId() === 'firefox' &&
     browser.getVersionNumber() <= 48 &&
     process.env.TRAVIS === 'true') {
     console.log('');
@@ -47,7 +47,7 @@ function runTest(browser, options) {
     return Promise.resolve();
   }
 
-  if (browser.getSeleniumBrowserId() === 'firefox' &&
+  if (browser.getId() === 'firefox' &&
     process.env.TRAVIS === 'true') {
     try {
       which.sync('geckodriver');
@@ -71,7 +71,7 @@ function runTest(browser, options) {
     globalServer = server;
     testServerURL = 'http://127.0.0.1:' + server.port;
 
-    if (browser.getSeleniumBrowserId() === 'firefox') {
+    if (browser.getId() === 'firefox') {
       // This is based off of: https://bugzilla.mozilla.org/show_bug.cgi?id=1275521
       // Unfortunately it doesn't seem to work :(
       const ffProfile = new seleniumFirefox.Profile();
@@ -79,7 +79,7 @@ function runTest(browser, options) {
       ffProfile.setPreference('notification.prompt.testing', true);
       ffProfile.setPreference('notification.prompt.testing.allow', true);
       browser.getSeleniumOptions().setProfile(ffProfile);
-    } else if (browser.getSeleniumBrowserId() === 'chrome') {
+    } else if (browser.getId() === 'chrome') {
       const chromeOperaPreferences = {
         profile: {
           content_settings: {
@@ -199,10 +199,9 @@ function runTest(browser, options) {
 
 seleniumAssistant.printAvailableBrowserInfo();
 
-const availableBrowsers = seleniumAssistant.getAvailableBrowsers();
+const availableBrowsers = seleniumAssistant.getLocalBrowsers();
 availableBrowsers.forEach(function(browser) {
-  if (browser.getSeleniumBrowserId() !== 'chrome' &&
-    browser.getSeleniumBrowserId() !== 'firefox') {
+  if (browser.getId() !== 'chrome' && browser.getId() !== 'firefox') {
     return;
   }
 

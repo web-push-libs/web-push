@@ -3,16 +3,16 @@
 const seleniumAssistant = require('selenium-assistant');
 
 const MAX_RETRIES = 3;
-let forceDownload = false;
+let expiration;
 if (process.env.TRAVIS) {
-  forceDownload = true;
+  expiration = 0;
 }
 
 const downloadBrowser = (name, version, attempt) => {
   attempt = attempt || 0;
 
   return new Promise((resolve, reject) => {
-    seleniumAssistant.downloadBrowser(name, version, forceDownload)
+    seleniumAssistant.downloadLocalBrowser(name, version, expiration)
     .catch((err) => {
       if (attempt < MAX_RETRIES) {
         console.log(`Attempt ${attempt + 1} of browser ${name} - ${version} failed.`);
