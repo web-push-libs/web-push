@@ -1,3 +1,4 @@
+/* Needed because of https://github.com/airbnb/javascript/issues/1632 */
 /* eslint no-restricted-globals: 0 */
 
 'use strict';
