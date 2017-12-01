@@ -27,7 +27,6 @@ before_install:
   - export NPM=${NODE%node}npm
 install:
   - $NPM install
-  - $NPM install mocha
 before_script:
   - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sh -e /etc/init.d/xvfb start; fi
 script:
