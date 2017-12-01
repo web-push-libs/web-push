@@ -36,18 +36,6 @@ function runTest(browser, options) {
   options = options || {};
 
   if (browser.getId() === 'firefox' &&
-    browser.getVersionNumber() <= 48 &&
-    process.env.TRAVIS === 'true') {
-    console.log('');
-    console.warn(chalk.red(
-      'Running on Travis so skipping firefox tests as ' +
-      'they don\'t currently work.'
-    ));
-    console.log('');
-    return Promise.resolve();
-  }
-
-  if (browser.getId() === 'firefox' &&
     process.env.TRAVIS === 'true') {
     try {
       which.sync('geckodriver');
