@@ -1,5 +1,11 @@
 'use strict';
 
+// The latest version of Selenium doesn't support Node 4.
+const semver = require('semver');
+if (!semver.satisfies(process.version, '5')) {
+  return;
+}
+
 const seleniumAssistant = require('selenium-assistant');
 const webdriver = require('selenium-webdriver');
 const seleniumFirefox = require('selenium-webdriver/firefox');
