@@ -6,6 +6,8 @@ const asn1 = require('asn1.js');
 const jws = require('jws');
 const url = require('url');
 
+const WebPushConstants = require('./web-push-constants.js');
+
 /**
  * DEFAULT_EXPIRATION is set to seconds in 12 hours
  */
@@ -156,16 +158,17 @@ function validateExpiration(expiration) {
 /**
  * This method takes the required VAPID parameters and returns the required
  * header to be added to a Web Push Protocol Request.
- * @param  {string} audience       This must be the origin of the push service.
- * @param  {string} subject        This should be a URL or a 'mailto:' email
+ * @param  {string} audience        This must be the origin of the push service.
+ * @param  {string} subject         This should be a URL or a 'mailto:' email
  * address.
- * @param  {Buffer} publicKey      The VAPID public key.
- * @param  {Buffer} privateKey     The VAPID private key.
- * @param  {integer} [expiration]  The expiration of the VAPID JWT.
- * @return {Object}                Returns an Object with the Authorization and
+ * @param  {Buffer} publicKey       The VAPID public key.
+ * @param  {Buffer} privateKey      The VAPID private key.
+ * @param  {string} contentEncoding The contentEncoding type.
+ * @param  {integer} [expiration]   The expiration of the VAPID JWT.
+ * @return {Object}                 Returns an Object with the Authorization and
  * 'Crypto-Key' values to be used as headers.
  */
-function getVapidHeaders(audience, subject, publicKey, privateKey, expiration) {
+function getVapidHeaders(audience, subject, publicKey, privateKey, contentEncoding, expiration) {
   if (!audience) {
     throw new Error('No audience could be generated for VAPID.');
   }
@@ -210,10 +213,18 @@ function getVapidHeaders(audience, subject, publicKey, privateKey, expiration) {
     privateKey: toPEM(privateKey)
   });
 
-  return {
-    Authorization: 'WebPush ' + jwt,
-    'Crypto-Key': 'p256ecdsa=' + urlBase64.encode(publicKey)
-  };
+  if (contentEncoding === WebPushConstants.supportedContentEncodings.AES_128_GCM) {
+    return {
+      Authorization: 'vapid t=' + jwt + ', k=' + urlBase64.encode(publicKey)
+    };
+  } else if (contentEncoding === WebPushConstants.supportedContentEncodings.AES_GCM) {
+    return {
+      Authorization: 'WebPush ' + jwt,
+      'Crypto-Key': 'p256ecdsa=' + urlBase64.encode(publicKey)
+    };
+  }
+
+  throw new Error('Unsupported encoding type specified.');
 }
 
 module.exports = {

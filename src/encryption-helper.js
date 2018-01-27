@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const ece = require('http_ece');
 const urlBase64 = require('urlsafe-base64');
 
-const encrypt = function(userPublicKey, userAuth, payload) {
+const encrypt = function(userPublicKey, userAuth, payload, contentEncoding) {
   if (!userPublicKey) {
     throw new Error('No user public key provided for encryption.');
   }
@@ -43,14 +43,12 @@ const encrypt = function(userPublicKey, userAuth, payload) {
 
   const salt = urlBase64.encode(crypto.randomBytes(16));
 
-  ece.saveKey('webpushKey', localCurve, 'P-256');
-
   const cipherText = ece.encrypt(payload, {
-    keyid: 'webpushKey',
+    version: contentEncoding,
     dh: userPublicKey,
+    privateKey: localCurve,
     salt: salt,
-    authSecret: userAuth,
-    padSize: 2
+    authSecret: userAuth
   });
 
   return {

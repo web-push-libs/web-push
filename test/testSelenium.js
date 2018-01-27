@@ -150,14 +150,17 @@ function runTest(browser, options) {
       let promise;
       let pushPayload = null;
       let vapid = null;
+      let contentEncoding = null;
       if (options) {
         pushPayload = options.payload;
         vapid = options.vapid;
+        contentEncoding = options.contentEncoding;
       }
 
       if (!pushPayload) {
         promise = webPush.sendNotification(subscription, null, {
-          vapidDetails: vapid
+          vapidDetails: vapid,
+          contentEncoding: contentEncoding
         });
       } else {
         if (!subscription.keys) {
@@ -165,7 +168,8 @@ function runTest(browser, options) {
         }
 
         promise = webPush.sendNotification(subscription, pushPayload, {
-          vapidDetails: vapid
+          vapidDetails: vapid,
+          contentEncoding: contentEncoding
         });
       }
 
@@ -243,30 +247,67 @@ availableBrowsers.forEach(function(browser) {
       });
     });
 
-    test('send/receive notification without payload with ' + browser.getPrettyName(), function() {
-      this.timeout(PUSH_TEST_TIMEOUT);
-      return runTest(browser);
-    });
-
-    test('send/receive notification with payload with ' + browser.getPrettyName(), function() {
+    test('send/receive notification without payload with ' + browser.getPrettyName() + ' (aesgcm)', function() {
       this.timeout(PUSH_TEST_TIMEOUT);
       return runTest(browser, {
-        payload: 'marco'
+        contentEncoding: webPush.supportedContentEncodings.AES_GCM
       });
     });
 
-    test('send/receive notification with vapid with ' + browser.getPrettyName(), function() {
+    test('send/receive notification without payload with ' + browser.getPrettyName() + ' (aes128gcm)', function() {
       this.timeout(PUSH_TEST_TIMEOUT);
       return runTest(browser, {
-        vapid: VAPID_PARAM
+        contentEncoding: webPush.supportedContentEncodings.AES_128_GCM
       });
     });
 
-    test('send/receive notification with payload & vapid with ' + browser.getPrettyName(), function() {
+    test('send/receive notification with payload with ' + browser.getPrettyName() + ' (aesgcm)', function() {
       this.timeout(PUSH_TEST_TIMEOUT);
       return runTest(browser, {
         payload: 'marco',
-        vapid: VAPID_PARAM
+        contentEncoding: webPush.supportedContentEncodings.AES_GCM
+      });
+    });
+
+    test('send/receive notification with payload with ' + browser.getPrettyName() + ' (aes128gcm)', function() {
+      this.timeout(PUSH_TEST_TIMEOUT);
+      return runTest(browser, {
+        payload: 'marco',
+        contentEncoding: webPush.supportedContentEncodings.AES_128_GCM
+      });
+    });
+
+    test('send/receive notification with vapid with ' + browser.getPrettyName() + ' (aesgcm)', function() {
+      this.timeout(PUSH_TEST_TIMEOUT);
+      return runTest(browser, {
+        vapid: VAPID_PARAM,
+        contentEncoding: webPush.supportedContentEncodings.AES_GCM
+      });
+    });
+
+    test('send/receive notification with vapid with ' + browser.getPrettyName() + ' (aes128gcm)', function() {
+      this.timeout(PUSH_TEST_TIMEOUT);
+      return runTest(browser, {
+        vapid: VAPID_PARAM,
+        contentEncoding: webPush.supportedContentEncodings.AES_128_GCM
+      });
+    });
+
+    test('send/receive notification with payload & vapid with ' + browser.getPrettyName() + ' (aesgcm)', function() {
+      this.timeout(PUSH_TEST_TIMEOUT);
+      return runTest(browser, {
+        payload: 'marco',
+        vapid: VAPID_PARAM,
+        contentEncoding: webPush.supportedContentEncodings.AES_GCM
+      });
+    });
+
+    test('send/receive notification with payload & vapid with ' + browser.getPrettyName() + ' (aes128gcm)', function() {
+      this.timeout(PUSH_TEST_TIMEOUT);
+      return runTest(browser, {
+        payload: 'marco',
+        vapid: VAPID_PARAM,
+        contentEncoding: webPush.supportedContentEncodings.AES_128_GCM
       });
     });
   });

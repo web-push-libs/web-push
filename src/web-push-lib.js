@@ -7,6 +7,7 @@ const https = require('https');
 const WebPushError = require('./web-push-error.js');
 const vapidHelper = require('./vapid-helper.js');
 const encryptionHelper = require('./encryption-helper.js');
+const webPushConstants = require('./web-push-constants.js');
 
 // Default TTL is four weeks.
 const DEFAULT_TTL = 2419200;
@@ -107,13 +108,15 @@ WebPushLib.prototype.generateRequestDetails =
     let currentVapidDetails = vapidDetails;
     let timeToLive = DEFAULT_TTL;
     let extraHeaders = {};
+    let contentEncoding = webPushConstants.supportedContentEncodings.AES_GCM;
 
     if (options) {
       const validOptionKeys = [
         'headers',
         'gcmAPIKey',
         'vapidDetails',
-        'TTL'
+        'TTL',
+        'contentEncoding'
       ];
       const optionKeys = Object.keys(options);
       for (let i = 0; i < optionKeys.length; i += 1) {
@@ -150,6 +153,15 @@ WebPushLib.prototype.generateRequestDetails =
       if (options.TTL) {
         timeToLive = options.TTL;
       }
+
+      if (options.contentEncoding) {
+        if ((options.contentEncoding === webPushConstants.supportedContentEncodings.AES_128_GCM
+          || options.contentEncoding === webPushConstants.supportedContentEncodings.AES_GCM)) {
+          contentEncoding = options.contentEncoding;
+        } else {
+          throw new Error('Unsupported content encoding specified.');
+        }
+      }
     }
 
     if (typeof timeToLive === 'undefined') {
@@ -177,13 +189,19 @@ WebPushLib.prototype.generateRequestDetails =
           'required encryption keys'));
       }
 
-      const encrypted = encryptionHelper.encrypt(subscription.keys.p256dh, subscription.keys.auth, payload);
+      const encrypted = encryptionHelper
+        .encrypt(subscription.keys.p256dh, subscription.keys.auth, payload, contentEncoding);
 
       requestDetails.headers['Content-Length'] = encrypted.cipherText.length;
       requestDetails.headers['Content-Type'] = 'application/octet-stream';
-      requestDetails.headers['Content-Encoding'] = 'aesgcm';
-      requestDetails.headers.Encryption = 'salt=' + encrypted.salt;
-      requestDetails.headers['Crypto-Key'] = 'dh=' + urlBase64.encode(encrypted.localPublicKey);
+
+      if (contentEncoding === webPushConstants.supportedContentEncodings.AES_128_GCM) {
+        requestDetails.headers['Content-Encoding'] = webPushConstants.supportedContentEncodings.AES_128_GCM;
+      } else if (contentEncoding === webPushConstants.supportedContentEncodings.AES_GCM) {
+        requestDetails.headers['Content-Encoding'] = webPushConstants.supportedContentEncodings.AES_GCM;
+        requestDetails.headers.Encryption = 'salt=' + encrypted.salt;
+        requestDetails.headers['Crypto-Key'] = 'dh=' + urlBase64.encode(encrypted.localPublicKey);
+      }
 
       requestPayload = encrypted.cipherText;
     } else {
@@ -201,6 +219,10 @@ WebPushLib.prototype.generateRequestDetails =
         requestDetails.headers.Authorization = 'key=' + currentGCMAPIKey;
       }
     } else if (currentVapidDetails) {
+      if (contentEncoding === webPushConstants.supportedContentEncodings.AES_128_GCM
+          && subscription.endpoint.indexOf('https://fcm.googleapis.com') === 0) {
+        subscription.endpoint = subscription.endpoint.replace('fcm/send', 'wp');
+      }
       const parsedUrl = url.parse(subscription.endpoint);
       const audience = parsedUrl.protocol + '//' +
         parsedUrl.host;
@@ -209,15 +231,19 @@ WebPushLib.prototype.generateRequestDetails =
         audience,
         currentVapidDetails.subject,
         currentVapidDetails.publicKey,
-        currentVapidDetails.privateKey
+        currentVapidDetails.privateKey,
+        contentEncoding
       );
 
       requestDetails.headers.Authorization = vapidHeaders.Authorization;
-      if (requestDetails.headers['Crypto-Key']) {
-        requestDetails.headers['Crypto-Key'] += ';' +
-          vapidHeaders['Crypto-Key'];
-      } else {
-        requestDetails.headers['Crypto-Key'] = vapidHeaders['Crypto-Key'];
+
+      if (contentEncoding === webPushConstants.supportedContentEncodings.AES_GCM) {
+        if (requestDetails.headers['Crypto-Key']) {
+          requestDetails.headers['Crypto-Key'] += ';' +
+            vapidHeaders['Crypto-Key'];
+        } else {
+          requestDetails.headers['Crypto-Key'] = vapidHeaders['Crypto-Key'];
+        }
       }
     }
 

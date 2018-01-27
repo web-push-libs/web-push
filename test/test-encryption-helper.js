@@ -15,61 +15,75 @@ suite('Test Encryption Helpers', function() {
     assert(webPush.encrypt);
   });
 
-  function encryptDecrypt(thing) {
-    const encrypted = webPush.encrypt(VALID_PUBLIC_KEY, VALID_AUTH, thing);
-
-    ece.saveKey('webpushKey', userCurve, 'P-256');
+  function encryptDecrypt(thing, contentEncoding) {
+    const encrypted = webPush.encrypt(VALID_PUBLIC_KEY, VALID_AUTH, thing, contentEncoding);
 
     return ece.decrypt(encrypted.cipherText, {
-      keyid: 'webpushKey',
+      version: contentEncoding,
       dh: urlBase64.encode(encrypted.localPublicKey),
+      privateKey: userCurve,
       salt: encrypted.salt,
-      authSecret: VALID_AUTH,
-      padSize: 2
+      authSecret: VALID_AUTH
     });
   }
 
-  test('encrypt/decrypt string', function() {
-    assert(encryptDecrypt('hello').equals(new Buffer('hello')));
+  test('encrypt/decrypt string (aesgcm)', function() {
+    assert(encryptDecrypt('hello', webPush.supportedContentEncodings.AES_GCM).equals(new Buffer('hello')));
   });
 
-  test('encrypt/decrypt buffer', function() {
-    assert(encryptDecrypt(new Buffer('hello')).equals(new Buffer('hello')));
+  test('encrypt/decrypt string (aes128gcm)', function() {
+    assert(encryptDecrypt('hello', webPush.supportedContentEncodings.AES_128_GCM).equals(new Buffer('hello')));
   });
 
-  test('bad input to encrypt', function() {
-    // userPublicKey, userAuth, payload
-    const badInputs = [
-      function() {
-        webPush.encrypt();
-      },
-      function() {
-        // Invalid public key
-        webPush.encrypt(null, VALID_AUTH, 'Example');
-      },
-      function() {
-        // Invalid auth
-        webPush.encrypt(VALID_PUBLIC_KEY, null, 'Example');
-      },
-      function() {
-        // No payload
-        webPush.encrypt(VALID_PUBLIC_KEY, VALID_AUTH, null);
-      },
-      function() {
-        // Invalid auth size
-        webPush.encrypt(VALID_PUBLIC_KEY, 'Fake', 'Example');
-      },
-      function() {
-        // Invalid auth size
-        webPush.encrypt(VALID_PUBLIC_KEY, VALID_AUTH, []);
-      }
-    ];
+  test('encrypt/decrypt buffer (aesgcm)', function() {
+    assert(encryptDecrypt(new Buffer('hello'), webPush.supportedContentEncodings.AES_GCM).equals(new Buffer('hello')));
+  });
 
+  test('encrypt/decrypt buffer (aes128gcm)', function() {
+    assert(encryptDecrypt(new Buffer('hello'), webPush.supportedContentEncodings.AES_128_GCM).equals(new Buffer('hello')));
+  });
+
+  // userPublicKey, userAuth, payload
+  const badInputs = [
+    function(contentEncoding) {
+      webPush.encrypt(null, null, null, contentEncoding);
+    },
+    function(contentEncoding) {
+      // Invalid public key
+      webPush.encrypt(null, VALID_AUTH, 'Example', contentEncoding);
+    },
+    function(contentEncoding) {
+      // Invalid auth
+      webPush.encrypt(VALID_PUBLIC_KEY, null, 'Example', contentEncoding);
+    },
+    function(contentEncoding) {
+      // No payload
+      webPush.encrypt(VALID_PUBLIC_KEY, VALID_AUTH, null, contentEncoding);
+    },
+    function(contentEncoding) {
+      // Invalid auth size
+      webPush.encrypt(VALID_PUBLIC_KEY, 'Fake', 'Example', contentEncoding);
+    },
+    function(contentEncoding) {
+      // Invalid auth size
+      webPush.encrypt(VALID_PUBLIC_KEY, VALID_AUTH, [], contentEncoding);
+    }
+  ];
+
+  function testBadInput(contentEncoding) {
     badInputs.forEach(function(badInput, index) {
       assert.throws(function() {
-        badInput();
+        badInput(contentEncoding);
         console.log('Encryption input failed to throw: ' + index);
       });
     });
+  }
+
+  test('bad input to encrypt (aesgcm)', function() {
+    testBadInput(webPush.supportedContentEncodings.AES_GCM);
+  });
+
+  test('bad input to encrypt (aes128gcm)', function() {
+    testBadInput(webPush.supportedContentEncodings.AES_128_GCM);
   });
 });
