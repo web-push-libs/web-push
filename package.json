@@ -45,7 +45,7 @@
     "geckodriver": "^1.10.0",
     "istanbul": "^0.4.2",
     "mkdirp": "^0.5.1",
-    "mocha": "^4.0.1",
+    "mocha": "^5.0.0",
     "portfinder": "^1.0.2",
     "selenium-assistant": "^5.2.0",
     "selenium-webdriver": "^3.6.0",
