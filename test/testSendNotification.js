@@ -9,6 +9,7 @@ const ece = require('http_ece');
 const urlBase64 = require('urlsafe-base64');
 const portfinder = require('portfinder');
 const jws = require('jws');
+const WebPushConstants = require('../src/web-push-constants.js');
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
@@ -145,16 +146,14 @@ suite('sendNotification', function() {
         return key.indexOf('dh=') === 0;
       }).substring('dh='.length);
 
-      assert.equal(requestDetails.headers['content-encoding'], 'aesgcm', 'Check Content-Encoding header');
-
-      ece.saveKey('webpushKey', userCurve, 'P-256');
+      assert.equal(requestDetails.headers['content-encoding'], options.extraOptions.contentEncoding, 'Check Content-Encoding header');
 
       const decrypted = ece.decrypt(requestBody, {
-        keyid: 'webpushKey',
+        version: options.extraOptions.contentEncoding,
+        privateKey: userCurve,
         dh: appServerPublicKey,
         salt: salt,
-        authSecret: urlBase64.encode(userAuth),
-        padSize: 2
+        authSecret: urlBase64.encode(userAuth)
       });
 
       assert(decrypted.equals(new Buffer(options.message)), 'Check cipher text can be correctly decoded');
@@ -329,7 +328,7 @@ suite('sendNotification', function() {
   // TODO: Add test for VAPID override
 
   validRequests.forEach(function(validRequest) {
-    test(validRequest.testTitle, function() {
+    test(validRequest.testTitle + ' (aesgcm)', function() {
       // Set the default endpoint if it's not already configured
       if (!validRequest.requestOptions.subscription.endpoint) {
         validRequest.requestOptions.subscription.endpoint =
@@ -340,6 +339,38 @@ suite('sendNotification', function() {
         validRequest.requestOptions.subscription.endpoint += '?' +
           validRequest.serverFlags.join('&');
       }
+
+      validRequest.requestOptions.extraOptions = validRequest.requestOptions.extraOptions || {};
+      validRequest.requestOptions.extraOptions.contentEncoding = WebPushConstants.supportedContentEncodings.AES_GCM;
+
+      const webPush = require('../src/index');
+      return webPush.sendNotification(
+        validRequest.requestOptions.subscription,
+        validRequest.requestOptions.message,
+        validRequest.requestOptions.extraOptions
+      )
+      .then(function(response) {
+        assert.equal(response.body, 'ok');
+      })
+      .then(function() {
+        validateRequest(validRequest);
+      });
+    });
+
+    test(validRequest.testTitle + ' (aes128gcm)', function() {
+      // Set the default endpoint if it's not already configured
+      if (!validRequest.requestOptions.subscription.endpoint) {
+        validRequest.requestOptions.subscription.endpoint =
+          'https://127.0.0.1:' + serverPort;
+      }
+
+      if (validRequest.serverFlags) {
+        validRequest.requestOptions.subscription.endpoint += '?' +
+          validRequest.serverFlags.join('&');
+      }
+
+      validRequest.requestOptions.extraOptions = validRequest.requestOptions.extraOptions || {};
+      validRequest.requestOptions.extraOptions.contentEncoding = WebPushConstants.supportedContentEncodings.AES_128_GCM;
 
       const webPush = require('../src/index');
       return webPush.sendNotification(
@@ -383,7 +414,7 @@ suite('sendNotification', function() {
         }
       }
     }, {
-      testTitle: 'send notification if push service is GCM and you want to use VAPID',
+      testTitle: 'send notification if push service is GCM and you want to use VAPID (aesgcm)',
       requestOptions: {
         subscription: {
         },
@@ -392,7 +423,22 @@ suite('sendNotification', function() {
             subject: 'mailto:mozilla@example.org',
             privateKey: vapidKeys.privateKey,
             publicKey: vapidKeys.publicKey
-          }
+          },
+          contentEncoding: WebPushConstants.supportedContentEncodings.AES_GCM
+        }
+      }
+    }, {
+      testTitle: 'send notification if push service is GCM and you want to use VAPID (aes128gcm)',
+      requestOptions: {
+        subscription: {
+        },
+        extraOptions: {
+          vapidDetails: {
+            subject: 'mailto:mozilla@example.org',
+            privateKey: vapidKeys.privateKey,
+            publicKey: vapidKeys.publicKey
+          },
+          contentEncoding: WebPushConstants.supportedContentEncodings.AES_128_GCM
         }
       }
     }
@@ -611,7 +657,7 @@ suite('sendNotification', function() {
   ];
 
   invalidRequests.forEach(function(invalidRequest) {
-    test(invalidRequest.testTitle, function() {
+    test(invalidRequest.testTitle + ' (aesgcm)', function() {
       if (invalidRequest.addEndpoint) {
         invalidRequest.requestOptions.subscription.endpoint =
           'https://127.0.0.1:' + serverPort;
@@ -621,6 +667,36 @@ suite('sendNotification', function() {
         invalidRequest.requestOptions.subscription.endpoint += '?' +
           invalidRequest.serverFlags.join('&');
       }
+
+      invalidRequest.requestOptions.extraOptions = invalidRequest.requestOptions.extraOptions || {};
+      invalidRequest.requestOptions.extraOptions.contentEncoding = WebPushConstants.supportedContentEncodings.AES_GCM;
+
+      const webPush = require('../src/index');
+      return webPush.sendNotification(
+        invalidRequest.requestOptions.subscription,
+        invalidRequest.requestOptions.message,
+        invalidRequest.requestOptions.extraOptions
+      )
+      .then(function() {
+        throw new Error('Expected promise to reject');
+      }, function() {
+        // NOOP, this error is expected
+      });
+    });
+
+    test(invalidRequest.testTitle + ' (aes128gcm)', function() {
+      if (invalidRequest.addEndpoint) {
+        invalidRequest.requestOptions.subscription.endpoint =
+          'https://127.0.0.1:' + serverPort;
+      }
+
+      if (invalidRequest.serverFlags) {
+        invalidRequest.requestOptions.subscription.endpoint += '?' +
+          invalidRequest.serverFlags.join('&');
+      }
+
+      invalidRequest.requestOptions.extraOptions = invalidRequest.requestOptions.extraOptions || {};
+      invalidRequest.requestOptions.extraOptions.contentEncoding = WebPushConstants.supportedContentEncodings.AES_128_GCM;
 
       const webPush = require('../src/index');
       return webPush.sendNotification(

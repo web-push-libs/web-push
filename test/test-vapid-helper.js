@@ -12,6 +12,7 @@ const VALID_SUBJECT_MAILTO = 'mailto: example@example.com';
 const VALID_SUBJECT_URL = 'https://exampe.com/contact';
 const VALID_PUBLIC_KEY = urlBase64.encode(new Buffer(65));
 const VALID_PRIVATE_KEY = urlBase64.encode(new Buffer(32));
+const VALID_CONTENT_ENCODING = webPush.supportedContentEncodings.AES_GCM;
 const VALID_EXPIRATION = Math.floor(Date.now() / 1000) + (60 * 60 * 12);
 
 suite('Test Vapid Helpers', function() {
@@ -118,26 +119,29 @@ suite('Test Vapid Helpers', function() {
       function() {
         vapidHelper.getVapidHeaders(VALID_AUDIENCE, { something: 'else' }, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY);
       },
+      function() {
+        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, 'invalid encoding type');
+      },
       function () {
         // String with text, is not accepted as a valid expiration value
-        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, 'Not valid expiration: Must be a number, this is a string with text');
+        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, VALID_CONTENT_ENCODING, 'Not valid expiration: Must be a number, this is a string with text');
       },
       function () {
         // Object is not accepted as a valid expiration value
-        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, { message: 'Not valid expiration: Must be a number, this is an object' });
+        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, VALID_CONTENT_ENCODING, { message: 'Not valid expiration: Must be a number, this is an object' });
       },
       function () {
         // Boolean is not accepted as a valid expiration value
-        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, true);
+        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, VALID_CONTENT_ENCODING, true);
       },
       function () {
         // String is not accepted as a valid expiration value
-        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, '12213');
+        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, VALID_CONTENT_ENCODING, '12213');
       },
       function () {
         // Invalid `expiration` as it exceeds 24 hours in duration
         const invalidExpiration = Math.floor(Date.now() / 1000) + (25 * 60 * 60);
-        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, invalidExpiration);
+        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, VALID_CONTENT_ENCODING, invalidExpiration);
       }
     ];
 
@@ -149,41 +153,52 @@ suite('Test Vapid Helpers', function() {
     });
   });
 
-  test('should get valid VAPID headers', function() {
-    const validInputs = [
-      function() {
-        return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_URL, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY);
-      },
-      function() {
-        return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY);
-      },
-      function() {
-        return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_URL, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, VALID_EXPIRATION);
-      },
-      function() {
-        // 0 is a valid value for `expiration`
-        // since the the `expiration` value isn't checked for minimum
-        const secondsFromEpoch = 0;
-        return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_URL, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, secondsFromEpoch);
-      },
-      function () {
-        // Valid value for `secondsFromEpoch` passed in to
-        // `vapidHelper.getVapidHeaders` function
-        const secondsFromEpoch = Math.floor(Date.now() / 1000) + (5 * 60 * 60);
-        return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_URL, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, secondsFromEpoch);
-      }
-    ];
+  const validInputs = [
+    function(contentEncoding) {
+      return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_URL, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, contentEncoding);
+    },
+    function(contentEncoding) {
+      return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, contentEncoding);
+    },
+    function(contentEncoding) {
+      return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_URL, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, contentEncoding, VALID_EXPIRATION);
+    },
+    function(contentEncoding) {
+      // 0 is a valid value for `expiration`
+      // since the the `expiration` value isn't checked for minimum
+      const secondsFromEpoch = 0;
+      return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_URL, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, contentEncoding, secondsFromEpoch);
+    },
+    function (contentEncoding) {
+      // Valid value for `secondsFromEpoch` passed in to
+      // `vapidHelper.getVapidHeaders` function
+      const secondsFromEpoch = Math.floor(Date.now() / 1000) + (5 * 60 * 60);
+      return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_URL, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, contentEncoding, secondsFromEpoch);
+    }
+  ];
 
+  function testValidInputs(contentEncoding) {
     validInputs.forEach(function(validInput, index) {
       try {
-        const headers = validInput();
+        const headers = validInput(contentEncoding);
         assert(headers.Authorization);
-        assert(headers['Crypto-Key']);
+
+        if (contentEncoding === webPush.supportedContentEncodings.AES_GCM) {
+          assert(headers['Crypto-Key']);
+        }
       } catch (err) {
         console.warn('Valid input call for getVapidHeaders() threw an ' +
           'error. [' + index + ']');
         throw err;
       }
     });
+  }
+
+  test('should get valid VAPID headers (aesgcm)', function() {
+    testValidInputs(webPush.supportedContentEncodings.AES_GCM);
+  });
+
+  test('should get valid VAPID headers (aes128gcm)', function() {
+    testValidInputs(webPush.supportedContentEncodings.AES_128_GCM);
   });
 });

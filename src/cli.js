@@ -15,6 +15,7 @@ const printUsageDetails = () => {
         '[--auth=<auth secret>]',
         '[--payload=<message>]',
         '[--ttl=<seconds>]',
+        '[--encoding=<encoding type>]',
         '[--vapid-subject=<vapid subject>]',
         '[--vapid-pubkey=<public key url base64>]',
         '[--vapid-pvtkey=<private key url base64>]',
@@ -88,6 +89,10 @@ const sendNotification = args => {
 
   if (args['gcm-api-key']) {
     options.gcmAPIKey = args['gcm-api-key'];
+  }
+
+  if (args.encoding) {
+    options.encodingType = args.encoding;
   }
 
   webPush.sendNotification(subscription, payload, options)

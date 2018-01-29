@@ -132,7 +132,8 @@ const options = {
   TTL: <Number>,
   headers: {
     '< header name >': '< header value >'
-  }
+  },
+  contentEncoding: '< Encoding type, e.g.: aesgcm or aes128gcm >'
 }
 
 webpush.sendNotification(
@@ -179,6 +180,7 @@ request only. This overrides any API key set via `setGCMAPIKey()`.
 - **TTL** is a value in seconds that describes how long a push message is
 retained by the push service (by default, four weeks).
 - **headers** is an object with all the extra headers you want to add to the request.
+- **contentEncoding** is the type of push encoding to use (e.g. 'aesgcm', by default, or 'aes128gcm').
 
 ### Returns
 
@@ -237,7 +239,7 @@ None.
 
 <hr />
 
-## encrypt(userPublicKey, userAuth, payload)
+## encrypt(userPublicKey, userAuth, payload, contentEncoding)
 
 ```javascript
 const pushSubscription = {
@@ -250,7 +252,8 @@ const pushSubscription = {
 webPush.encrypt(
   pushSubscription.keys.p256dh,
   pushSubscription.keys.auth,
-  'My Payload'
+  'My Payload',
+  'aes128gcm'
 )
 .then(encryptionDetails => {
 
@@ -270,6 +273,7 @@ The `encrypt()` method expects the following input:
 - *userPublicKey*: the public key of the receiver (from the browser).
 - *userAuth*: the auth secret of the receiver (from the browser).
 - *payload*: the message to attach to the notification.
+- *contentEncoding*: the type of content encoding to use (e.g. aesgcm or aes128gcm).
 
 ### Returns
 
@@ -282,7 +286,7 @@ encryption.
 
 <hr />
 
-## getVapidHeaders(audience, subject, publicKey, privateKey, expiration)
+## getVapidHeaders(audience, subject, publicKey, privateKey, contentEncoding, expiration)
 
 ```javascript
 const parsedUrl = url.parse(subscription.endpoint);
@@ -293,7 +297,8 @@ const vapidHeaders = vapidHelper.getVapidHeaders(
   audience,
   'mailto: example@web-push-node.org',
   vapidDetails.publicKey,
-  vapidDetails.privateKey
+  vapidDetails.privateKey,
+  'aes128gcm'
 );
 ```
 
@@ -308,6 +313,7 @@ The `getVapidHeaders()` method expects the following input:
 - *subject*: the mailto or URL for your application.
 - *publicKey*: the VAPID public key.
 - *privateKey*: the VAPID private key.
+- *contentEncoding*: the type of content encoding to use (e.g. aesgcm or aes128gcm).
 
 ### Returns
 
@@ -343,7 +349,8 @@ const options = {
   TTL: <Number>,
   headers: {
     '< header name >': '< header value >'
-  }
+  },
+  contentEncoding: '< Encoding type, e.g.: aesgcm or aes128gcm >'
 }
 
 try {
@@ -396,6 +403,7 @@ request only. This overrides any API key set via `setGCMAPIKey()`.
 - **TTL** is a value in seconds that describes how long a push message is
 retained by the push service (by default, four weeks).
 - **headers** is an object with all the extra headers you want to add to the request.
+- **contentEncoding** is the type of push encoding to use (e.g. 'aesgcm', by default, or 'aes128gcm').
 
 ### Returns
 
