@@ -93,6 +93,7 @@
           '--auth=auth',
           '--payload=hello',
           '--ttl=1234',
+          '--encoding=aesgcm',
           '--vapid-subject=http://example.push-serice.com/contact',
           '--vapid-pubkey=vapid-publicKey',
           '--vapid-pvtkey=vapid-privateKey',
