@@ -3,6 +3,7 @@
 const urlBase64 = require('urlsafe-base64');
 const url = require('url');
 const https = require('https');
+const HttpsProxyAgent = require('https-proxy-agent');
 
 const WebPushError = require('./web-push-error.js');
 const vapidHelper = require('./vapid-helper.js');
@@ -116,7 +117,8 @@ WebPushLib.prototype.generateRequestDetails =
         'gcmAPIKey',
         'vapidDetails',
         'TTL',
-        'contentEncoding'
+        'contentEncoding',
+        'proxy'
       ];
       const optionKeys = Object.keys(options);
       for (let i = 0; i < optionKeys.length; i += 1) {
@@ -285,7 +287,11 @@ WebPushLib.prototype.sendNotification =
 
       httpsOptions.headers = requestDetails.headers;
       httpsOptions.method = requestDetails.method;
-
+      
+      if('proxy' in options && typeof options.proxy === 'string') {
+          httpsOptions.agent = new HttpsProxyAgent(options.proxy);
+      }
+      
       const pushRequest = https.request(httpsOptions, function(pushResponse) {
         let responseText = '';
 
