@@ -252,6 +252,14 @@ WebPushLib.prototype.generateRequestDetails =
     requestDetails.body = requestPayload;
     requestDetails.endpoint = subscription.endpoint;
 
+    if (options.proxy) {
+      if (typeof options.proxy === 'string') {
+        requestDetails.proxy = options.proxy;
+      } else {
+        console.warn('Attempt to use proxy option, but invalid type it should be a string ');
+      }
+    }
+
     return requestDetails;
   };
 
@@ -287,11 +295,11 @@ WebPushLib.prototype.sendNotification =
 
       httpsOptions.headers = requestDetails.headers;
       httpsOptions.method = requestDetails.method;
-      
-      if('proxy' in options && typeof options.proxy === 'string') {
-          httpsOptions.agent = new HttpsProxyAgent(options.proxy);
+
+      if (requestDetails.proxy) {
+        httpsOptions.agent = new HttpsProxyAgent(requestDetails.proxy);
       }
-      
+
       const pushRequest = https.request(httpsOptions, function(pushResponse) {
         let responseText = '';
 

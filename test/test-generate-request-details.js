@@ -233,7 +233,8 @@ suite('Test Generate Request Details', function() {
       headers: {
         'Topic': 'topic',
         'Urgency': 'urgency'
-      }
+      },
+      'proxy': 'proxy'
     };
     let details = webPush.generateRequestDetails(
       subscription,
@@ -243,6 +244,7 @@ suite('Test Generate Request Details', function() {
     assert.equal(details.headers.TTL, extraOptions.TTL);
     assert.equal(details.headers.Topic, extraOptions.headers.Topic);
     assert.equal(details.headers.Urgency, extraOptions.headers.Urgency);
+    assert.equal(details.proxy, extraOptions.proxy);
   });
 
   test('Audience contains port', function() {
