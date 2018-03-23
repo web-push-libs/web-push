@@ -110,6 +110,7 @@ WebPushLib.prototype.generateRequestDetails =
     let timeToLive = DEFAULT_TTL;
     let extraHeaders = {};
     let contentEncoding = webPushConstants.supportedContentEncodings.AES_GCM;
+    let proxy;
 
     if (options) {
       const validOptionKeys = [
@@ -162,6 +163,14 @@ WebPushLib.prototype.generateRequestDetails =
           contentEncoding = options.contentEncoding;
         } else {
           throw new Error('Unsupported content encoding specified.');
+        }
+      }
+
+      if (options.proxy) {
+        if (typeof options.proxy === 'string') {
+          proxy = options.proxy;
+        } else {
+          console.warn('Attempt to use proxy option, but invalid type it should be a string ');
         }
       }
     }
@@ -252,12 +261,8 @@ WebPushLib.prototype.generateRequestDetails =
     requestDetails.body = requestPayload;
     requestDetails.endpoint = subscription.endpoint;
 
-    if (options.proxy) {
-      if (typeof options.proxy === 'string') {
-        requestDetails.proxy = options.proxy;
-      } else {
-        console.warn('Attempt to use proxy option, but invalid type it should be a string ');
-      }
+    if (proxy) {
+      requestDetails.proxy = proxy;
     }
 
     return requestDetails;
