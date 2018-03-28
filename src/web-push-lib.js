@@ -3,6 +3,7 @@
 const urlBase64 = require('urlsafe-base64');
 const url = require('url');
 const https = require('https');
+const HttpsProxyAgent = require('https-proxy-agent');
 
 const WebPushError = require('./web-push-error.js');
 const vapidHelper = require('./vapid-helper.js');
@@ -109,6 +110,7 @@ WebPushLib.prototype.generateRequestDetails =
     let timeToLive = DEFAULT_TTL;
     let extraHeaders = {};
     let contentEncoding = webPushConstants.supportedContentEncodings.AES_GCM;
+    let proxy;
 
     if (options) {
       const validOptionKeys = [
@@ -116,7 +118,8 @@ WebPushLib.prototype.generateRequestDetails =
         'gcmAPIKey',
         'vapidDetails',
         'TTL',
-        'contentEncoding'
+        'contentEncoding',
+        'proxy'
       ];
       const optionKeys = Object.keys(options);
       for (let i = 0; i < optionKeys.length; i += 1) {
@@ -160,6 +163,14 @@ WebPushLib.prototype.generateRequestDetails =
           contentEncoding = options.contentEncoding;
         } else {
           throw new Error('Unsupported content encoding specified.');
+        }
+      }
+
+      if (options.proxy) {
+        if (typeof options.proxy === 'string') {
+          proxy = options.proxy;
+        } else {
+          console.warn('Attempt to use proxy option, but invalid type it should be a string ');
         }
       }
     }
@@ -250,6 +261,10 @@ WebPushLib.prototype.generateRequestDetails =
     requestDetails.body = requestPayload;
     requestDetails.endpoint = subscription.endpoint;
 
+    if (proxy) {
+      requestDetails.proxy = proxy;
+    }
+
     return requestDetails;
   };
 
@@ -285,6 +300,10 @@ WebPushLib.prototype.sendNotification =
 
       httpsOptions.headers = requestDetails.headers;
       httpsOptions.method = requestDetails.method;
+
+      if (requestDetails.proxy) {
+        httpsOptions.agent = new HttpsProxyAgent(requestDetails.proxy);
+      }
 
       const pushRequest = https.request(httpsOptions, function(pushResponse) {
         let responseText = '';
