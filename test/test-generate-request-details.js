@@ -271,4 +271,18 @@ suite('Test Generate Request Details', function() {
     assert.ok(audience, 'Audience exists');
     assert.equal(audience, 'http://example.com:4242', 'Audience contains expected value with port');
   });
+
+  test('Proxy option', function() {
+    let subscription = { endpoint: 'https://127.0.0.1:8080' };
+    let message;
+    let extraOptions = {
+      'proxy': 'proxy'
+    };
+    let details = webPush.generateRequestDetails(
+      subscription,
+      message,
+      extraOptions
+    );
+    assert.equal(details.proxy, extraOptions.proxy);
+  });
 });
