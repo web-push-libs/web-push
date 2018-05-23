@@ -352,7 +352,8 @@ const options = {
   headers: {
     '< header name >': '< header value >'
   },
-  contentEncoding: '< Encoding type, e.g.: aesgcm or aes128gcm >'
+  contentEncoding: '< Encoding type, e.g.: aesgcm or aes128gcm >',
+  proxy: '< proxy server address >'
 }
 
 try {
