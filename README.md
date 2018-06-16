@@ -449,13 +449,13 @@ object will contain:
 <td>Edge</td>
 
 <!-- Push without payloads support-->
-<td>✗</td>
+<td>✓ April 2018</td>
 
 <!-- Push with payload support -->
-<td>✗</td>
+<td>✓ April 2018</td>
 
 <!-- VAPID Support -->
-<td>✗</td>
+<td>✓ April 2018</td>
 
 <td></td>
 </tr>
