@@ -50,7 +50,7 @@
     "portfinder": "^1.0.2",
     "selenium-assistant": "^5.3.0",
     "semver": "^5.1.0",
-    "sinon": "^5.0.7",
+    "sinon": "^6.0.0",
     "which": "^1.2.11"
   },
   "engines": {
