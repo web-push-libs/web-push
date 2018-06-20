@@ -133,7 +133,8 @@ const options = {
   headers: {
     '< header name >': '< header value >'
   },
-  contentEncoding: '< Encoding type, e.g.: aesgcm or aes128gcm >'
+  contentEncoding: '< Encoding type, e.g.: aesgcm or aes128gcm >',
+  proxy: '< proxy server address >'
 }
 
 webpush.sendNotification(
@@ -181,6 +182,7 @@ request only. This overrides any API key set via `setGCMAPIKey()`.
 retained by the push service (by default, four weeks).
 - **headers** is an object with all the extra headers you want to add to the request.
 - **contentEncoding** is the type of push encoding to use (e.g. 'aesgcm', by default, or 'aes128gcm').
+- **proxy** proxy hostname/ip and a port to tunnel your requests through (eg. http://< hostname >:< port >).
 
 ### Returns
 
@@ -350,7 +352,8 @@ const options = {
   headers: {
     '< header name >': '< header value >'
   },
-  contentEncoding: '< Encoding type, e.g.: aesgcm or aes128gcm >'
+  contentEncoding: '< Encoding type, e.g.: aesgcm or aes128gcm >',
+  proxy: '< proxy server address >'
 }
 
 try {
@@ -404,6 +407,7 @@ request only. This overrides any API key set via `setGCMAPIKey()`.
 retained by the push service (by default, four weeks).
 - **headers** is an object with all the extra headers you want to add to the request.
 - **contentEncoding** is the type of push encoding to use (e.g. 'aesgcm', by default, or 'aes128gcm').
+- **proxy** proxy hostname/ip and a port to tunnel your requests through (eg. http://< hostname >:< port >).
 
 ### Returns
 
