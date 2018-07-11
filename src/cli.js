@@ -92,7 +92,7 @@ const sendNotification = args => {
   }
 
   if (args.encoding) {
-    options.encodingType = args.encoding;
+    options.contentEncoding = args.encoding;
   }
 
   webPush.sendNotification(subscription, payload, options)
