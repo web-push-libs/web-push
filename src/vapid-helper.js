@@ -161,8 +161,8 @@ function validateExpiration(expiration) {
  * @param  {string} audience        This must be the origin of the push service.
  * @param  {string} subject         This should be a URL or a 'mailto:' email
  * address.
- * @param  {Buffer} publicKey       The VAPID public key.
- * @param  {Buffer} privateKey      The VAPID private key.
+ * @param  {string} publicKey       The VAPID public key.
+ * @param  {string} privateKey      The VAPID private key.
  * @param  {string} contentEncoding The contentEncoding type.
  * @param  {integer} [expiration]   The expiration of the VAPID JWT.
  * @return {Object}                 Returns an Object with the Authorization and

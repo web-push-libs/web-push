@@ -47,8 +47,8 @@ WebPushLib.prototype.setGCMAPIKey = function(apiKey) {
  * @param  {string} subject    This must be either a URL or a 'mailto:'
  * address. For example: 'https://my-site.com/contact' or
  * 'mailto: contact@my-site.com'
- * @param  {Buffer} publicKey  The public VAPID key.
- * @param  {Buffer} privateKey The private VAPID key.
+ * @param  {string} publicKey  The public VAPID key, a URL safe, base64 encoded string
+ * @param  {string} privateKey The private VAPID key, a URL safe, base64 encoded string.
  */
 WebPushLib.prototype.setVapidDetails =
   function(subject, publicKey, privateKey) {
@@ -75,7 +75,7 @@ WebPushLib.prototype.setVapidDetails =
    * This method will throw an error if there is an issue with the input.
    * @param  {PushSubscription} subscription The PushSubscription you wish to
    * send the notification to.
-   * @param  {string} [payload]              The payload you wish to send to the
+   * @param  {string|Buffer} [payload]       The payload you wish to send to the
    * the user.
    * @param  {Object} [options]              Options for the GCM API key and
    * vapid keys can be passed in if they are unique for each notification you
@@ -273,7 +273,7 @@ WebPushLib.prototype.generateRequestDetails =
  * payload and any options.
  * @param  {PushSubscription} subscription The PushSubscription you wish to
  * send the notification to.
- * @param  {string} [payload]              The payload you wish to send to the
+ * @param  {string|Buffer} [payload]       The payload you wish to send to the
  * the user.
  * @param  {Object} [options]              Options for the GCM API key and
  * vapid keys can be passed in if they are unique for each notification you
