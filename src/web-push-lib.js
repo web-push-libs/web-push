@@ -230,10 +230,6 @@ WebPushLib.prototype.generateRequestDetails =
         requestDetails.headers.Authorization = 'key=' + currentGCMAPIKey;
       }
     } else if (currentVapidDetails) {
-      if (contentEncoding === webPushConstants.supportedContentEncodings.AES_128_GCM
-          && subscription.endpoint.indexOf('https://fcm.googleapis.com') === 0) {
-        subscription.endpoint = subscription.endpoint.replace('fcm/send', 'wp');
-      }
       const parsedUrl = url.parse(subscription.endpoint);
       const audience = parsedUrl.protocol + '//' +
         parsedUrl.host;
