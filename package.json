@@ -37,7 +37,7 @@
     "https-proxy-agent": "^2.2.1"
   },
   "devDependencies": {
-    "chalk": "2.4.1",
+    "chalk": "2.4.2",
     "chromedriver": "2.43.0",
     "del": "3.0.0",
     "eslint": "4.19.1",
