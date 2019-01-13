@@ -47,7 +47,7 @@
     "istanbul": "0.4.5",
     "mkdirp": "0.5.1",
     "mocha": "5.2.0",
-    "portfinder": "1.0.18",
+    "portfinder": "1.0.20",
     "selenium-assistant": "5.3.0",
     "semver": "5.6.0",
     "sinon": "7.0.0",
