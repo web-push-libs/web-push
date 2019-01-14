@@ -48,13 +48,13 @@ function generateVAPIDKeys() {
   // in errors, hence this padding.
   // See https://github.com/web-push-libs/web-push/issues/295 for history.
   if (privateKeyBuffer.length < 32) {
-    const padding = new Buffer(32 - privateKeyBuffer.length);
+    const padding = Buffer.alloc(32 - privateKeyBuffer.length);
     padding.fill(0);
     privateKeyBuffer = Buffer.concat([privateKeyBuffer, padding]);
   }
 
   if (publicKeyBuffer.length < 65) {
-    const padding = new Buffer(65 - publicKeyBuffer.length);
+    const padding = Buffer.alloc(65 - publicKeyBuffer.length);
     padding.fill(0);
     publicKeyBuffer = Buffer.concat([publicKeyBuffer, padding]);
   }

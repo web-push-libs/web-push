@@ -35,7 +35,7 @@ const encrypt = function(userPublicKey, userAuth, payload, contentEncoding) {
   }
 
   if (typeof payload === 'string' || payload instanceof String) {
-    payload = new Buffer(payload);
+    payload = Buffer.from(payload);
   }
 
   const localCurve = crypto.createECDH('prime256v1');
