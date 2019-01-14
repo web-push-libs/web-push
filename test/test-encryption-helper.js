@@ -28,19 +28,19 @@ suite('Test Encryption Helpers', function() {
   }
 
   test('encrypt/decrypt string (aesgcm)', function() {
-    assert(encryptDecrypt('hello', webPush.supportedContentEncodings.AES_GCM).equals(new Buffer('hello')));
+    assert(encryptDecrypt('hello', webPush.supportedContentEncodings.AES_GCM).equals(Buffer.from('hello')));
   });
 
   test('encrypt/decrypt string (aes128gcm)', function() {
-    assert(encryptDecrypt('hello', webPush.supportedContentEncodings.AES_128_GCM).equals(new Buffer('hello')));
+    assert(encryptDecrypt('hello', webPush.supportedContentEncodings.AES_128_GCM).equals(Buffer.from('hello')));
   });
 
   test('encrypt/decrypt buffer (aesgcm)', function() {
-    assert(encryptDecrypt(new Buffer('hello'), webPush.supportedContentEncodings.AES_GCM).equals(new Buffer('hello')));
+    assert(encryptDecrypt(Buffer.from('hello'), webPush.supportedContentEncodings.AES_GCM).equals(Buffer.from('hello')));
   });
 
   test('encrypt/decrypt buffer (aes128gcm)', function() {
-    assert(encryptDecrypt(new Buffer('hello'), webPush.supportedContentEncodings.AES_128_GCM).equals(new Buffer('hello')));
+    assert(encryptDecrypt(Buffer.from('hello'), webPush.supportedContentEncodings.AES_128_GCM).equals(Buffer.from('hello')));
   });
 
   // userPublicKey, userAuth, payload

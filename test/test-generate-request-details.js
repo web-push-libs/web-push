@@ -128,7 +128,7 @@ suite('Test Generate Request Details', function() {
       requestOptions: {
         subscription: {
           keys: {
-            p256dh: urlBase64.encode(Buffer.concat([userPublicKey, new Buffer(1)])),
+            p256dh: urlBase64.encode(Buffer.concat([userPublicKey, Buffer.alloc(1)])),
             auth: urlBase64.encode(userAuth)
           }
         },
@@ -245,7 +245,7 @@ suite('Test Generate Request Details', function() {
     assert.equal(details.headers.Urgency, extraOptions.headers.Urgency);
   });
 
-  test('Audience contains port', function() {
+  test('Audience contains port with aes128gcm', function() {
     const subscription = {
       endpoint: 'http://example.com:4242/life-universe-and-everything'
     };
@@ -256,6 +256,34 @@ suite('Test Generate Request Details', function() {
         publicKey: vapidKeys.publicKey,
         privateKey: vapidKeys.privateKey
       }
+    };
+
+    const requestDetails = webPush.generateRequestDetails(subscription, null, extraOptions);
+    const authHeader = requestDetails.headers.Authorization;
+
+    // Get the Encoded JWT Token from the Authorization Header
+    // and decoded it using `jws.decode`
+    // to get the value of audience in jwt payload
+    const jwtContents = authHeader.match(/vapid\st=([^,]*)/)[1];
+    const decodedContents = jws.decode(jwtContents);
+    const audience = decodedContents.payload.aud;
+
+    assert.ok(audience, 'Audience exists');
+    assert.equal(audience, 'http://example.com:4242', 'Audience contains expected value with port');
+  });
+
+  test('Audience contains port with aesgcm', function() {
+    const subscription = {
+      endpoint: 'http://example.com:4242/life-universe-and-everything'
+    };
+
+    const extraOptions = {
+      vapidDetails: {
+        subject: 'mailto:example@example.com',
+        publicKey: vapidKeys.publicKey,
+        privateKey: vapidKeys.privateKey
+      },
+      contentEncoding: 'aesgcm'
     };
 
     const requestDetails = webPush.generateRequestDetails(subscription, null, extraOptions);

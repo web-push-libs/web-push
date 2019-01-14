@@ -109,7 +109,7 @@ WebPushLib.prototype.generateRequestDetails =
     let currentVapidDetails = vapidDetails;
     let timeToLive = DEFAULT_TTL;
     let extraHeaders = {};
-    let contentEncoding = webPushConstants.supportedContentEncodings.AES_GCM;
+    let contentEncoding = webPushConstants.supportedContentEncodings.AES_128_GCM;
     let proxy;
 
     if (options) {

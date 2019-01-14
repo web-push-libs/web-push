@@ -12,7 +12,7 @@ suite('http_ece', function() {
   }
 
   test('aesgcm - padSize 2 - pad 0', function() {
-    const input = new Buffer(urlBase64.encode('marco'));
+    const input = Buffer.from(urlBase64.encode('marco'));
 
     const receiverCurve = crypto.createECDH('prime256v1');
     receiverCurve.setPrivateKey('a4C8H+f9IWtbAbTTkL2AgQ7xo/tqXddWWw7R2CR5OME=', 'base64');
@@ -34,7 +34,7 @@ suite('http_ece', function() {
       salt: salt,
       authSecret: authSecret
     });
-    assert(encrypted.equals(new Buffer('Np3XM0NFvnxothcJfFzrv8Vsprn_k9I', 'base64')));
+    assert(encrypted.equals(Buffer.from('Np3XM0NFvnxothcJfFzrv8Vsprn_k9I', 'base64')));
 
     const decrypted = ece.decrypt(encrypted, {
       keyid: 'receiver',
@@ -46,7 +46,7 @@ suite('http_ece', function() {
   });
 
   test('aesgcm - padSize 2 - pad 1', function() {
-    const input = new Buffer(urlBase64.encode('marco'));
+    const input = Buffer.from(urlBase64.encode('marco'));
 
     const receiverCurve = crypto.createECDH('prime256v1');
     receiverCurve.setPrivateKey('a4C8H+f9IWtbAbTTkL2AgQ7xo/tqXddWWw7R2CR5OME=', 'base64');
@@ -69,7 +69,7 @@ suite('http_ece', function() {
       authSecret: authSecret,
       pad: 1
     });
-    assert(encrypted.equals(new Buffer('Npy6P1BUsvRGMWEbwYq2JArF0l9YD38o', 'base64')));
+    assert(encrypted.equals(Buffer.from('Npy6P1BUsvRGMWEbwYq2JArF0l9YD38o', 'base64')));
 
     const decrypted = ece.decrypt(encrypted, {
       keyid: 'receiver',
