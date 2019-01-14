@@ -128,7 +128,7 @@ suite('Test Generate Request Details', function() {
       requestOptions: {
         subscription: {
           keys: {
-            p256dh: urlBase64.encode(Buffer.concat([userPublicKey, new Buffer(1)])),
+            p256dh: urlBase64.encode(Buffer.concat([userPublicKey, Buffer.alloc(1)])),
             auth: urlBase64.encode(userAuth)
           }
         },

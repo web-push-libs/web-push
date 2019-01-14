@@ -69,7 +69,7 @@ suite('sendNotification', function() {
     };
 
     server = https.createServer(options, function(req, res) {
-      requestBody = new Buffer(0);
+      requestBody = Buffer.alloc(0);
 
       req.on('data', function(chunk) {
         requestBody = Buffer.concat([requestBody, chunk]);
@@ -156,7 +156,7 @@ suite('sendNotification', function() {
         authSecret: urlBase64.encode(userAuth)
       });
 
-      assert(decrypted.equals(new Buffer(options.message)), 'Check cipher text can be correctly decoded');
+      assert(decrypted.equals(Buffer.from(options.message)), 'Check cipher text can be correctly decoded');
     }
 
     if (options.vapid) {
@@ -227,7 +227,7 @@ suite('sendNotification', function() {
         subscription: {
           keys: VALID_KEYS
         },
-        message: new Buffer('hello')
+        message: Buffer.from('hello')
       }
     }, {
       testTitle: 'send/receive unicode character',
@@ -586,7 +586,7 @@ suite('sendNotification', function() {
       requestOptions: {
         subscription: {
           keys: {
-            p256dh: urlBase64.encode(Buffer.concat([userPublicKey, new Buffer(1)])),
+            p256dh: urlBase64.encode(Buffer.concat([userPublicKey, Buffer.alloc(1)])),
             auth: urlBase64.encode(userAuth)
           }
         },

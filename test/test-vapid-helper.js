@@ -10,8 +10,8 @@ const vapidHelper = require('../src/vapid-helper');
 const VALID_AUDIENCE = 'https://example.com';
 const VALID_SUBJECT_MAILTO = 'mailto: example@example.com';
 const VALID_SUBJECT_URL = 'https://exampe.com/contact';
-const VALID_PUBLIC_KEY = urlBase64.encode(new Buffer(65));
-const VALID_PRIVATE_KEY = urlBase64.encode(new Buffer(32));
+const VALID_PUBLIC_KEY = urlBase64.encode(Buffer.alloc(65));
+const VALID_PRIVATE_KEY = urlBase64.encode(Buffer.alloc(32));
 const VALID_CONTENT_ENCODING = webPush.supportedContentEncodings.AES_GCM;
 const VALID_EXPIRATION = Math.floor(Date.now() / 1000) + (60 * 60 * 12);
 
@@ -47,8 +47,8 @@ suite('Test Vapid Helpers', function() {
     sandbox.stub(crypto, 'createECDH').callsFake(() => {
       return {
         generateKeys: () => {},
-        getPublicKey: () => new Buffer(60),
-        getPrivateKey: () => new Buffer(27)
+        getPublicKey: () => Buffer.alloc(60),
+        getPrivateKey: () => Buffer.alloc(27)
       };
     });
 
