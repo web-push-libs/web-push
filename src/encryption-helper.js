@@ -26,8 +26,8 @@ const encrypt = function(userPublicKey, userAuth, payload, contentEncoding) {
   }
 
   if (urlBase64.decode(userAuth).length < 16) {
-    throw new Error('The subscription auth key should be at least 16 ' +
-      'bytes long');
+    throw new Error('The subscription auth key should be at least 16 '
+    + 'bytes long');
   }
 
   if (typeof payload !== 'string' && !Buffer.isBuffer(payload)) {

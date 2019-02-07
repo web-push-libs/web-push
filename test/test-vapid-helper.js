@@ -187,8 +187,8 @@ suite('Test Vapid Helpers', function() {
           assert(headers['Crypto-Key']);
         }
       } catch (err) {
-        console.warn('Valid input call for getVapidHeaders() threw an ' +
-          'error. [' + index + ']');
+        console.warn('Valid input call for getVapidHeaders() threw an '
+        + 'error. [' + index + ']');
         throw err;
       }
     });

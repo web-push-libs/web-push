@@ -41,8 +41,8 @@ let testServerURL;
 function runTest(browser, options) {
   options = options || {};
 
-  if (browser.getId() === 'firefox' &&
-    process.env.TRAVIS === 'true') {
+  if (browser.getId() === 'firefox'
+  && process.env.TRAVIS === 'true') {
     try {
       which.sync('geckodriver');
     } catch (err) {
@@ -223,8 +223,8 @@ availableBrowsers.forEach(function(browser) {
 
         return del(testDirectory)
         .catch(function() {
-          console.warn('Unable to delete test directory, going to wait 2 ' +
-            'seconds and try again');
+          console.warn('Unable to delete test directory, going to wait 2 '
+          + 'seconds and try again');
           // Add a timeout so that if the browser
           // changes any files in the test directory
           // it doesn't cause del to throw an error
