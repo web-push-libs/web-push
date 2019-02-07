@@ -71,8 +71,8 @@ function validateSubject(subject) {
   }
 
   if (typeof subject !== 'string' || subject.length === 0) {
-    throw new Error('The subject value must be a string containing a URL or ' +
-      'mailto: address. ' + subject);
+    throw new Error('The subject value must be a string containing a URL or '
+    + 'mailto: address. ' + subject);
   }
 
   if (subject.indexOf('mailto:') !== 0) {
@@ -89,8 +89,8 @@ function validatePublicKey(publicKey) {
   }
 
   if (typeof publicKey !== 'string') {
-    throw new Error('Vapid public key is must be a URL safe Base 64 ' +
-      'encoded string.');
+    throw new Error('Vapid public key is must be a URL safe Base 64 '
+    + 'encoded string.');
   }
 
   publicKey = urlBase64.decode(publicKey);
@@ -106,8 +106,8 @@ function validatePrivateKey(privateKey) {
   }
 
   if (typeof privateKey !== 'string') {
-    throw new Error('Vapid private key must be a URL safe Base 64 ' +
-      'encoded string.');
+    throw new Error('Vapid private key must be a URL safe Base 64 '
+    + 'encoded string.');
   }
 
   privateKey = urlBase64.decode(privateKey);
@@ -174,8 +174,8 @@ function getVapidHeaders(audience, subject, publicKey, privateKey, contentEncodi
   }
 
   if (typeof audience !== 'string' || audience.length === 0) {
-    throw new Error('The audience value must be a string containing the ' +
-      'origin of a push service. ' + audience);
+    throw new Error('The audience value must be a string containing the '
+    + 'origin of a push service. ' + audience);
   }
 
   const audienceParseResult = url.parse(audience);
@@ -217,7 +217,8 @@ function getVapidHeaders(audience, subject, publicKey, privateKey, contentEncodi
     return {
       Authorization: 'vapid t=' + jwt + ', k=' + urlBase64.encode(publicKey)
     };
-  } else if (contentEncoding === WebPushConstants.supportedContentEncodings.AES_GCM) {
+  }
+  if (contentEncoding === WebPushConstants.supportedContentEncodings.AES_GCM) {
     return {
       Authorization: 'WebPush ' + jwt,
       'Crypto-Key': 'p256ecdsa=' + urlBase64.encode(publicKey)

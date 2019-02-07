@@ -48,10 +48,10 @@ const generateVapidKeys = returnJson => {
     outputText = JSON.stringify(vapidKeys);
   } else {
     const outputLine = '\n=======================================\n';
-    outputText = outputLine + '\n' +
-      'Public Key:\n' + vapidKeys.publicKey + '\n\n' +
-      'Private Key:\n' + vapidKeys.privateKey + '\n' +
-      outputLine;
+    outputText = outputLine + '\n'
+    + 'Public Key:\n' + vapidKeys.publicKey + '\n\n'
+    + 'Private Key:\n' + vapidKeys.privateKey + '\n'
+    + outputLine;
   }
 
   console.log(outputText);

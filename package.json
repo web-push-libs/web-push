@@ -41,7 +41,7 @@
     "chromedriver": "2.46.0",
     "del": "3.0.0",
     "eslint": "5.13.0",
-    "eslint-config-airbnb": "16.1.0",
+    "eslint-config-airbnb": "17.1.0",
     "eslint-plugin-import": "2.16.0",
     "geckodriver": "1.14.1",
     "istanbul": "0.4.5",

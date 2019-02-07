@@ -206,13 +206,12 @@ suite('Test Generate Request Details', function() {
   invalidRequests.forEach(function(invalidRequest) {
     test(invalidRequest.testTitle, function() {
       if (invalidRequest.addEndpoint) {
-        invalidRequest.requestOptions.subscription.endpoint =
-          'https://127.0.0.1:8080';
+        invalidRequest.requestOptions.subscription.endpoint = 'https://127.0.0.1:8080';
       }
 
       if (invalidRequest.serverFlags) {
-        invalidRequest.requestOptions.subscription.endpoint += '?' +
-          invalidRequest.serverFlags.join('&');
+        invalidRequest.requestOptions.subscription.endpoint += '?'
+        + invalidRequest.serverFlags.join('&');
       }
 
       assert.throws(function() {
