@@ -30,7 +30,7 @@
   "homepage": "https://github.com/web-push-libs/web-push#readme",
   "dependencies": {
     "asn1.js": "^5.0.0",
-    "http_ece": "1.0.5",
+    "http_ece": "1.1.0",
     "jws": "^3.1.3",
     "minimist": "^1.2.0",
     "urlsafe-base64": "^1.0.0",
