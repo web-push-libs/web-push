@@ -126,8 +126,8 @@ suite('sendNotification', function() {
 
     assert.equal(requestDetails.headers['content-length'], requestBody.length, 'Check Content-Length header');
 
-    if (typeof options.extraOptions !== 'undefined' &&
-      typeof options.extraOptions.TTL !== 'undefined') {
+    if (typeof options.extraOptions !== 'undefined'
+    && typeof options.extraOptions.TTL !== 'undefined') {
       assert.equal(requestDetails.headers.ttl, options.extraOptions.TTL, 'Check TTL header');
     } else if (!isGCM) {
       assert.equal(requestDetails.headers.ttl, 2419200, 'Check default TTL header');
@@ -183,8 +183,8 @@ suite('sendNotification', function() {
     }
 
     if (isGCM) {
-      if (typeof options.extraOptions !== 'undefined' &&
-        typeof options.extraOptions.gcmAPIKey !== 'undefined') {
+      if (typeof options.extraOptions !== 'undefined'
+      && typeof options.extraOptions.gcmAPIKey !== 'undefined') {
         assert.equal(requestDetails.headers.authorization, 'key=' + options.extraOptions.gcmAPIKey, 'Check GCM Authorization header');
       } else {
         assert.equal(requestDetails.headers.authorization, 'key=my_gcm_key', 'Check GCM Authorization header');
@@ -331,13 +331,12 @@ suite('sendNotification', function() {
     test(validRequest.testTitle + ' (aesgcm)', function() {
       // Set the default endpoint if it's not already configured
       if (!validRequest.requestOptions.subscription.endpoint) {
-        validRequest.requestOptions.subscription.endpoint =
-          'https://127.0.0.1:' + serverPort;
+        validRequest.requestOptions.subscription.endpoint = 'https://127.0.0.1:' + serverPort;
       }
 
       if (validRequest.serverFlags) {
-        validRequest.requestOptions.subscription.endpoint += '?' +
-          validRequest.serverFlags.join('&');
+        validRequest.requestOptions.subscription.endpoint += '?'
+        + validRequest.serverFlags.join('&');
       }
 
       validRequest.requestOptions.extraOptions = validRequest.requestOptions.extraOptions || {};
@@ -360,13 +359,12 @@ suite('sendNotification', function() {
     test(validRequest.testTitle + ' (aes128gcm)', function() {
       // Set the default endpoint if it's not already configured
       if (!validRequest.requestOptions.subscription.endpoint) {
-        validRequest.requestOptions.subscription.endpoint =
-          'https://127.0.0.1:' + serverPort;
+        validRequest.requestOptions.subscription.endpoint = 'https://127.0.0.1:' + serverPort;
       }
 
       if (validRequest.serverFlags) {
-        validRequest.requestOptions.subscription.endpoint += '?' +
-          validRequest.serverFlags.join('&');
+        validRequest.requestOptions.subscription.endpoint += '?'
+        + validRequest.serverFlags.join('&');
       }
 
       validRequest.requestOptions.extraOptions = validRequest.requestOptions.extraOptions || {};
@@ -458,8 +456,7 @@ suite('sendNotification', function() {
 
       // Set the default endpoint if it's not already configured
       if (!validGCMRequest.requestOptions.subscription.endpoint) {
-        validGCMRequest.requestOptions.subscription.endpoint =
-          'https://android.googleapis.com/gcm/send/someSubscriptionID';
+        validGCMRequest.requestOptions.subscription.endpoint = 'https://android.googleapis.com/gcm/send/someSubscriptionID';
       }
 
       const webPush = require('../src/index');
@@ -659,13 +656,12 @@ suite('sendNotification', function() {
   invalidRequests.forEach(function(invalidRequest) {
     test(invalidRequest.testTitle + ' (aesgcm)', function() {
       if (invalidRequest.addEndpoint) {
-        invalidRequest.requestOptions.subscription.endpoint =
-          'https://127.0.0.1:' + serverPort;
+        invalidRequest.requestOptions.subscription.endpoint = 'https://127.0.0.1:' + serverPort;
       }
 
       if (invalidRequest.serverFlags) {
-        invalidRequest.requestOptions.subscription.endpoint += '?' +
-          invalidRequest.serverFlags.join('&');
+        invalidRequest.requestOptions.subscription.endpoint += '?'
+        + invalidRequest.serverFlags.join('&');
       }
 
       invalidRequest.requestOptions.extraOptions = invalidRequest.requestOptions.extraOptions || {};
@@ -686,13 +682,12 @@ suite('sendNotification', function() {
 
     test(invalidRequest.testTitle + ' (aes128gcm)', function() {
       if (invalidRequest.addEndpoint) {
-        invalidRequest.requestOptions.subscription.endpoint =
-          'https://127.0.0.1:' + serverPort;
+        invalidRequest.requestOptions.subscription.endpoint = 'https://127.0.0.1:' + serverPort;
       }
 
       if (invalidRequest.serverFlags) {
-        invalidRequest.requestOptions.subscription.endpoint += '?' +
-          invalidRequest.serverFlags.join('&');
+        invalidRequest.requestOptions.subscription.endpoint += '?'
+        + invalidRequest.serverFlags.join('&');
       }
 
       invalidRequest.requestOptions.extraOptions = invalidRequest.requestOptions.extraOptions || {};

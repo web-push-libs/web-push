@@ -32,8 +32,9 @@ WebPushLib.prototype.setGCMAPIKey = function(apiKey) {
     return;
   }
 
-  if (typeof apiKey === 'undefined' || typeof apiKey !== 'string' ||
-    apiKey.length === 0) {
+  if (typeof apiKey === 'undefined'
+  || typeof apiKey !== 'string'
+  || apiKey.length === 0) {
     throw new Error('The GCM API Key should be a non-empty string or null.');
   }
 
@@ -50,8 +51,7 @@ WebPushLib.prototype.setGCMAPIKey = function(apiKey) {
  * @param  {string} publicKey  The public VAPID key, a URL safe, base64 encoded string
  * @param  {string} privateKey The private VAPID key, a URL safe, base64 encoded string.
  */
-WebPushLib.prototype.setVapidDetails =
-  function(subject, publicKey, privateKey) {
+WebPushLib.prototype.setVapidDetails = function(subject, publicKey, privateKey) {
     if (arguments.length === 1 && arguments[0] === null) {
       vapidDetails = null;
       return;
@@ -83,25 +83,24 @@ WebPushLib.prototype.setVapidDetails =
    * @return {Object}                       This method returns an Object which
    * contains 'endpoint', 'method', 'headers' and 'payload'.
    */
-WebPushLib.prototype.generateRequestDetails =
-  function(subscription, payload, options) {
+WebPushLib.prototype.generateRequestDetails = function(subscription, payload, options) {
     if (!subscription || !subscription.endpoint) {
-      throw new Error('You must pass in a subscription with at least ' +
-        'an endpoint.');
+      throw new Error('You must pass in a subscription with at least '
+      + 'an endpoint.');
     }
 
-    if (typeof subscription.endpoint !== 'string' ||
-      subscription.endpoint.length === 0) {
-      throw new Error('The subscription endpoint must be a string with ' +
-        'a valid URL.');
+    if (typeof subscription.endpoint !== 'string'
+    || subscription.endpoint.length === 0) {
+      throw new Error('The subscription endpoint must be a string with '
+      + 'a valid URL.');
     }
 
     if (payload) {
       // Validate the subscription keys
-      if (!subscription.keys || !subscription.keys.p256dh ||
-        !subscription.keys.auth) {
-        throw new Error('To send a message with a payload, the ' +
-          'subscription must have \'auth\' and \'p256dh\' keys.');
+      if (!subscription.keys || !subscription.keys.p256dh
+      || !subscription.keys.auth) {
+        throw new Error('To send a message with a payload, the '
+        + 'subscription must have \'auth\' and \'p256dh\' keys.');
       }
     }
 
@@ -125,9 +124,9 @@ WebPushLib.prototype.generateRequestDetails =
       for (let i = 0; i < optionKeys.length; i += 1) {
         const optionKey = optionKeys[i];
         if (validOptionKeys.indexOf(optionKey) === -1) {
-          throw new Error('\'' + optionKey + '\' is an invalid option. ' +
-            'The valid options are [\'' + validOptionKeys.join('\', \'') +
-            '\'].');
+          throw new Error('\'' + optionKey + '\' is an invalid option. '
+          + 'The valid options are [\'' + validOptionKeys.join('\', \'')
+          + '\'].');
         }
       }
 
@@ -139,9 +138,9 @@ WebPushLib.prototype.generateRequestDetails =
             });
 
         if (duplicates.length > 0) {
-          throw new Error('Duplicated headers defined [' +
-            duplicates.join(',') + ']. Please either define the header in the' +
-            'top level options OR in the \'headers\' key.');
+          throw new Error('Duplicated headers defined ['
+          + duplicates.join(',') + ']. Please either define the header in the'
+          + 'top level options OR in the \'headers\' key.');
         }
       }
 
@@ -191,13 +190,13 @@ WebPushLib.prototype.generateRequestDetails =
     let requestPayload = null;
 
     if (payload) {
-      if (!subscription.keys ||
-        typeof subscription !== 'object' ||
-        !subscription.keys.p256dh ||
-        !subscription.keys.auth) {
-        throw new Error(new Error('Unable to send a message with ' +
-          'payload to this subscription since it doesn\'t have the ' +
-          'required encryption keys'));
+      if (!subscription.keys
+      || typeof subscription !== 'object'
+      || !subscription.keys.p256dh
+      + !subscription.keys.auth) {
+        throw new Error(new Error('Unable to send a message with '
+        + 'payload to this subscription since it doesn\'t have the '
+        + 'required encryption keys'));
       }
 
       const encrypted = encryptionHelper
@@ -224,16 +223,16 @@ WebPushLib.prototype.generateRequestDetails =
     // VAPID isn't supported by GCM hence the if, else if.
     if (isGCM) {
       if (!currentGCMAPIKey) {
-        console.warn('Attempt to send push notification to GCM endpoint, ' +
-          'but no GCM key is defined. Please use setGCMApiKey() or add ' +
-          '\'gcmAPIKey\' as an option.');
+        console.warn('Attempt to send push notification to GCM endpoint, '
+        + 'but no GCM key is defined. Please use setGCMApiKey() or add '
+        + '\'gcmAPIKey\' as an option.');
       } else {
         requestDetails.headers.Authorization = 'key=' + currentGCMAPIKey;
       }
     } else if (currentVapidDetails) {
       const parsedUrl = url.parse(subscription.endpoint);
-      const audience = parsedUrl.protocol + '//' +
-        parsedUrl.host;
+      const audience = parsedUrl.protocol + '//'
+      + parsedUrl.host;
 
       const vapidHeaders = vapidHelper.getVapidHeaders(
         audience,
@@ -247,8 +246,8 @@ WebPushLib.prototype.generateRequestDetails =
 
       if (contentEncoding === webPushConstants.supportedContentEncodings.AES_GCM) {
         if (requestDetails.headers['Crypto-Key']) {
-          requestDetails.headers['Crypto-Key'] += ';' +
-            vapidHeaders['Crypto-Key'];
+          requestDetails.headers['Crypto-Key'] += ';'
+          + vapidHeaders['Crypto-Key'];
         } else {
           requestDetails.headers['Crypto-Key'] = vapidHeaders['Crypto-Key'];
         }
@@ -281,8 +280,7 @@ WebPushLib.prototype.generateRequestDetails =
  * resolves if the sending of the notification was successful, otherwise it
  * rejects.
  */
-WebPushLib.prototype.sendNotification =
-  function(subscription, payload, options) {
+WebPushLib.prototype.sendNotification = function(subscription, payload, options) {
     let requestDetails;
     try {
       requestDetails = this.generateRequestDetails(subscription, payload, options);
