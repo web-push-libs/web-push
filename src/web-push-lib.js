@@ -222,7 +222,15 @@ WebPushLib.prototype.generateRequestDetails =
     const isGCM = subscription.endpoint.indexOf('https://android.googleapis.com/gcm/send') === 0;
     const isFCM = subscription.endpoint.indexOf('https://fcm.googleapis.com/fcm/send') === 0;
     // VAPID isn't supported by GCM hence the if, else if.
-    if (currentVapidDetails) {
+    if (isGCM) {
+      if (!currentGCMAPIKey) {
+        console.warn('Attempt to send push notification to GCM endpoint, ' +
+          'but no GCM key is defined. Please use setGCMApiKey() or add ' +
+          '\'gcmAPIKey\' as an option.');
+      } else {
+        requestDetails.headers.Authorization = 'key=' + currentGCMAPIKey;
+      }
+    } else if (currentVapidDetails) {
       const parsedUrl = url.parse(subscription.endpoint);
       const audience = parsedUrl.protocol + '//' +
         parsedUrl.host;
@@ -245,14 +253,8 @@ WebPushLib.prototype.generateRequestDetails =
           requestDetails.headers['Crypto-Key'] = vapidHeaders['Crypto-Key'];
         }
       }
-    } else if (isGCM || isFCM) {
-      if (!currentGCMAPIKey) {
-        console.warn('Attempt to send push notification to GCM endpoint, ' +
-          'but no GCM key is defined. Please use setGCMApiKey() or add ' +
-          '\'gcmAPIKey\' as an option.');
-      } else {
-        requestDetails.headers.Authorization = 'key=' + currentGCMAPIKey;
-      }
+    } else if (isFCM && currentGCMAPIKey) {
+      requestDetails.headers.Authorization = 'key=' + currentGCMAPIKey;
     }
 
     requestDetails.body = requestPayload;
