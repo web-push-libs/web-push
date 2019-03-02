@@ -40,7 +40,7 @@
     "chalk": "2.4.2",
     "chromedriver": "2.46.0",
     "del": "3.0.0",
-    "eslint": "5.14.1",
+    "eslint": "5.15.0",
     "eslint-config-airbnb": "17.1.0",
     "eslint-plugin-import": "2.16.0",
     "geckodriver": "1.14.1",
