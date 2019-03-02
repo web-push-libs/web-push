@@ -219,6 +219,7 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
     }
 
     const isGCM = subscription.endpoint.indexOf('https://android.googleapis.com/gcm/send') === 0;
+    const isFCM = subscription.endpoint.indexOf('https://fcm.googleapis.com/fcm/send') === 0;
     // VAPID isn't supported by GCM hence the if, else if.
     if (isGCM) {
       if (!currentGCMAPIKey) {
@@ -251,6 +252,8 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
           requestDetails.headers['Crypto-Key'] = vapidHeaders['Crypto-Key'];
         }
       }
+    } else if (isFCM && currentGCMAPIKey) {
+      requestDetails.headers.Authorization = 'key=' + currentGCMAPIKey;
     }
 
     requestDetails.body = requestPayload;
