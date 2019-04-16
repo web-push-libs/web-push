@@ -148,7 +148,8 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
         currentGCMAPIKey = options.gcmAPIKey;
       }
 
-      if (options.vapidDetails) {
+      // Falsy values are allowed here so one can skip Vapid `else if` below and use FCM
+      if (options.vapidDetails !== undefined) {
         currentVapidDetails = options.vapidDetails;
       }
 
