@@ -12,8 +12,6 @@ const jws = require('jws');
 const mocha = require('mocha');
 const WebPushConstants = require('../src/web-push-constants.js');
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
 suite('sendNotification', function() {
   test('is defined', function() {
     const webPush = require('../src/index');
@@ -22,9 +20,18 @@ suite('sendNotification', function() {
 
   let server;
   let serverPort;
+  const pem = fs.readFileSync('test/data/certs/cert.pem');
   let requestBody;
   let requestDetails;
-  let originalHTTPSRequest = https.request;
+
+  const originalHTTPSRequest = https.request;
+
+  // https request mock to accept self-signed certificate.
+  // Probably worth switching with proxyquire and sinon.
+  const certHTTPSRequest = function(options, listener) {
+    options.rejectUnauthorized = false;
+    return originalHTTPSRequest.call(https, options, listener);
+  };
 
   mocha.beforeEach(function() {
     requestBody = null;
@@ -35,7 +42,7 @@ suite('sendNotification', function() {
     delete require.cache[path.join(__dirname, '..', 'src', 'web-push-lib.js')];
 
     // Reset https request mock
-    https.request = originalHTTPSRequest;
+    https.request = certHTTPSRequest;
 
     let returnPromise = Promise.resolve();
     if (!server) {
@@ -62,8 +69,6 @@ suite('sendNotification', function() {
   const vapidKeys = require('../src/vapid-helper').generateVAPIDKeys();
 
   function startServer() {
-    const pem = fs.readFileSync('test/data/certs/cert.pem');
-
     const options = {
       key: pem,
       cert: pem
@@ -452,7 +457,7 @@ suite('sendNotification', function() {
         options.port = serverPort;
         options.path = '/';
 
-        return originalHTTPSRequest.call(https, options, listener);
+        return certHTTPSRequest.call(https, options, listener);
       };
 
       // Set the default endpoint if it's not already configured
