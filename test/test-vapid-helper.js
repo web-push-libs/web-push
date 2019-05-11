@@ -4,6 +4,7 @@ const assert = require('assert');
 const urlBase64 = require('urlsafe-base64');
 const sinon = require('sinon');
 const crypto = require('crypto');
+const mocha = require('mocha');
 const webPush = require('../src/index');
 const vapidHelper = require('../src/vapid-helper');
 
@@ -18,11 +19,11 @@ const VALID_EXPIRATION = Math.floor(Date.now() / 1000) + (60 * 60 * 12);
 suite('Test Vapid Helpers', function() {
   const sandbox = sinon.sandbox.create();
 
-  beforeEach(function() {
+  mocha.beforeEach(function() {
     sandbox.restore();
   });
 
-  after(function() {
+  mocha.after(function() {
     sandbox.restore();
   });
 

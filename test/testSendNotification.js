@@ -9,6 +9,7 @@ const ece = require('http_ece');
 const urlBase64 = require('urlsafe-base64');
 const portfinder = require('portfinder');
 const jws = require('jws');
+const mocha = require('mocha');
 const WebPushConstants = require('../src/web-push-constants.js');
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -25,7 +26,7 @@ suite('sendNotification', function() {
   let requestDetails;
   let originalHTTPSRequest = https.request;
 
-  beforeEach(function() {
+  mocha.beforeEach(function() {
     requestBody = null;
     requestDetails = null;
 
@@ -44,7 +45,7 @@ suite('sendNotification', function() {
     return returnPromise;
   });
 
-  after(function() {
+  mocha.after(function() {
     return closeServer();
   });
 
