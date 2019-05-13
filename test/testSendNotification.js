@@ -131,6 +131,8 @@ suite('sendNotification', function() {
       || WebPushConstants.supportedContentEncodings.AES_GCM;
     const isGCM = options.subscription.endpoint
       .indexOf('https://android.googleapis.com/gcm') === 0;
+    const isFCM = options.subscription.endpoint
+    .indexOf('https://fcm.googleapis.com/fcm') === 0;
 
     assert.equal(requestDetails.headers['content-length'], requestBody.length, 'Check Content-Length header');
 
@@ -201,7 +203,7 @@ suite('sendNotification', function() {
       assert.equal(decoded.payload.sub, 'mailto:mozilla@example.org');
     }
 
-    if (isGCM) {
+    if (isGCM || (isFCM && !options.vapid)) {
       if (typeof options.extraOptions !== 'undefined'
       && typeof options.extraOptions.gcmAPIKey !== 'undefined') {
         assert.equal(requestDetails.headers.authorization, 'key=' + options.extraOptions.gcmAPIKey, 'Check GCM Authorization header');
