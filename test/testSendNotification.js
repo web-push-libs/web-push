@@ -127,6 +127,8 @@ suite('sendNotification', function() {
 
   function validateRequest(request) {
     const options = request.requestOptions;
+    const contentEncoding = (options.extraOptions && options.extraOptions.contentEncoding)
+      || WebPushConstants.supportedContentEncodings.AES_GCM;
     const isGCM = options.subscription.endpoint
       .indexOf('https://android.googleapis.com/gcm') === 0;
 
@@ -152,10 +154,10 @@ suite('sendNotification', function() {
         return key.indexOf('dh=') === 0;
       }).substring('dh='.length);
 
-      assert.equal(requestDetails.headers['content-encoding'], options.extraOptions.contentEncoding, 'Check Content-Encoding header');
+      assert.equal(requestDetails.headers['content-encoding'], contentEncoding, 'Check Content-Encoding header');
 
       const decrypted = ece.decrypt(requestBody, {
-        version: options.extraOptions.contentEncoding,
+        version: contentEncoding,
         privateKey: userCurve,
         dh: appServerPublicKey,
         salt: salt,
@@ -166,24 +168,35 @@ suite('sendNotification', function() {
     }
 
     if (options.vapid) {
+      let jwt;
+      let vapidKey;
+
+      if (contentEncoding === WebPushConstants.supportedContentEncodings.AES_GCM) {
       const keys = requestDetails.headers['crypto-key'].split(';');
-      const vapidKey = keys.find(function(key) {
+        const vapidKeyHeader = keys.find(function(key) {
         return key.indexOf('p256ecdsa=') === 0;
       });
 
-      assert.equal(vapidKey.indexOf('p256ecdsa='), 0, 'Crypto-Key header correct');
-      const appServerVapidPublicKey = urlBase64.decode(vapidKey.substring('p256ecdsa='.length));
-
-      assert(appServerVapidPublicKey.equals(vapidKeys.publicKey));
+        assert.equal(vapidKeyHeader.indexOf('p256ecdsa='), 0, 'Crypto-Key header correct');
+        vapidKey = vapidKeyHeader.substring('p256ecdsa='.length);
 
       const authorizationHeader = requestDetails.headers.authorization;
       assert.equal(authorizationHeader.indexOf('WebPush '), 0, 'Check VAPID Authorization header');
-      const jwt = authorizationHeader.substring('WebPush '.length);
+        jwt = authorizationHeader.substring('WebPush '.length);
+      } else if (contentEncoding === WebPushConstants.supportedContentEncodings.AES_128_GCM) {
+        const authorizationHeader = requestDetails.headers.authorization;
+        assert.equal(authorizationHeader.indexOf('vapid t='), 0, 'Check VAPID Authorization header');
+        [jwt, vapidKey] = authorizationHeader.substring('vapid t='.length).split(', k=');
+      }
+
+      // const appServerVapidPublicKey = urlBase64.decode(vapidKey);
+      assert.equal(vapidKey, vapidKeys.publicKey);
+
       // assert(jws.verify(jwt, 'ES256', appServerVapidPublicKey)), 'JWT valid');
       const decoded = jws.decode(jwt);
       assert.equal(decoded.header.typ, 'JWT');
       assert.equal(decoded.header.alg, 'ES256');
-      assert.equal(decoded.payload.aud, 'https://127.0.0.1');
+       assert.equal(options.subscription.endpoint.indexOf(decoded.payload.aud) === 0, true);
       assert(decoded.payload.exp > Date.now() / 1000);
       assert.equal(decoded.payload.sub, 'mailto:mozilla@example.org');
     }
