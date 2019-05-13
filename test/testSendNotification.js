@@ -465,8 +465,22 @@ suite('sendNotification', function() {
         validGCMRequest.requestOptions.subscription.endpoint = 'https://android.googleapis.com/gcm/send/someSubscriptionID';
       }
 
+      validGCMRequest.globalOptions = validGCMRequest.globalOptions || {};
+      if (validGCMRequest.globalOptions.gcmAPIKey === undefined) {
+        validGCMRequest.globalOptions.gcmAPIKey = 'my_gcm_key';
+      }
+
       const webPush = require('../src/index');
-      webPush.setGCMAPIKey('my_gcm_key');
+      if (validGCMRequest.globalOptions.gcmAPIKey) {
+        webPush.setGCMAPIKey(validGCMRequest.globalOptions.gcmAPIKey);
+      }
+      if (validGCMRequest.globalOptions.vapidDetails) {
+        webPush.setVapidDetails(
+          validGCMRequest.globalOptions.vapidDetails.subject,
+          validGCMRequest.globalOptions.vapidDetails.publicKey,
+          validGCMRequest.globalOptions.vapidDetails.privateKey
+        );
+      }
 
       return webPush.sendNotification(
         validGCMRequest.requestOptions.subscription,
