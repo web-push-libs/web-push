@@ -5,6 +5,7 @@ const urlBase64 = require('urlsafe-base64');
 const webPush = require('../src/index');
 const crypto = require('crypto');
 const jws = require('jws');
+const urlParse = require('url').parse;
 
 suite('Test Generate Request Details', function() {
   test('is defined', function() {
@@ -308,6 +309,22 @@ suite('Test Generate Request Details', function() {
     let details = webPush.generateRequestDetails(
       subscription,
       message,
+      extraOptions
+    );
+    assert.equal(details.proxy, extraOptions.proxy);
+  });
+
+  test('Proxy option as an object', function() {
+    let subscription = {
+      endpoint: 'https://127.0.0.1:8080'
+    };
+    let proxyOption = urlParse('http://proxy');
+    let extraOptions = {
+      proxy: proxyOption
+    };
+    let details = webPush.generateRequestDetails(
+      subscription,
+      null,
       extraOptions
     );
     assert.equal(details.proxy, extraOptions.proxy);
