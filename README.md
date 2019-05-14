@@ -134,7 +134,7 @@ const options = {
     '< header name >': '< header value >'
   },
   contentEncoding: '< Encoding type, e.g.: aesgcm or aes128gcm >',
-  proxy: '< proxy server address >'
+  proxy: '< proxy server options >'
 }
 
 webpush.sendNotification(
@@ -182,7 +182,9 @@ request only. This overrides any API key set via `setGCMAPIKey()`.
 retained by the push service (by default, four weeks).
 - **headers** is an object with all the extra headers you want to add to the request.
 - **contentEncoding** is the type of push encoding to use (e.g. 'aesgcm', by default, or 'aes128gcm').
-- **proxy** proxy hostname/ip and a port to tunnel your requests through (eg. http://< hostname >:< port >).
+- **proxy** is the [HttpsProxyAgent's constructor argument](https://github.com/TooTallNate/node-https-proxy-agent#new-httpsproxyagentobject-options)
+that may either be a string URI of the proxy server (eg. http://< hostname >:< port >)
+or an "options" object with more specific properties.
 
 ### Returns
 
@@ -353,7 +355,7 @@ const options = {
     '< header name >': '< header value >'
   },
   contentEncoding: '< Encoding type, e.g.: aesgcm or aes128gcm >',
-  proxy: '< proxy server address >'
+  proxy: '< proxy server options >'
 }
 
 try {
@@ -407,7 +409,9 @@ request only. This overrides any API key set via `setGCMAPIKey()`.
 retained by the push service (by default, four weeks).
 - **headers** is an object with all the extra headers you want to add to the request.
 - **contentEncoding** is the type of push encoding to use (e.g. 'aesgcm', by default, or 'aes128gcm').
-- **proxy** proxy hostname/ip and a port to tunnel your requests through (eg. http://< hostname >:< port >).
+- **proxy** is the [HttpsProxyAgent's constructor argument](https://github.com/TooTallNate/node-https-proxy-agent#new-httpsproxyagentobject-options)
+that may either be a string URI of the proxy server (eg. http://< hostname >:< port >)
+or an "options" object with more specific properties.
 
 ### Returns
 
