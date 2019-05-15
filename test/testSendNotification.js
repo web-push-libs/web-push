@@ -191,14 +191,13 @@ suite('sendNotification', function() {
         [jwt, vapidKey] = authorizationHeader.substring('vapid t='.length).split(', k=');
       }
 
-      // const appServerVapidPublicKey = urlBase64.decode(vapidKey);
       assert.equal(vapidKey, vapidKeys.publicKey);
 
       // assert(jws.verify(jwt, 'ES256', appServerVapidPublicKey)), 'JWT valid');
        const decoded = jws.decode(jwt);
        assert.equal(decoded.header.typ, 'JWT');
        assert.equal(decoded.header.alg, 'ES256');
-       assert.equal(options.subscription.endpoint.indexOf(decoded.payload.aud) === 0, true);
+       assert.equal(options.subscription.endpoint.startsWith(decoded.payload.aud), true);
        assert(decoded.payload.exp > Date.now() / 1000);
        assert.equal(decoded.payload.sub, 'mailto:mozilla@example.org');
     }
