@@ -167,10 +167,11 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
       }
 
       if (options.proxy) {
-        if (typeof options.proxy === 'string') {
+        if (typeof options.proxy === 'string'
+          || typeof options.proxy.host === 'string') {
           proxy = options.proxy;
         } else {
-          console.warn('Attempt to use proxy option, but invalid type it should be a string ');
+          console.warn('Attempt to use proxy option, but invalid type it should be a string or proxy options object.');
         }
       }
     }
