@@ -127,8 +127,12 @@ suite('sendNotification', function() {
 
   function validateRequest(request) {
     const options = request.requestOptions;
+    const contentEncoding = (options.extraOptions && options.extraOptions.contentEncoding)
+      || WebPushConstants.supportedContentEncodings.AES_GCM;
     const isGCM = options.subscription.endpoint
       .indexOf('https://android.googleapis.com/gcm') === 0;
+    const isFCM = options.subscription.endpoint
+    .indexOf('https://fcm.googleapis.com/fcm') === 0;
 
     assert.equal(requestDetails.headers['content-length'], requestBody.length, 'Check Content-Length header');
 
@@ -152,10 +156,10 @@ suite('sendNotification', function() {
         return key.indexOf('dh=') === 0;
       }).substring('dh='.length);
 
-      assert.equal(requestDetails.headers['content-encoding'], options.extraOptions.contentEncoding, 'Check Content-Encoding header');
+      assert.equal(requestDetails.headers['content-encoding'], contentEncoding, 'Check Content-Encoding header');
 
       const decrypted = ece.decrypt(requestBody, {
-        version: options.extraOptions.contentEncoding,
+        version: contentEncoding,
         privateKey: userCurve,
         dh: appServerPublicKey,
         salt: salt,
@@ -166,29 +170,39 @@ suite('sendNotification', function() {
     }
 
     if (options.vapid) {
-      const keys = requestDetails.headers['crypto-key'].split(';');
-      const vapidKey = keys.find(function(key) {
-        return key.indexOf('p256ecdsa=') === 0;
-      });
+      let jwt;
+      let vapidKey;
 
-      assert.equal(vapidKey.indexOf('p256ecdsa='), 0, 'Crypto-Key header correct');
-      const appServerVapidPublicKey = urlBase64.decode(vapidKey.substring('p256ecdsa='.length));
+      if (contentEncoding === WebPushConstants.supportedContentEncodings.AES_GCM) {
+        const keys = requestDetails.headers['crypto-key'].split(';');
+        const vapidKeyHeader = keys.find(function(key) {
+          return key.indexOf('p256ecdsa=') === 0;
+        });
 
-      assert(appServerVapidPublicKey.equals(vapidKeys.publicKey));
+        assert.equal(vapidKeyHeader.indexOf('p256ecdsa='), 0, 'Crypto-Key header correct');
+        vapidKey = vapidKeyHeader.substring('p256ecdsa='.length);
 
-      const authorizationHeader = requestDetails.headers.authorization;
-      assert.equal(authorizationHeader.indexOf('WebPush '), 0, 'Check VAPID Authorization header');
-      const jwt = authorizationHeader.substring('WebPush '.length);
+        const authorizationHeader = requestDetails.headers.authorization;
+        assert.equal(authorizationHeader.indexOf('WebPush '), 0, 'Check VAPID Authorization header');
+        jwt = authorizationHeader.substring('WebPush '.length);
+      } else if (contentEncoding === WebPushConstants.supportedContentEncodings.AES_128_GCM) {
+        const authorizationHeader = requestDetails.headers.authorization;
+        assert.equal(authorizationHeader.indexOf('vapid t='), 0, 'Check VAPID Authorization header');
+        [jwt, vapidKey] = authorizationHeader.substring('vapid t='.length).split(', k=');
+      }
+
+      assert.equal(vapidKey, vapidKeys.publicKey);
+
       // assert(jws.verify(jwt, 'ES256', appServerVapidPublicKey)), 'JWT valid');
-      const decoded = jws.decode(jwt);
-      assert.equal(decoded.header.typ, 'JWT');
-      assert.equal(decoded.header.alg, 'ES256');
-      assert.equal(decoded.payload.aud, 'https://127.0.0.1');
-      assert(decoded.payload.exp > Date.now() / 1000);
-      assert.equal(decoded.payload.sub, 'mailto:mozilla@example.org');
+       const decoded = jws.decode(jwt);
+       assert.equal(decoded.header.typ, 'JWT');
+       assert.equal(decoded.header.alg, 'ES256');
+       assert.equal(options.subscription.endpoint.startsWith(decoded.payload.aud), true);
+       assert(decoded.payload.exp > Date.now() / 1000);
+       assert.equal(decoded.payload.sub, 'mailto:mozilla@example.org');
     }
 
-    if (isGCM) {
+    if (isGCM || (isFCM && !options.vapid)) {
       if (typeof options.extraOptions !== 'undefined'
       && typeof options.extraOptions.gcmAPIKey !== 'undefined') {
         assert.equal(requestDetails.headers.authorization, 'key=' + options.extraOptions.gcmAPIKey, 'Check GCM Authorization header');
@@ -399,6 +413,102 @@ suite('sendNotification', function() {
         }
       }
     }, {
+      testTitle: 'send/receive FCM',
+      requestOptions: {
+        subscription: {
+          endpoint: 'https://fcm.googleapis.com/fcm/send/someSubscriptionID'
+        }
+      }
+    }, {
+      testTitle: 'send/receive FCM and you want to use VAPID (aesgcm)',
+      requestOptions: {
+        subscription: {
+          endpoint: 'https://fcm.googleapis.com/fcm/send/someSubscriptionID',
+          keys: VALID_KEYS
+        },
+        extraOptions: {
+          vapidDetails: {
+            subject: 'mailto:mozilla@example.org',
+            privateKey: vapidKeys.privateKey,
+            publicKey: vapidKeys.publicKey
+          },
+          contentEncoding: WebPushConstants.supportedContentEncodings.AES_GCM
+        },
+        vapid: true
+      }
+    }, {
+      testTitle: 'send/receive FCM and you want to use VAPID (aesgcm) (via global options)',
+      requestOptions: {
+        subscription: {
+          endpoint: 'https://fcm.googleapis.com/fcm/send/someSubscriptionID',
+          keys: VALID_KEYS
+        },
+        extraOptions: {
+          contentEncoding: WebPushConstants.supportedContentEncodings.AES_GCM
+        },
+        vapid: true
+      },
+      globalOptions: {
+        vapidDetails: {
+          subject: 'mailto:mozilla@example.org',
+          privateKey: vapidKeys.privateKey,
+          publicKey: vapidKeys.publicKey
+        }
+      }
+    }, {
+      testTitle: 'send/receive FCM and you want to use VAPID (aes128gcm)',
+      requestOptions: {
+        subscription: {
+          endpoint: 'https://fcm.googleapis.com/fcm/send/someSubscriptionID',
+          keys: VALID_KEYS
+        },
+        extraOptions: {
+          vapidDetails: {
+            subject: 'mailto:mozilla@example.org',
+            privateKey: vapidKeys.privateKey,
+            publicKey: vapidKeys.publicKey
+          },
+          contentEncoding: WebPushConstants.supportedContentEncodings.AES_128_GCM
+        },
+        vapid: true
+      }
+    }, {
+      testTitle: 'send/receive FCM and you want to use VAPID (aes128gcm) (via global options)',
+      requestOptions: {
+        subscription: {
+          endpoint: 'https://fcm.googleapis.com/fcm/send/someSubscriptionID',
+          keys: VALID_KEYS
+        },
+        extraOptions: {
+          contentEncoding: WebPushConstants.supportedContentEncodings.AES_128_GCM
+        },
+        vapid: true
+      },
+      globalOptions: {
+        vapidDetails: {
+          subject: 'mailto:mozilla@example.org',
+          privateKey: vapidKeys.privateKey,
+          publicKey: vapidKeys.publicKey
+        }
+      }
+    }, {
+      testTitle: 'send/receive FCM and you don\'t want to use VAPID (when global options set)',
+      requestOptions: {
+        subscription: {
+          endpoint: 'https://fcm.googleapis.com/fcm/send/someSubscriptionID'
+        },
+        extraOptions: {
+          vapidDetails: null
+        }
+      },
+      globalOptions: {
+        vapidDetails: {
+          subject: 'mailto:mozilla@example.org',
+          privateKey: vapidKeys.privateKey,
+          publicKey: vapidKeys.publicKey
+        }
+      }
+    }, {
       testTitle: 'send/receive string with GCM',
       requestOptions: {
         subscription: {
@@ -465,8 +575,22 @@ suite('sendNotification', function() {
         validGCMRequest.requestOptions.subscription.endpoint = 'https://android.googleapis.com/gcm/send/someSubscriptionID';
       }
 
+      validGCMRequest.globalOptions = validGCMRequest.globalOptions || {};
+      if (validGCMRequest.globalOptions.gcmAPIKey === undefined) {
+        validGCMRequest.globalOptions.gcmAPIKey = 'my_gcm_key';
+      }
+
       const webPush = require('../src/index');
-      webPush.setGCMAPIKey('my_gcm_key');
+      if (validGCMRequest.globalOptions.gcmAPIKey) {
+        webPush.setGCMAPIKey(validGCMRequest.globalOptions.gcmAPIKey);
+      }
+      if (validGCMRequest.globalOptions.vapidDetails) {
+        webPush.setVapidDetails(
+          validGCMRequest.globalOptions.vapidDetails.subject,
+          validGCMRequest.globalOptions.vapidDetails.publicKey,
+          validGCMRequest.globalOptions.vapidDetails.privateKey
+        );
+      }
 
       return webPush.sendNotification(
         validGCMRequest.requestOptions.subscription,
