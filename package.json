@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "chalk": "2.4.2",
-    "chromedriver": "75.0.0",
+    "chromedriver": "75.0.1",
     "del": "4.1.1",
     "eslint": "6.0.1",
     "eslint-config-airbnb": "17.1.0",
