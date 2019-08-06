@@ -6,6 +6,7 @@ const webPush = require('../src/index');
 const crypto = require('crypto');
 const jws = require('jws');
 const urlParse = require('url').parse;
+const https = require('https');
 
 suite('Test Generate Request Details', function() {
   test('is defined', function() {
@@ -201,6 +202,18 @@ suite('Test Generate Request Details', function() {
           }
         }
       }
+    }, {
+      testTitle: 'invalid agent',
+      requestOptions: {
+        subscription: {
+          keys: VALID_KEYS
+        },
+        message: 'hello',
+        addEndpoint: true,
+        extraOptions: {
+          agent: 'agent'
+        }
+      }
     }
   ];
 
@@ -328,5 +341,20 @@ suite('Test Generate Request Details', function() {
       extraOptions
     );
     assert.equal(details.proxy, extraOptions.proxy);
+  });
+
+  test('Agent option as an https.Agent instance', function() {
+    let subscription = {
+      endpoint: 'https://127.0.0.1:8080'
+    };
+    let extraOptions = {
+      agent: new https.Agent({ keepAlive: true })
+    };
+    let details = webPush.generateRequestDetails(
+      subscription,
+      null,
+      extraOptions
+    );
+    assert.equal(details.agent, extraOptions.agent);
   });
 });

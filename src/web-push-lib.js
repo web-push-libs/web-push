@@ -110,6 +110,7 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
     let extraHeaders = {};
     let contentEncoding = webPushConstants.supportedContentEncodings.AES_128_GCM;
     let proxy;
+    let agent;
 
     if (options) {
       const validOptionKeys = [
@@ -118,7 +119,8 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
         'vapidDetails',
         'TTL',
         'contentEncoding',
-        'proxy'
+        'proxy',
+        'agent'
       ];
       const optionKeys = Object.keys(options);
       for (let i = 0; i < optionKeys.length; i += 1) {
@@ -172,6 +174,14 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
           proxy = options.proxy;
         } else {
           console.warn('Attempt to use proxy option, but invalid type it should be a string or proxy options object.');
+        }
+      }
+
+      if (options.agent) {
+        if (options.agent instanceof https.Agent) {
+          agent = options.agent;
+        } else {
+          console.warn('Attempt to use agent option, but invalid type it should be an instanceof https.Agent.');
         }
       }
     }
@@ -265,6 +275,10 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
       requestDetails.proxy = proxy;
     }
 
+    if (agent) {
+      requestDetails.agent = agent;
+    }
+
     return requestDetails;
   };
 
@@ -299,6 +313,10 @@ WebPushLib.prototype.sendNotification = function(subscription, payload, options)
 
       httpsOptions.headers = requestDetails.headers;
       httpsOptions.method = requestDetails.method;
+
+      if (requestDetails.agent) {
+        httpsOptions.agent = requestDetails.agent;
+      }
 
       if (requestDetails.proxy) {
         httpsOptions.agent = new HttpsProxyAgent(requestDetails.proxy);
