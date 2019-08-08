@@ -134,7 +134,8 @@ const options = {
     '< header name >': '< header value >'
   },
   contentEncoding: '< Encoding type, e.g.: aesgcm or aes128gcm >',
-  proxy: '< proxy server options >'
+  proxy: '< proxy server options >',
+  agent: '< https.Agent instance >'
 }
 
 webpush.sendNotification(
@@ -185,6 +186,7 @@ retained by the push service (by default, four weeks).
 - **proxy** is the [HttpsProxyAgent's constructor argument](https://github.com/TooTallNate/node-https-proxy-agent#new-httpsproxyagentobject-options)
 that may either be a string URI of the proxy server (eg. http://< hostname >:< port >)
 or an "options" object with more specific properties.
+- **agent** is the [HTTPS Agent instance](https://nodejs.org/dist/latest/docs/api/https.html#https_class_https_agent) which will be used in the `https.request` method. If the `proxy` options defined, `agent` will be ignored!
 
 ### Returns
 
