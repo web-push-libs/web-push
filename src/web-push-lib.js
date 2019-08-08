@@ -181,7 +181,7 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
         if (options.agent instanceof https.Agent) {
           agent = options.agent;
         } else {
-          console.warn('Attempt to use agent option, but invalid type it should be an instanceof https.Agent.');
+          console.warn('Wrong type for the agent option, it should be an instance of https.Agent.');
         }
       }
     }
