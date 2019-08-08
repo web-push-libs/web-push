@@ -214,6 +214,19 @@ suite('Test Generate Request Details', function() {
           agent: 'agent'
         }
       }
+    }, {
+      testTitle: 'ignore valid agent if proxy denifed',
+      requestOptions: {
+        subscription: {
+          keys: VALID_KEYS
+        },
+        message: 'hello',
+        addEndpoint: true,
+        extraOptions: {
+          agent: new https.Agent({ keepAlive: true }),
+          proxy: 'http://localhost:3000'
+        }
+      }
     }
   ];
 

@@ -179,6 +179,10 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
 
       if (options.agent) {
         if (options.agent instanceof https.Agent) {
+          if (proxy) {
+            console.warn('Agent option will be ignored because proxy option is defined.');
+          }
+
           agent = options.agent;
         } else {
           console.warn('Wrong type for the agent option, it should be an instance of https.Agent.');
