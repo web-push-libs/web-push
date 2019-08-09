@@ -155,7 +155,7 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
         currentVapidDetails = options.vapidDetails;
       }
 
-      if (options.TTL) {
+      if (Number.isInteger(options.TTL) && options.TTL > -1) {
         timeToLive = options.TTL;
       }
 
