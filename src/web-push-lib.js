@@ -155,8 +155,11 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
         currentVapidDetails = options.vapidDetails;
       }
 
-      if (Number.isInteger(options.TTL) && options.TTL > -1) {
-        timeToLive = options.TTL;
+      if (options.TTL !== undefined) {
+        timeToLive = Number(options.TTL);
+        if (timeToLive < 0) {
+          throw new Error("TTL should be a number and should be at least 0");
+        }
       }
 
       if (options.contentEncoding) {
@@ -189,6 +192,7 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
         }
       }
     }
+
 
     if (typeof timeToLive === 'undefined') {
       timeToLive = DEFAULT_TTL;
