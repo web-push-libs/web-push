@@ -193,7 +193,6 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
       }
     }
 
-
     if (typeof timeToLive === 'undefined') {
       timeToLive = DEFAULT_TTL;
     }
