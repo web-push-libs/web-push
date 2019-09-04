@@ -158,7 +158,7 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
       if (options.TTL !== undefined) {
         timeToLive = Number(options.TTL);
         if (timeToLive < 0) {
-          throw new Error("TTL should be a number and should be at least 0");
+          throw new Error('TTL should be a number and should be at least 0');
         }
       }
 
