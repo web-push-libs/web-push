@@ -155,8 +155,11 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
         currentVapidDetails = options.vapidDetails;
       }
 
-      if (options.TTL) {
-        timeToLive = options.TTL;
+      if (options.TTL !== undefined) {
+        timeToLive = Number(options.TTL);
+        if (timeToLive < 0) {
+          throw new Error('TTL should be a number and should be at least 0');
+        }
       }
 
       if (options.contentEncoding) {
