@@ -31,4 +31,5 @@ before_script:
   - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sh -e /etc/init.d/xvfb start; fi
 script:
   - $NPM test
+  - $NPM run coveralls
 sudo: required
