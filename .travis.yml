@@ -31,4 +31,3 @@ install:
 script:
   - $NPM test
   - $NPM run coveralls
-sudo: required
