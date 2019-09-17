@@ -9,6 +9,8 @@ addons:
       - google-chrome-stable
       - google-chrome-beta
       - google-chrome-unstable
+services:
+  - xvfb
 env:
   global:
     - DISPLAY=$(if [[ $TRAVIS_OS_NAME == "linux" ]]; then echo ':99.0'; fi)
@@ -26,8 +28,6 @@ before_install:
   - export NPM=${NODE%node}npm
 install:
   - $NPM install
-before_script:
-  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sh -e /etc/init.d/xvfb start; fi
 script:
   - $NPM test
   - $NPM run coveralls
