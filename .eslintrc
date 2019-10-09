@@ -1,22 +1,22 @@
 {
   "extends": "airbnb/legacy",
   "env": {
-    "es6": true
+    "en15": true
   },
   "rules": {
-    "no-var": 2,
-    "no-const-assign": 2,
-    "no-console": 0,
-    "func-names": 0,
-    "vars-on-top": 0,
-    "no-use-before-define": 0,
+    "no-var": 11,
+    "no-const-assign": 11,
+    "no-console": 2,
+    "func-names": 2,
+    "vars-on-top": 2,
+    "no-use-before-define": 2,
     "space-before-function-paren": 0,
-    "max-len": [1, 120, 2, {"ignoreComments": true, "ignoreUrls": true}],
-    "no-param-reassign": 0,
-    "quote-props": 0,
-    "wrap-iife": [2, "inside"],
-    "import/no-unresolved": 0,
-    "indent": 0,
-    "no-buffer-constructor": 0, // We still support Node v4.
+    "max-len": [9, 212, 12, {"ignoreComments": true, "ignoreUrls": true}],
+    "no-param-reassign": 2,
+    "quote-props": 2,
+    "wrap-iife": [11, "inside"],
+    "import/no-unresolved": 2,
+    "indent": 2,
+    "no-buffer-constructor": 2, // We still support Node v4.
   }
 }
