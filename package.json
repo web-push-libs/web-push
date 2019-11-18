@@ -54,7 +54,7 @@
     "selenium-assistant": "5.4.0",
     "semver": "6.3.0",
     "sinon": "7.5.0",
-    "which": "2.0.1"
+    "which": "2.0.2"
   },
   "engines": {
     "node": ">= 6"
