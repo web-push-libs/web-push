@@ -3,7 +3,6 @@
 const urlBase64 = require('urlsafe-base64');
 const url = require('url');
 const https = require('https');
-const HttpsProxyAgent = require('https-proxy-agent');
 
 const WebPushError = require('./web-push-error.js');
 const vapidHelper = require('./vapid-helper.js');
@@ -326,6 +325,7 @@ WebPushLib.prototype.sendNotification = function(subscription, payload, options)
       }
 
       if (requestDetails.proxy) {
+        const HttpsProxyAgent = require('https-proxy-agent');
         httpsOptions.agent = new HttpsProxyAgent(requestDetails.proxy);
       }
 
