@@ -50,13 +50,13 @@ function generateVAPIDKeys() {
   if (privateKeyBuffer.length < 32) {
     const padding = Buffer.alloc(32 - privateKeyBuffer.length);
     padding.fill(0);
-    privateKeyBuffer = Buffer.concat([privateKeyBuffer, padding]);
+    privateKeyBuffer = Buffer.concat([padding, privateKeyBuffer]);
   }
 
   if (publicKeyBuffer.length < 65) {
     const padding = Buffer.alloc(65 - publicKeyBuffer.length);
     padding.fill(0);
-    publicKeyBuffer = Buffer.concat([publicKeyBuffer, padding]);
+    publicKeyBuffer = Buffer.concat([padding, publicKeyBuffer]);
   }
 
   return {
