@@ -1,11 +1,5 @@
 'use strict';
 
-// The latest version of Selenium doesn't support Node 4.
-const semver = require('semver');
-if (!semver.gte(process.version, '5.0.0')) {
-  return;
-}
-
 const seleniumAssistant = require('selenium-assistant');
 
 const MAX_RETRIES = 3;

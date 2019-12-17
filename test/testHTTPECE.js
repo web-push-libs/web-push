@@ -4,13 +4,8 @@ const assert = require('assert');
 const crypto = require('crypto');
 const ece = require('http_ece');
 const urlBase64 = require('urlsafe-base64');
-const semver = require('semver');
 
 suite('http_ece', function() {
-  if (!semver.satisfies(process.version, '5')) {
-    return;
-  }
-
   test('aesgcm - padSize 2 - pad 0', function() {
     const input = Buffer.from(urlBase64.encode('marco'));
 
