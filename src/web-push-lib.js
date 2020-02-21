@@ -96,7 +96,8 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
 
     if (payload) {
       // Validate the subscription keys
-      if (!subscription.keys || !subscription.keys.p256dh
+      if (typeof subscription !== 'object' || !subscription.keys
+      || !subscription.keys.p256dh
       || !subscription.keys.auth) {
         throw new Error('To send a message with a payload, the '
         + 'subscription must have \'auth\' and \'p256dh\' keys.');
@@ -208,15 +209,6 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
     let requestPayload = null;
 
     if (payload) {
-      if (!subscription.keys
-      || typeof subscription !== 'object'
-      || !subscription.keys.p256dh
-      + !subscription.keys.auth) {
-        throw new Error(new Error('Unable to send a message with '
-        + 'payload to this subscription since it doesn\'t have the '
-        + 'required encryption keys'));
-      }
-
       const encrypted = encryptionHelper
         .encrypt(subscription.keys.p256dh, subscription.keys.auth, payload, contentEncoding);
 
