@@ -39,7 +39,7 @@
   },
   "devDependencies": {
     "chalk": "3.0.0",
-    "chromedriver": "79.0.0",
+    "chromedriver": "79.0.3",
     "coveralls": "3.0.9",
     "del": "5.1.0",
     "eslint": "6.8.0",
