@@ -32,7 +32,7 @@
   "dependencies": {
     "asn1.js": "^5.2.0",
     "http_ece": "1.1.0",
-    "https-proxy-agent": "^4.0.0",
+    "https-proxy-agent": "^5.0.0",
     "jws": "^4.0.0",
     "minimist": "^1.2.0",
     "urlsafe-base64": "^1.0.0"
