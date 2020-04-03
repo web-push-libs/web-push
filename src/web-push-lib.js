@@ -111,6 +111,7 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
     let contentEncoding = webPushConstants.supportedContentEncodings.AES_128_GCM;
     let proxy;
     let agent;
+    let timeout;
 
     if (options) {
       const validOptionKeys = [
@@ -120,7 +121,8 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
         'TTL',
         'contentEncoding',
         'proxy',
-        'agent'
+        'agent',
+        'timeout'
       ];
       const optionKeys = Object.keys(options);
       for (let i = 0; i < optionKeys.length; i += 1) {
@@ -190,6 +192,10 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
         } else {
           console.warn('Wrong type for the agent option, it should be an instance of https.Agent.');
         }
+      }
+
+      if (typeof options.timeout === 'number') {
+        timeout = options.timeout;
       }
     }
 
@@ -277,6 +283,10 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
       requestDetails.agent = agent;
     }
 
+    if (timeout) {
+      requestDetails.timeout = timeout;
+    }
+
     return requestDetails;
   };
 
@@ -311,6 +321,10 @@ WebPushLib.prototype.sendNotification = function(subscription, payload, options)
 
       httpsOptions.headers = requestDetails.headers;
       httpsOptions.method = requestDetails.method;
+
+      if (requestDetails.timeout) {
+        httpsOptions.timeout = requestDetails.timeout;
+      }
 
       if (requestDetails.agent) {
         httpsOptions.agent = requestDetails.agent;
