@@ -8,7 +8,7 @@ env:
     - DISPLAY=$(if [[ $TRAVIS_OS_NAME == "linux" ]]; then echo ':99.0'; fi)
     - MOZ_XVFB=$(if [[ $TRAVIS_OS_NAME == "linux" ]]; then echo 1; fi)
   matrix:
-    - NODE_VERSION="8"  # Maintenance LTS
+    - NODE_VERSION="10"  # Maintenance LTS
     - NODE_VERSION="lts/*"
     - NODE_VERSION="node"
 before_install:
