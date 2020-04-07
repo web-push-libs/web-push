@@ -129,6 +129,7 @@ const options = {
     publicKey: '< URL Safe Base64 Encoded Public Key >',
     privateKey: '< URL Safe Base64 Encoded Private Key >'
   },
+  timeout: <Number>
   TTL: <Number>,
   headers: {
     '< header name >': '< header value >'
@@ -179,6 +180,7 @@ any of the following values defined, although none of them are required.
 request only. This overrides any API key set via `setGCMAPIKey()`.
 - **vapidDetails** should be an object with *subject*, *publicKey* and
 *privateKey* values defined. These values should follow the [VAPID Spec](https://tools.ietf.org/html/draft-thomson-webpush-vapid).
+- **timeout** is a value in milliseconds that specifies how long the library must wait for a response from the push service before timing out (by default undefined).
 - **TTL** is a value in seconds that describes how long a push message is
 retained by the push service (by default, four weeks).
 - **headers** is an object with all the extra headers you want to add to the request.
