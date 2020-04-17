@@ -115,6 +115,7 @@ function validatePrivateKey(privateKey) {
   if (privateKey.length !== 32) {
     throw new Error('Vapid private key should be 32 bytes long when decoded.');
   }
+  return privateKey;
 }
 
 /**
@@ -185,10 +186,7 @@ function getVapidHeaders(audience, subject, publicKey, privateKey, contentEncodi
 
   validateSubject(subject);
   validatePublicKey(publicKey);
-  validatePrivateKey(privateKey);
-
-  publicKey = urlBase64.decode(publicKey);
-  privateKey = urlBase64.decode(privateKey);
+  privateKey = validatePrivateKey(privateKey);
 
   if (expiration) {
     validateExpiration(expiration);
@@ -215,13 +213,13 @@ function getVapidHeaders(audience, subject, publicKey, privateKey, contentEncodi
 
   if (contentEncoding === WebPushConstants.supportedContentEncodings.AES_128_GCM) {
     return {
-      Authorization: 'vapid t=' + jwt + ', k=' + urlBase64.encode(publicKey)
+      Authorization: 'vapid t=' + jwt + ', k=' + publicKey
     };
   }
   if (contentEncoding === WebPushConstants.supportedContentEncodings.AES_GCM) {
     return {
       Authorization: 'WebPush ' + jwt,
-      'Crypto-Key': 'p256ecdsa=' + urlBase64.encode(publicKey)
+      'Crypto-Key': 'p256ecdsa=' + publicKey
     };
   }
 

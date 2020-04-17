@@ -268,8 +268,6 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
           requestDetails.headers['Crypto-Key'] = vapidHeaders['Crypto-Key'];
         }
       }
-    } else if (isFCM && currentGCMAPIKey) {
-      requestDetails.headers.Authorization = 'key=' + currentGCMAPIKey;
     }
 
     requestDetails.body = requestPayload;
