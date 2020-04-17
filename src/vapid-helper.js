@@ -115,7 +115,6 @@ function validatePrivateKey(privateKey) {
   if (privateKey.length !== 32) {
     throw new Error('Vapid private key should be 32 bytes long when decoded.');
   }
-  return privateKey;
 }
 
 /**
@@ -186,7 +185,9 @@ function getVapidHeaders(audience, subject, publicKey, privateKey, contentEncodi
 
   validateSubject(subject);
   validatePublicKey(publicKey);
-  privateKey = validatePrivateKey(privateKey);
+  validatePrivateKey(privateKey);
+
+  privateKey = urlBase64.decode(privateKey);
 
   if (expiration) {
     validateExpiration(expiration);

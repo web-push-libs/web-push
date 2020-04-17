@@ -184,7 +184,7 @@ request only. This overrides any API key set via `setGCMAPIKey()`.
 - **TTL** is a value in seconds that describes how long a push message is
 retained by the push service (by default, four weeks).
 - **headers** is an object with all the extra headers you want to add to the request.
-- **contentEncoding** is the type of push encoding to use (e.g. 'aesgcm128gcm', by default, or 'aesgcm').
+- **contentEncoding** is the type of push encoding to use (e.g. 'aes128gcm', by default, or 'aesgcm').
 - **proxy** is the [HttpsProxyAgent's constructor argument](https://github.com/TooTallNate/node-https-proxy-agent#new-httpsproxyagentobject-options)
 that may either be a string URI of the proxy server (eg. http://< hostname >:< port >)
 or an "options" object with more specific properties.
