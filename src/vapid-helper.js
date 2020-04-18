@@ -187,7 +187,6 @@ function getVapidHeaders(audience, subject, publicKey, privateKey, contentEncodi
   validatePublicKey(publicKey);
   validatePrivateKey(privateKey);
 
-  publicKey = urlBase64.decode(publicKey);
   privateKey = urlBase64.decode(privateKey);
 
   if (expiration) {
@@ -215,13 +214,13 @@ function getVapidHeaders(audience, subject, publicKey, privateKey, contentEncodi
 
   if (contentEncoding === WebPushConstants.supportedContentEncodings.AES_128_GCM) {
     return {
-      Authorization: 'vapid t=' + jwt + ', k=' + urlBase64.encode(publicKey)
+      Authorization: 'vapid t=' + jwt + ', k=' + publicKey
     };
   }
   if (contentEncoding === WebPushConstants.supportedContentEncodings.AES_GCM) {
     return {
       Authorization: 'WebPush ' + jwt,
-      'Crypto-Key': 'p256ecdsa=' + urlBase64.encode(publicKey)
+      'Crypto-Key': 'p256ecdsa=' + publicKey
     };
   }
 
