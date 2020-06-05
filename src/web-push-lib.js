@@ -201,7 +201,7 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
       }
 
       if (typeof options.socketTimeout === 'number') {
-        socketTimeout = options.socketT;
+        socketTimeout = options.socketTimeout;
       }
     }
 
