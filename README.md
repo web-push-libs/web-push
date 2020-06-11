@@ -180,7 +180,7 @@ any of the following values defined, although none of them are required.
 request only. This overrides any API key set via `setGCMAPIKey()`.
 - **vapidDetails** should be an object with *subject*, *publicKey* and
 *privateKey* values defined. These values should follow the [VAPID Spec](https://tools.ietf.org/html/draft-thomson-webpush-vapid).
-- **timeout** is a value in milliseconds that specifies how long the library must wait for a response from the push service before timing out (by default undefined).
+- **timeout** is a value in milliseconds that specifies the request's socket timeout. On timeout, the request will be destroyed and the promise will be rejected with a meaningful error. It's a common misconception that a socket timeout is the timeout to receive the full response. So if you have a socket timeout of 1 second, and a response comprised of 3 TCP packets, where each response packet takes 0.9 seconds to arrive, for a total response time of 2.7 seconds, then there will be no timeout. Once a socket 'timeout' triggers the request will be aborted by the library (by default undefined).
 - **TTL** is a value in seconds that describes how long a push message is
 retained by the push service (by default, four weeks).
 - **headers** is an object with all the extra headers you want to add to the request.

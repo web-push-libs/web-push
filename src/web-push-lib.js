@@ -358,6 +358,12 @@ WebPushLib.prototype.sendNotification = function(subscription, payload, options)
         });
       });
 
+      if (requestDetails.timeout) {
+        pushRequest.on('timeout', function() {
+          pushRequest.destroy(new Error('Socket timeout'));
+        });
+      }
+
       pushRequest.on('error', function(e) {
         reject(e);
       });
