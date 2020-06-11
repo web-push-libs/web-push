@@ -112,7 +112,6 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
     let proxy;
     let agent;
     let timeout;
-    let socketTimeout;
 
     if (options) {
       const validOptionKeys = [
@@ -123,8 +122,7 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
         'contentEncoding',
         'proxy',
         'agent',
-        'timeout',
-        'socketTimeout'
+        'timeout'
       ];
       const optionKeys = Object.keys(options);
       for (let i = 0; i < optionKeys.length; i += 1) {
@@ -198,10 +196,6 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
 
       if (typeof options.timeout === 'number') {
         timeout = options.timeout;
-      }
-
-      if (typeof options.socketTimeout === 'number') {
-        socketTimeout = options.socketTimeout;
       }
     }
 
@@ -293,10 +287,6 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
       requestDetails.timeout = timeout;
     }
 
-    if (socketTimeout) {
-      requestDetails.socketTimeout = socketTimeout;
-    }
-
     return requestDetails;
   };
 
@@ -323,7 +313,6 @@ WebPushLib.prototype.sendNotification = function(subscription, payload, options)
     }
 
     return new Promise(function(resolve, reject) {
-      let timeoutId;
       const httpsOptions = {};
       const urlParts = url.parse(requestDetails.endpoint);
       httpsOptions.hostname = urlParts.hostname;
@@ -333,8 +322,8 @@ WebPushLib.prototype.sendNotification = function(subscription, payload, options)
       httpsOptions.headers = requestDetails.headers;
       httpsOptions.method = requestDetails.method;
 
-      if (requestDetails.socketTimeout) {
-        httpsOptions.timeout = requestDetails.socketTimeout;
+      if (requestDetails.timeout) {
+        httpsOptions.timeout = requestDetails.timeout;
       }
 
       if (requestDetails.agent) {
@@ -354,10 +343,6 @@ WebPushLib.prototype.sendNotification = function(subscription, payload, options)
         });
 
         pushResponse.on('end', function() {
-          if (timeoutId) {
-            clearTimeout(timeoutId);
-          }
-
           if (pushResponse.statusCode < 200 || pushResponse.statusCode > 299) {
             reject(new WebPushError(
               'Received unexpected response code',
@@ -374,13 +359,7 @@ WebPushLib.prototype.sendNotification = function(subscription, payload, options)
       });
 
       if (requestDetails.timeout) {
-        timeoutId = setTimeout(function () {
-          pushRequest.destroy(new Error('Request timeout while waiting for the push to complete'));
-        }, requestDetails.timeout);
-      }
-
-      if (requestDetails.socketTimeout) {
-        pushRequest.on('timeout', function(e) {
+        pushRequest.on('timeout', function() {
           pushRequest.destroy(new Error('Socket timeout'));
         });
       }
