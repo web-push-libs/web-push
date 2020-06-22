@@ -42,7 +42,7 @@
     "chromedriver": "83.0.0",
     "coveralls": "3.0.9",
     "del": "5.1.0",
-    "eslint": "7.2.0",
+    "eslint": "7.3.0",
     "eslint-config-airbnb": "18.2.0",
     "eslint-plugin-import": "2.21.2",
     "geckodriver": "1.19.1",
