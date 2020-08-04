@@ -1,0 +1,2 @@
+language = "nodejs"
+run = "npm install -g web-push"

@@ -14,6 +14,8 @@
 
 # Why
 
+[![Run on Repl.it](https://repl.it/badge/github/web-push-libs/web-push)](https://repl.it/github/web-push-libs/web-push)
+
 Web push requires that push messages triggered from a backend be done via the
 [Web Push Protocol](https://tools.ietf.org/html/draft-ietf-webpush-protocol)
 and if you want to send data with your push message, you must also encrypt
