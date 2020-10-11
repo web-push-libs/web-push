@@ -852,4 +852,72 @@ suite('sendNotification', function() {
       });
     });
   });
+
+  test.only('Proxy hit for ' + validRequests[0].testTitle, function() {
+    let validRequest = validRequests[0];
+    const proxyOptions = {
+      key: pem,
+      cert: pem
+    };
+    return new Promise(function(resolve) {
+      let proxyPort;
+      const proxyServer = https.createServer(proxyOptions, function(req, res) {
+        requestBody = Buffer.alloc(0);
+
+        req.on('data', function(chunk) {
+          requestBody = Buffer.concat([requestBody, chunk]);
+        });
+
+        req.on('end', function() {
+          requestDetails = req;
+
+          if (req.url.indexOf('statusCode=404') !== -1) {
+            res.writeHead(404);
+            res.end();
+          } else {
+            res.writeHead(201);
+            res.end('ok');
+            resolve();
+          }
+        });
+      });
+      portfinder.getPort(function(error, port) {
+        if (error) {
+          proxyPort = 50005;
+        } else {
+          proxyPort = port;
+        }
+
+        proxyServer.listen(proxyPort, function() {
+          console.log('proxy server started');
+          if (!validRequest.requestOptions.subscription.endpoint) {
+            validRequest.requestOptions.subscription.endpoint = 'https://127.0.0.1:' + serverPort;
+          }
+
+          if (validRequest.serverFlags) {
+            validRequest.requestOptions.subscription.endpoint += '?'
+            + validRequest.serverFlags.join('&');
+          }
+          validRequest.requestOptions.extraOptions = validRequest.requestOptions.extraOptions || {};
+          validRequest.requestOptions.extraOptions.proxy = 'https://127.0.0.1:' + proxyPort;
+          validRequest.requestOptions.extraOptions.contentEncoding = WebPushConstants.supportedContentEncodings.AES_128_GCM;
+          const webPush = require('../src/index');
+          webPush.sendNotification(
+            validRequest.requestOptions.subscription,
+            validRequest.requestOptions.message,
+            validRequest.requestOptions.extraOptions
+          ).then(function(response) {
+            // need not be handled
+            console.log(response);
+          })
+          .then(function() {
+            // need not be handled
+          }).catch(function(err) {
+            console.log(err);
+            // do nothing
+          });
+        });
+      });
+    });
+});
 });
