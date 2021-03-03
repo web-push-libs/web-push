@@ -12,7 +12,9 @@ const VALID_AUDIENCE = 'https://example.com';
 const VALID_SUBJECT_MAILTO = 'mailto: example@example.com';
 const VALID_SUBJECT_URL = 'https://exampe.com/contact';
 const VALID_PUBLIC_KEY = urlBase64.encode(Buffer.alloc(65));
+const VALID_UNSAFE_BASE64_PUBLIC_KEY = Buffer.alloc(65).toString('base64');
 const VALID_PRIVATE_KEY = urlBase64.encode(Buffer.alloc(32));
+const VALID_UNSAFE_BASE64_PRIVATE_KEY = Buffer.alloc(32).toString('base64');
 const VALID_CONTENT_ENCODING = webPush.supportedContentEncodings.AES_GCM;
 const VALID_EXPIRATION = Math.floor(Date.now() / 1000) + (60 * 60 * 12);
 
@@ -122,6 +124,14 @@ suite('Test Vapid Helpers', function() {
       },
       function() {
         vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, 'invalid encoding type');
+      },
+      function () {
+        // Public key with unsafe base64
+        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_UNSAFE_BASE64_PUBLIC_KEY, VALID_PRIVATE_KEY, VALID_CONTENT_ENCODING);
+      },
+      function () {
+        // Private key with unsafe base64
+        vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_UNSAFE_BASE64_PRIVATE_KEY, VALID_CONTENT_ENCODING);
       },
       function () {
         // String with text, is not accepted as a valid expiration value

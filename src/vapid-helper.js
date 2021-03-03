@@ -93,10 +93,16 @@ function validatePublicKey(publicKey) {
     + 'encoded string.');
   }
 
-  publicKey = urlBase64.decode(publicKey);
+  const decodedPublicKey = urlBase64.decode(publicKey);
 
-  if (publicKey.length !== 65) {
+  if (decodedPublicKey.length !== 65) {
     throw new Error('Vapid public key should be 65 bytes long when decoded.');
+  }
+
+  const encodedPublicKey = urlBase64.encode(decodedPublicKey);
+
+  if (publicKey !== encodedPublicKey) {
+    throw new Error('Vapid public key must be a URL safe Base 64 (without "=")');
   }
 }
 
@@ -110,10 +116,16 @@ function validatePrivateKey(privateKey) {
     + 'encoded string.');
   }
 
-  privateKey = urlBase64.decode(privateKey);
+  const decodedPrivateKey = urlBase64.decode(privateKey);
 
-  if (privateKey.length !== 32) {
+  if (decodedPrivateKey.length !== 32) {
     throw new Error('Vapid private key should be 32 bytes long when decoded.');
+  }
+
+  const encodedPrivateKey = urlBase64.encode(decodedPrivateKey);
+
+  if (privateKey !== encodedPrivateKey) {
+    throw new Error('Vapid private key must be a URL safe Base 64 (without "=")');
   }
 }
 
