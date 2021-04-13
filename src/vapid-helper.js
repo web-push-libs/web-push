@@ -97,9 +97,9 @@ function validatePublicKey(publicKey) {
     throw new Error('Vapid public key must be a URL safe Base 64 (without "=")');
   }
 
-  const decodedPublicKey = urlBase64.decode(publicKey);
+  publicKey = urlBase64.decode(publicKey);
 
-  if (decodedPublicKey.length !== 65) {
+  if (publicKey.length !== 65) {
     throw new Error('Vapid public key should be 65 bytes long when decoded.');
   }
 }
@@ -118,9 +118,9 @@ function validatePrivateKey(privateKey) {
     throw new Error('Vapid private key must be a URL safe Base 64 (without "=")');
   }
 
-  const decodedPrivateKey = urlBase64.decode(privateKey);
+  privateKey = urlBase64.decode(privateKey);
 
-  if (decodedPrivateKey.length !== 32) {
+  if (privateKey.length !== 32) {
     throw new Error('Vapid private key should be 32 bytes long when decoded.');
   }
 }
@@ -172,7 +172,7 @@ function validateExpiration(expiration) {
  * @param  {string} publicKey       The VAPID public key.
  * @param  {string} privateKey      The VAPID private key.
  * @param  {string} contentEncoding The contentEncoding type.
- * @param  {number} [expiration]   The expiration of the VAPID JWT.
+ * @param  {integer} [expiration]   The expiration of the VAPID JWT.
  * @return {Object}                 Returns an Object with the Authorization and
  * 'Crypto-Key' values to be used as headers.
  */
