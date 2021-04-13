@@ -93,6 +93,10 @@ function validatePublicKey(publicKey) {
     + 'encoded string.');
   }
 
+  if (!urlBase64.validate(publicKey)) {
+    throw new Error('Vapid public key must be a URL safe Base 64 (without "=")');
+  }
+
   publicKey = urlBase64.decode(publicKey);
 
   if (publicKey.length !== 65) {
@@ -108,6 +112,10 @@ function validatePrivateKey(privateKey) {
   if (typeof privateKey !== 'string') {
     throw new Error('Vapid private key must be a URL safe Base 64 '
     + 'encoded string.');
+  }
+
+  if (!urlBase64.validate(privateKey)) {
+    throw new Error('Vapid private key must be a URL safe Base 64 (without "=")');
   }
 
   privateKey = urlBase64.decode(privateKey);
