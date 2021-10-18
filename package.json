@@ -38,7 +38,7 @@
     "urlsafe-base64": "^1.0.0"
   },
   "devDependencies": {
-    "chalk": "4.1.1",
+    "chalk": "4.1.2",
     "chromedriver": "89.0.0",
     "coveralls": "3.1.0",
     "del": "6.0.0",
