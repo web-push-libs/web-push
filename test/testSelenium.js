@@ -33,10 +33,6 @@ let testServerURL;
 function runTest(browser, options) {
   options = options || {};
 
-  if (process.env.CI) {
-    return Promise.resolve();
-  }
-
   return createServer(options, webPush)
   .then(function(server) {
     globalServer = server;
