@@ -346,7 +346,10 @@ WebPushLib.prototype.sendNotification = function(subscription, payload, options)
           if (pushResponse.statusCode < 200 || pushResponse.statusCode > 299) {
             reject(new WebPushError(
               'Received unexpected response code',
-              pushResponse.statusCode, pushResponse.headers, responseText, requestDetails.endpoint
+              pushResponse.statusCode,
+              pushResponse.headers,
+              responseText,
+              requestDetails.endpoint
             ));
           } else {
             resolve({
