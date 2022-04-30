@@ -4,7 +4,7 @@ const seleniumAssistant = require('selenium-assistant');
 
 const MAX_RETRIES = 3;
 let expiration;
-if (process.env.TRAVIS) {
+if (process.env.CI) {
   expiration = 0;
 }
 

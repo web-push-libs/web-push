@@ -1,16 +1,6 @@
 <h1 align="center">web-push</h1>
 
-<p align="center">
-  <a href="https://travis-ci.org/web-push-libs/web-push">
-    <img src="https://travis-ci.org/web-push-libs/web-push.svg?branch=master" alt="Travis Build Status" />
-  </a>
-  <a href="https://david-dm.org/web-push-libs/web-push">
-    <img src="https://david-dm.org/web-push-libs/web-push.svg" alt="NPM Dependency State" />
-  </a>
-  <a href="https://david-dm.org/web-push-libs/web-push?type=dev">
-    <img src="https://david-dm.org/web-push-libs/web-push/dev-status.svg" alt="NPM Dev Dependency State" />
-  </a>
-</p>
+[![Build Status](https://github.com/web-push-libs/web-push/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/web-push-libs/web-push/actions/workflows/ci.yml)
 
 # Why
 

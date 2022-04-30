@@ -7,10 +7,8 @@ const assert = require('assert');
 const mkdirp = require('mkdirp');
 const fs = require('fs');
 const del = require('del');
-const chalk = require('chalk');
 const webPush = require('../src/index');
 const createServer = require('./helpers/create-server');
-const which = require('which');
 
 // We need geckodriver on the path
 require('geckodriver');
@@ -35,20 +33,8 @@ let testServerURL;
 function runTest(browser, options) {
   options = options || {};
 
-  if (browser.getId() === 'firefox'
-  && process.env.TRAVIS === 'true') {
-    try {
-      which.sync('geckodriver');
-    } catch (err) {
-      // We can't find geckodriver so skip firefox tests on PRs which
-      // don't have the GH_TOKEN
-      if (process.env.TRAVIS_PULL_REQUEST !== false) {
-        console.log('');
-        console.warn(chalk.red('Running on Travis OS X so skipping firefox tests as they don\'t currently work.'));
-        console.log('');
-        return Promise.resolve();
-      }
-    }
+  if (process.env.CI) {
+    return Promise.resolve();
   }
 
   return createServer(options, webPush)
@@ -195,7 +181,7 @@ availableBrowsers.forEach(function(browser) {
   }
 
   suite('Selenium ' + browser.getPrettyName(), function() {
-    if (process.env.TRAVIS) {
+    if (process.env.CI) {
       this.retries(3);
     }
 
