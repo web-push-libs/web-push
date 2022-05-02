@@ -19,6 +19,7 @@ const printUsageDetails = () => {
         '[--vapid-subject=<vapid subject>]',
         '[--vapid-pubkey=<public key url base64>]',
         '[--vapid-pvtkey=<private key url base64>]',
+        '[--proxy=<https proxy, e.g:http://127.0.0.1:8889>]',
         '[--gcm-api-key=<api key>]'
       ]
     }, {
@@ -49,9 +50,9 @@ const generateVapidKeys = returnJson => {
   } else {
     const outputLine = '\n=======================================\n';
     outputText = outputLine + '\n'
-    + 'Public Key:\n' + vapidKeys.publicKey + '\n\n'
-    + 'Private Key:\n' + vapidKeys.privateKey + '\n'
-    + outputLine;
+      + 'Public Key:\n' + vapidKeys.publicKey + '\n\n'
+      + 'Private Key:\n' + vapidKeys.privateKey + '\n'
+      + outputLine;
   }
 
   console.log(outputText);
@@ -87,6 +88,10 @@ const sendNotification = args => {
     };
   }
 
+  if (args['proxy']) {
+    options.proxy = args['proxy'];
+  }
+
   if (args['gcm-api-key']) {
     options.gcmAPIKey = args['gcm-api-key'];
   }
@@ -96,15 +101,15 @@ const sendNotification = args => {
   }
 
   webPush.sendNotification(subscription, payload, options)
-  .then(() => {
-    console.log('Push message sent.');
-  }, err => {
-    console.log('Error sending push message: ');
-    console.log(err);
-  })
-  .then(() => {
-    process.exit(0);
-  });
+    .then(() => {
+      console.log('Push message sent.');
+    }, err => {
+      console.log('Error sending push message: ');
+      console.log(err);
+    })
+    .then(() => {
+      process.exit(0);
+    });
 };
 
 const action = process.argv[2];
