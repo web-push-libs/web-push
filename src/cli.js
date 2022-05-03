@@ -88,8 +88,8 @@ const sendNotification = args => {
     };
   }
 
-  if (args['proxy']) {
-    options.proxy = args['proxy'];
+  if (args.proxy) {
+    options.proxy = args.proxy;
   }
 
   if (args['gcm-api-key']) {
