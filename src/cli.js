@@ -19,7 +19,7 @@ const printUsageDetails = () => {
         '[--vapid-subject=<vapid subject>]',
         '[--vapid-pubkey=<public key url base64>]',
         '[--vapid-pvtkey=<private key url base64>]',
-        '[--proxy=<https proxy, e.g: http://127.0.0.1:8889>]',
+        '[--proxy=<http proxy uri, e.g: http://127.0.0.1:8889>]',
         '[--gcm-api-key=<api key>]'
       ]
     }, {
