@@ -19,6 +19,7 @@ const printUsageDetails = () => {
         '[--vapid-subject=<vapid subject>]',
         '[--vapid-pubkey=<public key url base64>]',
         '[--vapid-pvtkey=<private key url base64>]',
+        '[--proxy=<http proxy uri, e.g: http://127.0.0.1:8889>]',
         '[--gcm-api-key=<api key>]'
       ]
     }, {
@@ -85,6 +86,10 @@ const sendNotification = args => {
       publicKey: args['vapid-pubkey'] || null,
       privateKey: args['vapid-pvtkey'] || null
     };
+  }
+
+  if (args.proxy) {
+    options.proxy = args.proxy;
   }
 
   if (args['gcm-api-key']) {
