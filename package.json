@@ -39,7 +39,7 @@
   "devDependencies": {
     "chromedriver": "101.0.0",
     "del": "6.0.0",
-    "eslint": "8.14.0",
+    "eslint": "8.19.0",
     "eslint-config-airbnb": "19.0.4",
     "eslint-plugin-import": "2.26.0",
     "geckodriver": "3.0.1",
