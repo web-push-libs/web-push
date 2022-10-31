@@ -37,7 +37,7 @@
     "urlsafe-base64": "^1.0.0"
   },
   "devDependencies": {
-    "chromedriver": "101.0.0",
+    "chromedriver": "107.0.2",
     "del": "6.0.0",
     "eslint": "8.14.0",
     "eslint-config-airbnb": "19.0.4",
