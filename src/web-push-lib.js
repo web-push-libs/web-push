@@ -109,6 +109,8 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
     let timeToLive = DEFAULT_TTL;
     let extraHeaders = {};
     let contentEncoding = webPushConstants.supportedContentEncodings.AES_128_GCM;
+    let urgency =webPushConstants.supportedUrgency.NORMAL;  
+    let topic; 
     let proxy;
     let agent;
     let timeout;
@@ -120,6 +122,8 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
         'vapidDetails',
         'TTL',
         'contentEncoding',
+        'urgency',
+        'topic',
         'proxy',
         'agent',
         'timeout'
@@ -171,6 +175,26 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
         } else {
           throw new Error('Unsupported content encoding specified.');
         }
+      }
+
+      if (options.urgency) {
+        if ((options.urgency === webPushConstants.supportedUrgency.VERY_LOW
+          || options.urgency === webPushConstants.supportedUrgency.LOW
+          || options.urgency === webPushConstants.supportedUrgency.NORMAL
+          || options.urgency === webPushConstants.supportedUrgency.HIGH)) {
+          urgency = options.urgency;
+        } else {
+          throw new Error('Unsupported urgency specified.');
+        }
+      }
+      if (options.Topic) {
+        if(!urlBase64.validate(options.topic)) {
+          throw new Error('Unsupported characters set use maximum of 32 characters from the URL or filename-safe Base64 characters set');
+        }
+        if(options.topic.length>32) {
+          throw new Error('use maximum of 32 characters from the URL or filename-safe Base64 characters set');
+        }
+        topic = options.Topic
       }
 
       if (options.proxy) {
@@ -270,6 +294,20 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
       }
     } else if (isFCM && currentGCMAPIKey) {
       requestDetails.headers.Authorization = 'key=' + currentGCMAPIKey;
+    }
+
+    if(urgency === webPushConstants.supportedUrgency.VERY_LOW){
+      requestDetails.headers['Urgency'] = webPushConstants.supportedUrgency.VERY_LOW
+    } else if(urgency === webPushConstants.supportedUrgency.LOW){
+      requestDetails.headers['Urgency'] = webPushConstants.supportedUrgency.LOW
+    } else if(urgency === webPushConstants.supportedUrgency.NORMAL){
+      requestDetails.headers['Urgency'] = webPushConstants.supportedUrgency.NORMAL
+    } else if(urgency === webPushConstants.supportedUrgency.HIGH){
+      requestDetails.headers['Urgency'] = webPushConstants.supportedUrgency.HIGH
+    }
+
+    if(topic){
+      requestDetails.headers["Topic"] = topic
     }
 
     requestDetails.body = requestPayload;
