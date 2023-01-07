@@ -187,6 +187,7 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
           throw new Error('Unsupported urgency specified.');
         }
       }
+
       if (options.Topic) {
         if(!urlBase64.validate(options.topic)) {
           throw new Error('Unsupported characters set use maximum of 32 characters from the URL or filename-safe Base64 characters set');
@@ -296,18 +297,10 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
       requestDetails.headers.Authorization = 'key=' + currentGCMAPIKey;
     }
 
-    if(urgency === webPushConstants.supportedUrgency.VERY_LOW){
-      requestDetails.headers['Urgency'] = webPushConstants.supportedUrgency.VERY_LOW
-    } else if(urgency === webPushConstants.supportedUrgency.LOW){
-      requestDetails.headers['Urgency'] = webPushConstants.supportedUrgency.LOW
-    } else if(urgency === webPushConstants.supportedUrgency.NORMAL){
-      requestDetails.headers['Urgency'] = webPushConstants.supportedUrgency.NORMAL
-    } else if(urgency === webPushConstants.supportedUrgency.HIGH){
-      requestDetails.headers['Urgency'] = webPushConstants.supportedUrgency.HIGH
-    }
-
+    requestDetails.headers['Urgency'] = urgency
+    
     if(topic){
-      requestDetails.headers["Topic"] = topic
+      requestDetails.headers['Topic'] = topic
     }
 
     requestDetails.body = requestPayload;
