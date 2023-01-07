@@ -133,8 +133,8 @@ const options = {
     '< header name >': '< header value >'
   },
   contentEncoding: '< Encoding type, e.g.: aesgcm or aes128gcm >',
-  urgency:'Defult is normal',
-  topic:'Use a maximum of 32 characters from the URL or filename-safe Base64 characters sets.',
+  urgency:'< Defult is "normal" >',
+  topic:'< Use a maximum of 32 characters from the URL or filename-safe Base64 characters sets. >',
 
   proxy: '< proxy server options >',
   agent: '< https.Agent instance >'
@@ -362,8 +362,8 @@ const options = {
     '< header name >': '< header value >'
   },
   contentEncoding: '< Encoding type, e.g.: aesgcm or aes128gcm >',
-  urgency:''Defult is normal'',
-  topic:'Use a maximum of 32 characters from the URL or filename-safe Base64 characters sets.',
+  urgency:'< Defult is normal "Defult" >',
+  topic:'< Use a maximum of 32 characters from the URL or filename-safe Base64 characters sets. >',
   proxy: '< proxy server options >'
 }
 
@@ -518,15 +518,15 @@ object will contain:
 <td>Safari</td>
 
 <!-- Push without payloads support-->
-<td>Safari 16 in macOS 13 or later</td>
+<td>✓ v16+ </td>
 
 <!-- Push with payload support -->
-<td>Safari 16 in macOS 13 or later</td>
+<td>✓ v16+</td>
 
 <!-- VAPID Support -->
-<td>Safari 16 in macOS 13 or later</td>
+<td>✓ v16+</td>
 
-<td></td>
+<td>Safari 16 in macOS 13 or later</td>
 </tr>
 
 <tr>

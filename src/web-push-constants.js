@@ -8,10 +8,10 @@ WebPushConstants.supportedContentEncodings = {
 };
 
 WebPushConstants.supportedUrgency = {
-  VERY_LOW:'very-low',
-  LOW:'low',
-  NORMAL:'normal',
-  HIGH:'high'
+  VERY_LOW: 'very-low',
+  LOW: 'low',
+  NORMAL: 'normal',
+  HIGH: 'high'
 };
 
 module.exports = WebPushConstants;
