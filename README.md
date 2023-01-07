@@ -133,6 +133,9 @@ const options = {
     '< header name >': '< header value >'
   },
   contentEncoding: '< Encoding type, e.g.: aesgcm or aes128gcm >',
+  urgency:'Defult is normal',
+  topic:'Use a maximum of 32 characters from the URL or filename-safe Base64 characters sets.',
+
   proxy: '< proxy server options >',
   agent: '< https.Agent instance >'
 }
@@ -183,6 +186,8 @@ request only. This overrides any API key set via `setGCMAPIKey()`.
 retained by the push service (by default, four weeks).
 - **headers** is an object with all the extra headers you want to add to the request.
 - **contentEncoding** is the type of push encoding to use (e.g. 'aes128gcm', by default, or 'aesgcm').
+- **urgency** is to indicate to the push service whether to send the notification immediately or prioritize the recipient’s device power considerations for delivery, provide one of the following values: very-low, low, normal, or high. To attempt to deliver the notification immediately, specify high.
+- **topic** optionally provide an identifier that the push service uses to coalesce notifications. Use a maximum of 32 characters from the URL or filename-safe Base64 characters sets.
 - **proxy** is the [HttpsProxyAgent's constructor argument](https://github.com/TooTallNate/node-https-proxy-agent#new-httpsproxyagentobject-options)
 that may either be a string URI of the proxy server (eg. http://< hostname >:< port >)
 or an "options" object with more specific properties.
@@ -357,6 +362,8 @@ const options = {
     '< header name >': '< header value >'
   },
   contentEncoding: '< Encoding type, e.g.: aesgcm or aes128gcm >',
+  urgency:''Defult is normal'',
+  topic:'Use a maximum of 32 characters from the URL or filename-safe Base64 characters sets.',
   proxy: '< proxy server options >'
 }
 
@@ -411,6 +418,8 @@ request only. This overrides any API key set via `setGCMAPIKey()`.
 retained by the push service (by default, four weeks).
 - **headers** is an object with all the extra headers you want to add to the request.
 - **contentEncoding** is the type of push encoding to use (e.g. 'aesgcm', by default, or 'aes128gcm').
+- **urgency** is to indicate to the push service whether to send the notification immediately or prioritize the recipient’s device power considerations for delivery, provide one of the following values: very-low, low, normal, or high. To attempt to deliver the notification immediately, specify high.
+- **topic** optionally provide an identifier that the push service uses to coalesce notifications. Use a maximum of 32 characters from the URL or filename-safe Base64 characters sets.
 - **proxy** is the [HttpsProxyAgent's constructor argument](https://github.com/TooTallNate/node-https-proxy-agent#new-httpsproxyagentobject-options)
 that may either be a string URI of the proxy server (eg. http://< hostname >:< port >)
 or an "options" object with more specific properties.
@@ -509,13 +518,13 @@ object will contain:
 <td>Safari</td>
 
 <!-- Push without payloads support-->
-<td>✗</td>
+<td>Safari 16 in macOS 13 or later</td>
 
 <!-- Push with payload support -->
-<td>✗</td>
+<td>Safari 16 in macOS 13 or later</td>
 
 <!-- VAPID Support -->
-<td>✗</td>
+<td>Safari 16 in macOS 13 or later</td>
 
 <td></td>
 </tr>
