@@ -109,8 +109,8 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
     let timeToLive = DEFAULT_TTL;
     let extraHeaders = {};
     let contentEncoding = webPushConstants.supportedContentEncodings.AES_128_GCM;
-    let urgency =webPushConstants.supportedUrgency.NORMAL;  
-    let topic; 
+    let urgency = webPushConstants.supportedUrgency.NORMAL;
+    let topic;
     let proxy;
     let agent;
     let timeout;
@@ -189,13 +189,13 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
       }
 
       if (options.Topic) {
-        if(!urlBase64.validate(options.topic)) {
-          throw new Error('Unsupported characters set use maximum of 32 characters from the URL or filename-safe Base64 characters set');
+        if (!urlBase64.validate(options.topic)) {
+          throw new Error('Unsupported characters set use the URL or filename-safe Base64 characters set');
         }
-        if(options.topic.length>32) {
+        if (options.topic.length > 32) {
           throw new Error('use maximum of 32 characters from the URL or filename-safe Base64 characters set');
         }
-        topic = options.Topic
+        topic = options.Topic;
       }
 
       if (options.proxy) {
@@ -297,10 +297,10 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
       requestDetails.headers.Authorization = 'key=' + currentGCMAPIKey;
     }
 
-    requestDetails.headers['Urgency'] = urgency
-    
-    if(topic){
-      requestDetails.headers['Topic'] = topic
+    requestDetails.headers['Urgency'] = urgency;
+
+    if (topic) {
+      requestDetails.headers['Topic'] = topic;
     }
 
     requestDetails.body = requestPayload;
