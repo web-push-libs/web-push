@@ -297,10 +297,10 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
       requestDetails.headers.Authorization = 'key=' + currentGCMAPIKey;
     }
 
-    requestDetails.headers['Urgency'] = urgency;
+    requestDetails.headers.Urgency = urgency;
 
     if (topic) {
-      requestDetails.headers['Topic'] = topic;
+      requestDetails.headers.Topic = topic;
     }
 
     requestDetails.body = requestPayload;
