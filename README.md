@@ -418,7 +418,7 @@ request only. This overrides any API key set via `setGCMAPIKey()`.
 retained by the push service (by default, four weeks).
 - **headers** is an object with all the extra headers you want to add to the request.
 - **contentEncoding** is the type of push encoding to use (e.g. 'aesgcm', by default, or 'aes128gcm').
-- **urgency** is to indicate to the push service whether to send the notification immediately or prioritize the recipient’s device power considerations for delivery, provide one of the following values: very-low, low, normal, or high. To attempt to deliver the notification immediately, specify high.
+- **urgency** is to indicate to the push service whether to send the notification immediately or prioritize the recipient’s device power considerations for delivery. Provide one of the following values: very-low, low, normal, or high. To attempt to deliver the notification immediately, specify high.
 - **topic** optionally provide an identifier that the push service uses to coalesce notifications. Use a maximum of 32 characters from the URL or filename-safe Base64 characters sets.
 - **proxy** is the [HttpsProxyAgent's constructor argument](https://github.com/TooTallNate/node-https-proxy-agent#new-httpsproxyagentobject-options)
 that may either be a string URI of the proxy server (eg. http://< hostname >:< port >)
