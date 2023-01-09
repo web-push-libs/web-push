@@ -133,7 +133,7 @@ const options = {
     '< header name >': '< header value >'
   },
   contentEncoding: '< Encoding type, e.g.: aesgcm or aes128gcm >',
-  urgency:'< Defult is "normal" >',
+  urgency:'< Default is "normal" >',
   topic:'< Use a maximum of 32 characters from the URL or filename-safe Base64 characters sets. >',
 
   proxy: '< proxy server options >',
