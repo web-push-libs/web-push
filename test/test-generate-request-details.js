@@ -258,7 +258,7 @@ suite('Test Generate Request Details', function() {
       TTL: 100,
       headers: {
         'Topic': 'topic',
-        'Urgency': 'urgency'
+        'Urgency': 'normal'
       }
     };
     let details = webPush.generateRequestDetails(
