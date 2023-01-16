@@ -41,7 +41,7 @@
     "del": "6.0.0",
     "eslint": "8.31.0",
     "eslint-config-airbnb": "19.0.4",
-    "eslint-plugin-import": "2.26.0",
+    "eslint-plugin-import": "2.27.4",
     "geckodriver": "3.2.0",
     "nyc": "15.1.0",
     "mkdirp": "1.0.4",
