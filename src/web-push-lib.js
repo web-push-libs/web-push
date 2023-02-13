@@ -131,7 +131,7 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
       const optionKeys = Object.keys(options);
       for (let i = 0; i < optionKeys.length; i += 1) {
         const optionKey = optionKeys[i];
-        if (validOptionKeys.indexOf(optionKey) === -1) {
+        if (!validOptionKeys.includes(optionKey)) {
           throw new Error('\'' + optionKey + '\' is an invalid option. '
           + 'The valid options are [\'' + validOptionKeys.join('\', \'')
           + '\'].');
@@ -259,8 +259,8 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
       requestDetails.headers['Content-Length'] = 0;
     }
 
-    const isGCM = subscription.endpoint.indexOf('https://android.googleapis.com/gcm/send') === 0;
-    const isFCM = subscription.endpoint.indexOf('https://fcm.googleapis.com/fcm/send') === 0;
+    const isGCM = subscription.endpoint.startsWith('https://android.googleapis.com/gcm/send');
+    const isFCM = subscription.endpoint.startsWith('https://fcm.googleapis.com/fcm/send');
     // VAPID isn't supported by GCM hence the if, else if.
     if (isGCM) {
       if (!currentGCMAPIKey) {
