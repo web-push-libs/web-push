@@ -48,7 +48,7 @@
     "mocha": "10.2.0",
     "portfinder": "1.0.32",
     "selenium-assistant": "5.4.0",
-    "sinon": "15.0.1"
+    "sinon": "15.0.2"
   },
   "engines": {
     "node": ">= 6"
