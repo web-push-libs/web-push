@@ -2,7 +2,7 @@
 
 const crypto = require('crypto');
 const ece = require('http_ece');
-const urlBase64 = require('urlsafe-base64');
+const urlBase64Helper = require('./urlsafe-base64-helper');
 
 const encrypt = function(userPublicKey, userAuth, payload, contentEncoding) {
   if (!userPublicKey) {
@@ -13,7 +13,7 @@ const encrypt = function(userPublicKey, userAuth, payload, contentEncoding) {
     throw new Error('The subscription p256dh value must be a string.');
   }
 
-  if (urlBase64.decode(userPublicKey).length !== 65) {
+  if (urlBase64Helper.decode(userPublicKey).length !== 65) {
     throw new Error('The subscription p256dh value should be 65 bytes long.');
   }
 
@@ -25,7 +25,7 @@ const encrypt = function(userPublicKey, userAuth, payload, contentEncoding) {
     throw new Error('The subscription auth key must be a string.');
   }
 
-  if (urlBase64.decode(userAuth).length < 16) {
+  if (urlBase64Helper.decode(userAuth).length < 16) {
     throw new Error('The subscription auth key should be at least 16 '
     + 'bytes long');
   }
@@ -41,7 +41,7 @@ const encrypt = function(userPublicKey, userAuth, payload, contentEncoding) {
   const localCurve = crypto.createECDH('prime256v1');
   const localPublicKey = localCurve.generateKeys();
 
-  const salt = urlBase64.encode(crypto.randomBytes(16));
+  const salt = urlBase64Helper.encode(crypto.randomBytes(16));
 
   const cipherText = ece.encrypt(payload, {
     version: contentEncoding,

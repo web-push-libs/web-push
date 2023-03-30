@@ -1,12 +1,12 @@
 'use strict';
 
 const crypto = require('crypto');
-const urlBase64 = require('urlsafe-base64');
 const asn1 = require('asn1.js');
 const jws = require('jws');
 const { URL } = require('url');
 
 const WebPushConstants = require('./web-push-constants.js');
+const urlBase64Helper = require('./urlsafe-base64-helper');
 
 /**
  * DEFAULT_EXPIRATION is set to seconds in 12 hours
@@ -60,8 +60,8 @@ function generateVAPIDKeys() {
   }
 
   return {
-    publicKey: urlBase64.encode(publicKeyBuffer),
-    privateKey: urlBase64.encode(privateKeyBuffer)
+    publicKey: urlBase64Helper.encode(publicKeyBuffer),
+    privateKey: urlBase64Helper.encode(privateKeyBuffer)
   };
 }
 
@@ -100,11 +100,11 @@ function validatePublicKey(publicKey) {
     + 'encoded string.');
   }
 
-  if (!urlBase64.validate(publicKey)) {
+  if (!urlBase64Helper.validate(publicKey)) {
     throw new Error('Vapid public key must be a URL safe Base 64 (without "=")');
   }
 
-  publicKey = urlBase64.decode(publicKey);
+  publicKey = urlBase64Helper.decode(publicKey);
 
   if (publicKey.length !== 65) {
     throw new Error('Vapid public key should be 65 bytes long when decoded.');
@@ -121,11 +121,11 @@ function validatePrivateKey(privateKey) {
     + 'encoded string.');
   }
 
-  if (!urlBase64.validate(privateKey)) {
+  if (!urlBase64Helper.validate(privateKey)) {
     throw new Error('Vapid private key must be a URL safe Base 64 (without "=")');
   }
 
-  privateKey = urlBase64.decode(privateKey);
+  privateKey = urlBase64Helper.decode(privateKey);
 
   if (privateKey.length !== 32) {
     throw new Error('Vapid private key should be 32 bytes long when decoded.');
@@ -203,7 +203,7 @@ function getVapidHeaders(audience, subject, publicKey, privateKey, contentEncodi
   validatePublicKey(publicKey);
   validatePrivateKey(privateKey);
 
-  privateKey = urlBase64.decode(privateKey);
+  privateKey = urlBase64Helper.decode(privateKey);
 
   if (expiration) {
     validateExpiration(expiration);

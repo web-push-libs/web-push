@@ -1,8 +1,8 @@
 'use strict';
 
 const assert = require('assert');
-const urlBase64 = require('urlsafe-base64');
 const webPush = require('../src/index');
+const urlBase64Helper = require('../src/urlsafe-base64-helper');
 const crypto = require('crypto');
 const jws = require('jws');
 const urlParse = require('url').parse;
@@ -19,8 +19,8 @@ suite('Test Generate Request Details', function() {
   const vapidKeys = require('../src/vapid-helper').generateVAPIDKeys();
 
   const VALID_KEYS = {
-    p256dh: urlBase64.encode(userPublicKey),
-    auth: urlBase64.encode(userAuth)
+    p256dh: urlBase64Helper.encode(userPublicKey),
+    auth: urlBase64Helper.encode(userAuth)
   };
 
   const invalidRequests = [
@@ -85,7 +85,7 @@ suite('Test Generate Request Details', function() {
         subscription: {
           endpoint: true,
           keys: {
-            p256dh: urlBase64.encode(userPublicKey)
+            p256dh: urlBase64Helper.encode(userPublicKey)
           }
         },
         message: 'hello'
@@ -96,7 +96,7 @@ suite('Test Generate Request Details', function() {
         subscription: {
           endpoint: true,
           keys: {
-            auth: urlBase64.encode(userAuth)
+            auth: urlBase64Helper.encode(userAuth)
           }
         },
         message: 'hello'
@@ -107,7 +107,7 @@ suite('Test Generate Request Details', function() {
         subscription: {
           keys: {
             p256dh: userPublicKey,
-            auth: urlBase64.encode(userAuth)
+            auth: urlBase64Helper.encode(userAuth)
           }
         },
         message: 'hello'
@@ -118,7 +118,7 @@ suite('Test Generate Request Details', function() {
       requestOptions: {
         subscription: {
           keys: {
-            p256dh: urlBase64.encode(userPublicKey),
+            p256dh: urlBase64Helper.encode(userPublicKey),
             auth: userAuth
           }
         },
@@ -130,8 +130,8 @@ suite('Test Generate Request Details', function() {
       requestOptions: {
         subscription: {
           keys: {
-            p256dh: urlBase64.encode(Buffer.concat([userPublicKey, Buffer.alloc(1)])),
-            auth: urlBase64.encode(userAuth)
+            p256dh: urlBase64Helper.encode(Buffer.concat([userPublicKey, Buffer.alloc(1)])),
+            auth: urlBase64Helper.encode(userAuth)
           }
         },
         message: 'hello'
@@ -142,8 +142,8 @@ suite('Test Generate Request Details', function() {
       requestOptions: {
         subscription: {
           keys: {
-            p256dh: urlBase64.encode(userPublicKey.slice(1)),
-            auth: urlBase64.encode(userAuth)
+            p256dh: urlBase64Helper.encode(userPublicKey.slice(1)),
+            auth: urlBase64Helper.encode(userAuth)
           }
         },
         message: 'hello'
@@ -154,8 +154,8 @@ suite('Test Generate Request Details', function() {
       requestOptions: {
         subscription: {
           keys: {
-            p256dh: urlBase64.encode(userPublicKey),
-            auth: urlBase64.encode(userAuth.slice(1))
+            p256dh: urlBase64Helper.encode(userPublicKey),
+            auth: urlBase64Helper.encode(userAuth.slice(1))
           }
         },
         message: 'hello'
