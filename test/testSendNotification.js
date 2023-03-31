@@ -121,6 +121,9 @@ suite('sendNotification', function() {
         server = null;
         resolve();
       });
+      if (server.closeAllConnections) {
+        server.closeAllConnections();
+      }
       server.close();
     });
   }
