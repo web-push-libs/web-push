@@ -10,7 +10,9 @@ const vapidHelper = require('../src/vapid-helper');
 
 const VALID_AUDIENCE = 'https://example.com';
 const VALID_SUBJECT_MAILTO = 'mailto: example@example.com';
-const VALID_SUBJECT_URL = 'https://exampe.com/contact';
+const VALID_SUBJECT_URL = 'https://example.com/contact';
+const INVALIE_SUBJECT_URL_1 = 'http://example.gov'
+const INVALID_SUBJECT_URL_2 = 'ftp://example.net';
 const VALID_PUBLIC_KEY = urlBase64.encode(Buffer.alloc(65));
 const VALID_UNSAFE_BASE64_PUBLIC_KEY = Buffer.alloc(65).toString('base64');
 const VALID_PRIVATE_KEY = urlBase64.encode(Buffer.alloc(32));
@@ -100,6 +102,14 @@ suite('Test Vapid Helpers', function() {
       },
       function() {
         vapidHelper.getVapidHeaders('Not a URL', VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY);
+      },
+      function() {
+        // http URL protocol
+        vapidHelper.getVapidHeaders(VALID_AUDIENCE, INVALID_SUBJECT_URL_1, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY);
+      },
+      function() {
+        // ftp URL protocol
+        vapidHelper.getVapidHeaders(VALID_AUDIENCE, INVALID_SUBJECT_URL_2, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY);
       },
       function() {
         vapidHelper.getVapidHeaders(VALID_AUDIENCE, 'Some Random String', VALID_PUBLIC_KEY, VALID_PRIVATE_KEY);
