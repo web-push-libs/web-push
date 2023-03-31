@@ -1,6 +1,0 @@
-{
-  "extends": [
-    "config:base"
-  ],
-  "travis": { "enabled": true }
-}
