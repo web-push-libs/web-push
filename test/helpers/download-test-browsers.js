@@ -29,16 +29,16 @@ const downloadBrowser = (name, version, attempt) => {
   });
 };
 
-const promises = [
+let promises = [
   downloadBrowser('firefox', 'stable'),
   downloadBrowser('firefox', 'beta'),
-  downloadBrowser('firefox', 'unstable'),
+  downloadBrowser('firefox', 'unstable')
 ];
 
 // TODO: Temporarily disable downloading Chrome on Mac because of the following error on CI:
 // > Error: Command failed: hdiutil mount -nobrowse "/Users/runner/.selenium-assistant/google-chrome-unstable.dmg"
 // > hdiutil: mount failed - image not recognized
-if (os.platform() != 'darwin') {
+if (os.platform() !== 'darwin') {
   promises = [
     ...promises,
     downloadBrowser('chrome', 'stable'),
