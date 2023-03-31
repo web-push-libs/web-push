@@ -84,13 +84,13 @@ Then you can run the following commands:
   ```
    The subscription value:
   ```javascript
-    { 
-      "endpoint": "https://fcm.googleapis.com/fcm/send/d61c5u920dw:APA91bEmnw8utjDYCqSRplFMVCzQMg9e5XxpYajvh37mv2QIlISdasBFLbFca9ZZ4Uqcya0ck-SP84YJUEnWsVr3mwYfaDB7vGtsDQuEpfDdcIqOX_wrCRkBW2NDWRZ9qUz9hSgtI3sY", 
-      "expirationTime": null, 
-      "keys": { 
-        "p256dh": "BL7ELU24fJTAlH5Kyl8N6BDCac8u8li_U5PIwG963MOvdYs9s7LSzj8x_7v7RFdLZ9Eap50PiiyF5K0TDAis7t0", 
-        "auth": "juarI8x__VnHvsOgfeAPHg" 
-      } 
+    {
+      "endpoint": "https://fcm.googleapis.com/fcm/send/d61c5u920dw:APA91bEmnw8utjDYCqSRplFMVCzQMg9e5XxpYajvh37mv2QIlISdasBFLbFca9ZZ4Uqcya0ck-SP84YJUEnWsVr3mwYfaDB7vGtsDQuEpfDdcIqOX_wrCRkBW2NDWRZ9qUz9hSgtI3sY",
+      "expirationTime": null,
+      "keys": {
+        "p256dh": "BL7ELU24fJTAlH5Kyl8N6BDCac8u8li_U5PIwG963MOvdYs9s7LSzj8x_7v7RFdLZ9Eap50PiiyF5K0TDAis7t0",
+        "auth": "juarI8x__VnHvsOgfeAPHg"
+      }
     }
   ```
   The command example:
@@ -103,7 +103,7 @@ Then you can run the following commands:
     --vapid-pubkey=BGtkbcjrO12YMoDuq2sCQeHlu47uPx3SHTgFKZFYiBW8Qr0D9vgyZSZPdw6_4ZFEI9Snk1VEAj2qTYI1I1YxBXE \
     --vapid-pvtkey=I0_d0vnesxbBSUmlDdOKibGo6vEXRO-Vu88QlSlm5j0 \
     --payload=Hello
-  ```  
+  ```
 
 # API Reference
 
@@ -193,6 +193,8 @@ that may either be a string URI of the proxy server (eg. http://< hostname >:< p
 or an "options" object with more specific properties.
 - **agent** is the [HTTPS Agent instance](https://nodejs.org/dist/latest/docs/api/https.html#https_class_https_agent) which will be used in the `https.request` method. If the `proxy` options defined, `agent` will be ignored!
 
+> **Note:** As of this writing, if a push notification request contains a VAPID `subject` referencing an `https://localhost` URI (set either using the `options` argument or via the global `setVapidDetails()` method), Safari's push notification endpoint rejects the request with a `BadJwtToken` error.
+
 ### Returns
 
 A promise that resolves if the notification was sent successfully
@@ -243,6 +245,32 @@ your web app manifest.
 
 You can use a GCM API Key from the Google Developer Console or the
 *Cloud Messaging* tab under a Firebase Project.
+
+### Returns
+
+None.
+
+<hr />
+
+## setVapidDetails(subject, publicKey, privateKey)
+
+```javascript
+webpush.setVapidDetails(
+  'mailto:user@example.org',
+  process.env.VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY
+);
+```
+
+Globally sets the application's VAPID subject, public key, and private key, to be used in subsequent calls to `sendNotification()` and `generateRequestDetails()` that don't specifically override them in their `options` argument.
+
+### Input
+
+The `setVapidDetails` method expects the following input:
+
+- *subject*: the VAPID server contact information, as either an `https:` or `mailto:` URI ([as per the VAPID spec](https://datatracker.ietf.org/doc/html/draft-thomson-webpush-vapid#section-2.1)).
+- *publicKey*: the VAPID public key.
+- *privateKey*: the VAPID private key.
 
 ### Returns
 
