@@ -188,14 +188,14 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
         }
       }
 
-      if (options.Topic) {
+      if (options.topic) {
         if (!urlBase64.validate(options.topic)) {
           throw new Error('Unsupported characters set use the URL or filename-safe Base64 characters set');
         }
         if (options.topic.length > 32) {
           throw new Error('use maximum of 32 characters from the URL or filename-safe Base64 characters set');
         }
-        topic = options.Topic;
+        topic = options.topic;
       }
 
       if (options.proxy) {
