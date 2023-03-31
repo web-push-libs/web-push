@@ -1,7 +1,6 @@
 coverage
 test
 test_tools
-.travis.yml
 .eslintrc
 ISSUE_TEMPLATE.md
-.renovaterc.json
+.github/
