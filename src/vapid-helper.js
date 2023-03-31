@@ -79,6 +79,8 @@ function validateSubject(subject) {
     const subjectParseResult = url.parse(subject);
     if (!subjectParseResult.hostname) {
       throw new Error('Vapid subject is not a url or mailto url. ' + subject);
+    } else if (subjectParseResult.hostname === 'localhost' && subjectParseResult.protocol === 'https:') {
+      console.warn('VAPID subject points to a localhost web URI, which is unsupported by Apple\'s push notification server and will result in a BadJwtToken error when sending notifications.');
     }
   }
 }
