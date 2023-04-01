@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const urlBase64 = require('urlsafe-base64');
 const asn1 = require('asn1.js');
 const jws = require('jws');
-const url = require('url');
+const { URL } = require('url');
 
 const WebPushConstants = require('./web-push-constants.js');
 
@@ -71,18 +71,22 @@ function validateSubject(subject) {
   }
 
   if (typeof subject !== 'string' || subject.length === 0) {
-    throw new Error('The subject value must be a string containing a URL or '
+    throw new Error('The subject value must be a string containing an https: URL or '
     + 'mailto: address. ' + subject);
   }
 
-  if (subject.indexOf('mailto:') !== 0) {
-    const subjectParseResult = url.parse(subject);
-    if (!subjectParseResult.hostname) {
-      throw new Error('Vapid subject is not a url or mailto url. ' + subject);
-    } else if (subjectParseResult.hostname === 'localhost' && subjectParseResult.protocol === 'https:') {
-      console.warn('VAPID subject points to a localhost web URI, which is unsupported by Apple\'s push notification '
-      + 'server and will result in a BadJwtToken error when sending notifications.');
+  try {
+    const subjectParseResult = new URL(subject);
+    if (!['https:', 'mailto:'].includes(subjectParseResult.protocol)) {
+      throw new Error('Vapid subject is not an https: or mailto: URL. ' + subject);
     }
+    if (subjectParseResult.hostname === 'localhost') {
+      console.warn('Vapid subject points to a localhost web URI, which is unsupported by '
+        + 'Apple\'s push notification server and will result in a BadJwtToken error when '
+        + 'sending notifications.');
+    }
+  } catch (err) {
+    throw new Error('Vapid subject is not a valid URL. ' + subject);
   }
 }
 
@@ -189,8 +193,9 @@ function getVapidHeaders(audience, subject, publicKey, privateKey, contentEncodi
     + 'origin of a push service. ' + audience);
   }
 
-  const audienceParseResult = url.parse(audience);
-  if (!audienceParseResult.hostname) {
+  try {
+    new URL(audience); // eslint-disable-line no-new
+  } catch (err) {
     throw new Error('VAPID audience is not a url. ' + audience);
   }
 
