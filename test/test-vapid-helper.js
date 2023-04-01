@@ -9,8 +9,10 @@ const webPush = require('../src/index');
 const vapidHelper = require('../src/vapid-helper');
 
 const VALID_AUDIENCE = 'https://example.com';
-const VALID_SUBJECT_MAILTO = 'mailto: example@example.com';
+const VALID_SUBJECT_MAILTO = 'mailto:example@example.com';
+const VALID_SUBJECT_LOCALHOST_MAILTO = 'mailto:user@localhost';
 const VALID_SUBJECT_URL = 'https://example.com/contact';
+const WARN_SUBJECT_LOCALHOST_URL = 'https://localhost';
 const INVALID_SUBJECT_URL_1 = 'http://example.gov';
 const INVALID_SUBJECT_URL_2 = 'ftp://example.net';
 const VALID_PUBLIC_KEY = urlBase64.encode(Buffer.alloc(65));
@@ -179,7 +181,15 @@ suite('Test Vapid Helpers', function() {
       return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_URL, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, contentEncoding);
     },
     function(contentEncoding) {
+      // localhost https: subject; should pass, since we don't throw an error for this, just warn to console
+      return vapidHelper.getVapidHeaders(VALID_AUDIENCE, WARN_SUBJECT_LOCALHOST_URL, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, contentEncoding);
+    },
+    function(contentEncoding) {
       return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, contentEncoding);
+    },
+    function(contentEncoding) {
+      // localhost mailto: subject
+      return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_LOCALHOST_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, contentEncoding);
     },
     function(contentEncoding) {
       return vapidHelper.getVapidHeaders(VALID_AUDIENCE, VALID_SUBJECT_URL, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY, contentEncoding, VALID_EXPIRATION);
