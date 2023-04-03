@@ -42,9 +42,9 @@
     "eslint-config-airbnb": "19.0.4",
     "eslint-plugin-import": "2.27.5",
     "geckodriver": "3.2.0",
+    "nyc": "15.1.0",
     "mkdirp": "2.1.6",
     "mocha": "10.2.0",
-    "nyc": "15.1.0",
     "portfinder": "1.0.32",
     "selenium-assistant": "5.4.0",
     "sinon": "15.0.3"
