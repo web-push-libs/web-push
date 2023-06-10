@@ -1,3 +1,9 @@
 coverage/
 node_modules/
 test/output/
+
+# ignore nyc output
+.nyc_output
+
+# ignore history
+.history
