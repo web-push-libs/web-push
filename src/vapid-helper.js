@@ -107,7 +107,7 @@ function validatePublicKey(publicKey) {
   publicKey = urlBase64Helper.decode(publicKey);
 
   if (publicKey.length !== 65) {
-    throw new Error('Vapid public key should be 65 bytes long when decoded.');
+    throw new Error(`Vapid public key should be 65 bytes long when decoded. got (${publicKey.length}) ${publicKey}`);
   }
 }
 
