@@ -3,12 +3,12 @@
 const assert = require('assert');
 const crypto = require('crypto');
 const webPush = require('../src/index');
+const urlBase64Helper = require('../src/urlsafe-base64-helper');
 const ece = require('http_ece');
-const urlBase64 = require('urlsafe-base64');
 
 const userCurve = crypto.createECDH('prime256v1');
-const VALID_PUBLIC_KEY = urlBase64.encode(userCurve.generateKeys());
-const VALID_AUTH = urlBase64.encode(crypto.randomBytes(16));
+const VALID_PUBLIC_KEY = urlBase64Helper.encode(userCurve.generateKeys());
+const VALID_AUTH = urlBase64Helper.encode(crypto.randomBytes(16));
 
 suite('Test Encryption Helpers', function() {
   test('is defined', function() {
@@ -20,7 +20,7 @@ suite('Test Encryption Helpers', function() {
 
     return ece.decrypt(encrypted.cipherText, {
       version: contentEncoding,
-      dh: urlBase64.encode(encrypted.localPublicKey),
+      dh: urlBase64Helper.encode(encrypted.localPublicKey),
       privateKey: userCurve,
       salt: encrypted.salt,
       authSecret: VALID_AUTH

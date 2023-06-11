@@ -1,12 +1,12 @@
 'use strict';
 
 const assert = require('assert');
-const urlBase64 = require('urlsafe-base64');
 const sinon = require('sinon');
 const crypto = require('crypto');
 const mocha = require('mocha');
 const webPush = require('../src/index');
 const vapidHelper = require('../src/vapid-helper');
+const urlBase64Helper = require('../src/urlsafe-base64-helper');
 
 const VALID_AUDIENCE = 'https://example.com';
 const VALID_SUBJECT_MAILTO = 'mailto:example@example.com';
@@ -15,9 +15,9 @@ const VALID_SUBJECT_URL = 'https://example.com/contact';
 const WARN_SUBJECT_LOCALHOST_URL = 'https://localhost';
 const INVALID_SUBJECT_URL_1 = 'http://example.gov';
 const INVALID_SUBJECT_URL_2 = 'ftp://example.net';
-const VALID_PUBLIC_KEY = urlBase64.encode(Buffer.alloc(65));
+const VALID_PUBLIC_KEY = urlBase64Helper.encode(Buffer.alloc(65));
 const VALID_UNSAFE_BASE64_PUBLIC_KEY = Buffer.alloc(65).toString('base64');
-const VALID_PRIVATE_KEY = urlBase64.encode(Buffer.alloc(32));
+const VALID_PRIVATE_KEY = urlBase64Helper.encode(Buffer.alloc(32));
 const VALID_UNSAFE_BASE64_PRIVATE_KEY = Buffer.alloc(32).toString('base64');
 const VALID_CONTENT_ENCODING = webPush.supportedContentEncodings.AES_GCM;
 const VALID_EXPIRATION = Math.floor(Date.now() / 1000) + (60 * 60 * 12);
@@ -46,8 +46,8 @@ suite('Test Vapid Helpers', function() {
     assert.equal(typeof keys.privateKey, 'string');
     assert.equal(typeof keys.publicKey, 'string');
 
-    assert.equal(urlBase64.decode(keys.privateKey).length, 32);
-    assert.equal(urlBase64.decode(keys.publicKey).length, 65);
+    assert.equal(urlBase64Helper.decode(keys.privateKey).length, 32);
+    assert.equal(urlBase64Helper.decode(keys.publicKey).length, 65);
   });
 
   test('generate vapid keys with padding', function() {
@@ -66,8 +66,8 @@ suite('Test Vapid Helpers', function() {
     assert.equal(typeof keys.privateKey, 'string');
     assert.equal(typeof keys.publicKey, 'string');
 
-    assert.equal(urlBase64.decode(keys.privateKey).length, 32);
-    assert.equal(urlBase64.decode(keys.publicKey).length, 65);
+    assert.equal(urlBase64Helper.decode(keys.privateKey).length, 32);
+    assert.equal(urlBase64Helper.decode(keys.publicKey).length, 65);
   });
 
   test('generate new vapid keys between calls', function() {

@@ -6,11 +6,11 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const ece = require('http_ece');
-const urlBase64 = require('urlsafe-base64');
 const portfinder = require('portfinder');
 const jws = require('jws');
 const mocha = require('mocha');
 const WebPushConstants = require('../src/web-push-constants.js');
+const urlBase64Helper = require('../src/urlsafe-base64-helper');
 
 suite('sendNotification', function() {
   test('is defined', function() {
@@ -62,8 +62,8 @@ suite('sendNotification', function() {
   const userAuth = crypto.randomBytes(16);
 
   const VALID_KEYS = {
-    p256dh: urlBase64.encode(userPublicKey),
-    auth: urlBase64.encode(userAuth)
+    p256dh: urlBase64Helper.encode(userPublicKey),
+    auth: urlBase64Helper.encode(userAuth)
   };
 
   const vapidKeys = require('../src/vapid-helper').generateVAPIDKeys();
@@ -166,7 +166,7 @@ suite('sendNotification', function() {
         privateKey: userCurve,
         dh: appServerPublicKey,
         salt: salt,
-        authSecret: urlBase64.encode(userAuth)
+        authSecret: urlBase64Helper.encode(userAuth)
       });
 
       assert(decrypted.equals(Buffer.from(options.message)), 'Check cipher text can be correctly decoded');
@@ -671,7 +671,7 @@ suite('sendNotification', function() {
         subscription: {
           endpoint: true,
           keys: {
-            p256dh: urlBase64.encode(userPublicKey)
+            p256dh: urlBase64Helper.encode(userPublicKey)
           }
         },
         message: 'hello'
@@ -682,7 +682,7 @@ suite('sendNotification', function() {
         subscription: {
           endpoint: true,
           keys: {
-            auth: urlBase64.encode(userAuth)
+            auth: urlBase64Helper.encode(userAuth)
           }
         },
         message: 'hello'
@@ -693,7 +693,7 @@ suite('sendNotification', function() {
         subscription: {
           keys: {
             p256dh: userPublicKey,
-            auth: urlBase64.encode(userAuth)
+            auth: urlBase64Helper.encode(userAuth)
           }
         },
         message: 'hello'
@@ -704,7 +704,7 @@ suite('sendNotification', function() {
       requestOptions: {
         subscription: {
           keys: {
-            p256dh: urlBase64.encode(userPublicKey),
+            p256dh: urlBase64Helper.encode(userPublicKey),
             auth: userAuth
           }
         },
@@ -716,8 +716,8 @@ suite('sendNotification', function() {
       requestOptions: {
         subscription: {
           keys: {
-            p256dh: urlBase64.encode(Buffer.concat([userPublicKey, Buffer.alloc(1)])),
-            auth: urlBase64.encode(userAuth)
+            p256dh: urlBase64Helper.encode(Buffer.concat([userPublicKey, Buffer.alloc(1)])),
+            auth: urlBase64Helper.encode(userAuth)
           }
         },
         message: 'hello'
@@ -728,8 +728,8 @@ suite('sendNotification', function() {
       requestOptions: {
         subscription: {
           keys: {
-            p256dh: urlBase64.encode(userPublicKey.slice(1)),
-            auth: urlBase64.encode(userAuth)
+            p256dh: urlBase64Helper.encode(userPublicKey.slice(1)),
+            auth: urlBase64Helper.encode(userAuth)
           }
         },
         message: 'hello'
@@ -740,8 +740,8 @@ suite('sendNotification', function() {
       requestOptions: {
         subscription: {
           keys: {
-            p256dh: urlBase64.encode(userPublicKey),
-            auth: urlBase64.encode(userAuth.slice(1))
+            p256dh: urlBase64Helper.encode(userPublicKey),
+            auth: urlBase64Helper.encode(userAuth.slice(1))
           }
         },
         message: 'hello'

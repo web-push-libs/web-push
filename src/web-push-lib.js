@@ -1,6 +1,5 @@
 'use strict';
 
-const urlBase64 = require('urlsafe-base64');
 const url = require('url');
 const https = require('https');
 
@@ -8,6 +7,7 @@ const WebPushError = require('./web-push-error.js');
 const vapidHelper = require('./vapid-helper.js');
 const encryptionHelper = require('./encryption-helper.js');
 const webPushConstants = require('./web-push-constants.js');
+const urlBase64Helper = require('./urlsafe-base64-helper');
 
 // Default TTL is four weeks.
 const DEFAULT_TTL = 2419200;
@@ -189,7 +189,7 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
       }
 
       if (options.topic) {
-        if (!urlBase64.validate(options.topic)) {
+        if (!urlBase64Helper.validate(options.topic)) {
           throw new Error('Unsupported characters set use the URL or filename-safe Base64 characters set');
         }
         if (options.topic.length > 32) {
@@ -251,7 +251,7 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
       } else if (contentEncoding === webPushConstants.supportedContentEncodings.AES_GCM) {
         requestDetails.headers['Content-Encoding'] = webPushConstants.supportedContentEncodings.AES_GCM;
         requestDetails.headers.Encryption = 'salt=' + encrypted.salt;
-        requestDetails.headers['Crypto-Key'] = 'dh=' + urlBase64.encode(encrypted.localPublicKey);
+        requestDetails.headers['Crypto-Key'] = 'dh=' + urlBase64Helper.encode(encrypted.localPublicKey);
       }
 
       requestPayload = encrypted.cipherText;
