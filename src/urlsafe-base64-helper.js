@@ -18,7 +18,7 @@ function decode(base64) {
     .replace(/_/g, '/'); // Convert '_' to '/'
 
   // change from urlsafe-base64 since new Buffer() is deprecated
-  return Buffer.from(base64, "base64").toString();
+  return Buffer.from(base64, 'base64').toString();
 }
 
 function validate(base64) {
