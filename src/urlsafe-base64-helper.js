@@ -3,22 +3,11 @@
 'use strict';
 
 function encode(buffer) {
-   return buffer.toString('base64')
-    .replace(/\+/g, '-') // Convert '+' to '-'
-    .replace(/\//g, '_') // Convert '/' to '_'
-    .replace(/=+$/, ''); // Remove ending '='
+   return buffer.toString('base64url');
 }
 
 function decode(base64) {
-   // Add removed at end '='
-  base64 += Array(5 - (base64.length % 4)).join('=');
-
-  base64 = base64
-    .replace(/-/g, '+') // Convert '-' to '+'
-    .replace(/_/g, '/'); // Convert '_' to '/'
-
-  // change from urlsafe-base64 since new Buffer() is deprecated
-  return Buffer.from(base64, 'base64');
+  return Buffer.from(base64, 'base64url');
 }
 
 function validate(base64) {
