@@ -41,7 +41,7 @@ const encrypt = function(userPublicKey, userAuth, payload, contentEncoding) {
   const localCurve = crypto.createECDH('prime256v1');
   const localPublicKey = localCurve.generateKeys();
 
-  const salt = urlBase64Helper.encode(crypto.randomBytes(16));
+  const salt = crypto.randomBytes(16).toString('base64url');
 
   const cipherText = ece.encrypt(payload, {
     version: contentEncoding,

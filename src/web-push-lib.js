@@ -251,7 +251,7 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
       } else if (contentEncoding === webPushConstants.supportedContentEncodings.AES_GCM) {
         requestDetails.headers['Content-Encoding'] = webPushConstants.supportedContentEncodings.AES_GCM;
         requestDetails.headers.Encryption = 'salt=' + encrypted.salt;
-        requestDetails.headers['Crypto-Key'] = 'dh=' + urlBase64Helper.encode(encrypted.localPublicKey);
+        requestDetails.headers['Crypto-Key'] = 'dh=' + encrypted.localPublicKey.toString('base64url');
       }
 
       requestPayload = encrypted.cipherText;

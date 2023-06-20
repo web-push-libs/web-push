@@ -60,8 +60,8 @@ function generateVAPIDKeys() {
   }
 
   return {
-    publicKey: urlBase64Helper.encode(publicKeyBuffer),
-    privateKey: urlBase64Helper.encode(privateKeyBuffer)
+    publicKey: publicKeyBuffer.toString('base64url'),
+    privateKey: privateKeyBuffer.toString('base64url')
   };
 }
 

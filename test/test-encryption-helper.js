@@ -7,8 +7,8 @@ const urlBase64Helper = require('../src/urlsafe-base64-helper');
 const ece = require('http_ece');
 
 const userCurve = crypto.createECDH('prime256v1');
-const VALID_PUBLIC_KEY = urlBase64Helper.encode(userCurve.generateKeys());
-const VALID_AUTH = urlBase64Helper.encode(crypto.randomBytes(16));
+const VALID_PUBLIC_KEY = userCurve.generateKeys().toString('base64url');
+const VALID_AUTH = crypto.randomBytes(16).toString('base64url');
 
 suite('Test Encryption Helpers', function() {
   test('is defined', function() {
@@ -20,7 +20,7 @@ suite('Test Encryption Helpers', function() {
 
     return ece.decrypt(encrypted.cipherText, {
       version: contentEncoding,
-      dh: urlBase64Helper.encode(encrypted.localPublicKey),
+      dh: encrypted.localPublicKey.toString('base64url'),
       privateKey: userCurve,
       salt: encrypted.salt,
       authSecret: VALID_AUTH
