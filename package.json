@@ -46,7 +46,7 @@
     "mkdirp": "2.1.6",
     "mocha": "10.2.0",
     "portfinder": "1.0.32",
-    "selenium-assistant": "5.4.0",
+    "selenium-assistant": "6.1.1",
     "sinon": "15.0.3"
   },
   "engines": {
