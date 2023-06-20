@@ -9,7 +9,6 @@
 
   const assert = require('assert');
   const spawn = require('child_process').spawn;
-  const urlBase64Helper = require('../src/urlsafe-base64-helper');
 
   const cliPath = 'src/cli.js';
 
@@ -147,13 +146,13 @@
             return line.indexOf('Public Key:') !== -1;
           });
           const publicKey = lines[publicKeyTitleIndex + 1].trim();
-          assert.equal(urlBase64Helper.decode(publicKey).length, 65);
+          assert.equal(Buffer.from(publicKey, 'base64url').length, 65);
 
           const privateKeyTitleIndex = lines.findIndex(function(line) {
             return line.indexOf('Private Key:') !== -1;
           });
           const privateKey = lines[privateKeyTitleIndex + 1].trim();
-          assert.equal(urlBase64Helper.decode(privateKey).length, 32);
+          assert.equal(Buffer.from(privateKey, 'base64url').length, 32);
           resolve();
         });
       });
@@ -185,8 +184,8 @@
           assert(vapidKeys.publicKey);
           assert(vapidKeys.privateKey);
 
-          assert.equal(urlBase64Helper.decode(vapidKeys.privateKey).length, 32);
-          assert.equal(urlBase64Helper.decode(vapidKeys.publicKey).length, 65);
+          assert.equal(Buffer.from(vapidKeys, 'base64url'.privateKey).length, 32);
+          assert.equal(Buffer.from(vapidKeys, 'base64url'.publicKey).length, 65);
 
           resolve();
         });

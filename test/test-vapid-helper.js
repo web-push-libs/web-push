@@ -6,7 +6,6 @@ const crypto = require('crypto');
 const mocha = require('mocha');
 const webPush = require('../src/index');
 const vapidHelper = require('../src/vapid-helper');
-const urlBase64Helper = require('../src/urlsafe-base64-helper');
 
 const VALID_AUDIENCE = 'https://example.com';
 const VALID_SUBJECT_MAILTO = 'mailto:example@example.com';
@@ -46,8 +45,8 @@ suite('Test Vapid Helpers', function() {
     assert.equal(typeof keys.privateKey, 'string');
     assert.equal(typeof keys.publicKey, 'string');
 
-    assert.equal(urlBase64Helper.decode(keys.privateKey).length, 32);
-    assert.equal(urlBase64Helper.decode(keys.publicKey).length, 65);
+    assert.equal(Buffer.from(keys.privateKey, 'base64url').length, 32);
+    assert.equal(Buffer.from(keys.publicKey, 'base64url').length, 65);
   });
 
   test('generate vapid keys with padding', function() {
@@ -66,8 +65,8 @@ suite('Test Vapid Helpers', function() {
     assert.equal(typeof keys.privateKey, 'string');
     assert.equal(typeof keys.publicKey, 'string');
 
-    assert.equal(urlBase64Helper.decode(keys.privateKey).length, 32);
-    assert.equal(urlBase64Helper.decode(keys.publicKey).length, 65);
+    assert.equal(Buffer.from(keys.privateKey, 'base64url').length, 32);
+    assert.equal(Buffer.from(keys.publicKey, 'base64url').length, 65);
   });
 
   test('generate new vapid keys between calls', function() {

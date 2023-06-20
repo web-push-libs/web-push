@@ -104,7 +104,7 @@ function validatePublicKey(publicKey) {
     throw new Error('Vapid public key must be a URL safe Base 64 (without "=")');
   }
 
-  publicKey = urlBase64Helper.decode(publicKey);
+  publicKey = Buffer.from(publicKey, 'base64url');
 
   if (publicKey.length !== 65) {
     throw new Error('Vapid public key should be 65 bytes long when decoded.');
@@ -125,7 +125,7 @@ function validatePrivateKey(privateKey) {
     throw new Error('Vapid private key must be a URL safe Base 64 (without "=")');
   }
 
-  privateKey = urlBase64Helper.decode(privateKey);
+  privateKey = Buffer.from(privateKey, 'base64url');
 
   if (privateKey.length !== 32) {
     throw new Error('Vapid private key should be 32 bytes long when decoded.');
@@ -203,7 +203,7 @@ function getVapidHeaders(audience, subject, publicKey, privateKey, contentEncodi
   validatePublicKey(publicKey);
   validatePrivateKey(privateKey);
 
-  privateKey = urlBase64Helper.decode(privateKey);
+  privateKey = Buffer.from(privateKey, 'base64url');
 
   if (expiration) {
     validateExpiration(expiration);
