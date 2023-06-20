@@ -184,8 +184,8 @@
           assert(vapidKeys.publicKey);
           assert(vapidKeys.privateKey);
 
-          assert.equal(Buffer.from(vapidKeys, 'base64url'.privateKey).length, 32);
-          assert.equal(Buffer.from(vapidKeys, 'base64url'.publicKey).length, 65);
+          assert.equal(Buffer.from(vapidKeys.privateKey, 'base64url').length, 32);
+          assert.equal(Buffer.from(vapidKeys.publicKey, 'base64url').length, 65);
 
           resolve();
         });
