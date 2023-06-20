@@ -1,14 +1,6 @@
 'use strict';
 
 /**
- * @param {Buffer} buffer
- * @returns {string}
- */
-function encode(buffer) {
-  return buffer.toString('base64url');
-}
-
-/**
  * @param {string} base64
  * @returns {Buffer}
  */
@@ -25,7 +17,6 @@ function validate(base64) {
 }
 
 module.exports = {
-  encode: encode,
   decode: decode,
   validate: validate
 };
