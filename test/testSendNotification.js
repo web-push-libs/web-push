@@ -10,7 +10,6 @@ const portfinder = require('portfinder');
 const jws = require('jws');
 const mocha = require('mocha');
 const WebPushConstants = require('../src/web-push-constants.js');
-const urlBase64Helper = require('../src/urlsafe-base64-helper');
 
 suite('sendNotification', function() {
   test('is defined', function() {

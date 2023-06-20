@@ -2,7 +2,6 @@
 
 const assert = require('assert');
 const webPush = require('../src/index');
-const urlBase64Helper = require('../src/urlsafe-base64-helper');
 
 const VALID_SUBJECT_MAILTO = 'mailto: example@example.com';
 const VALID_SUBJECT_URL = 'https://exampe.com/contact';

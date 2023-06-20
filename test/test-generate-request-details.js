@@ -2,7 +2,6 @@
 
 const assert = require('assert');
 const webPush = require('../src/index');
-const urlBase64Helper = require('../src/urlsafe-base64-helper');
 const crypto = require('crypto');
 const jws = require('jws');
 const urlParse = require('url').parse;

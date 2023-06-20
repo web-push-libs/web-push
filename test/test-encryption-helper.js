@@ -3,7 +3,6 @@
 const assert = require('assert');
 const crypto = require('crypto');
 const webPush = require('../src/index');
-const urlBase64Helper = require('../src/urlsafe-base64-helper');
 const ece = require('http_ece');
 
 const userCurve = crypto.createECDH('prime256v1');
