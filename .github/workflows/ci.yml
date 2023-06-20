@@ -13,7 +13,7 @@ jobs:
         node:
           - "16" # Maintenance LTS
           - "lts/*"
-          - "19"
+          - "20"
 
     steps:
       - name: Checkout repository
