@@ -2,12 +2,11 @@
 
 const assert = require('assert');
 const webPush = require('../src/index');
-const urlBase64Helper = require('../src/urlsafe-base64-helper');
 
 const VALID_SUBJECT_MAILTO = 'mailto: example@example.com';
 const VALID_SUBJECT_URL = 'https://exampe.com/contact';
-const VALID_PUBLIC_KEY = urlBase64Helper.encode(Buffer.alloc(65));
-const VALID_PRIVATE_KEY = urlBase64Helper.encode(Buffer.alloc(32));
+const VALID_PUBLIC_KEY = Buffer.alloc(65).toString('base64url');
+const VALID_PRIVATE_KEY = Buffer.alloc(32).toString('base64url');
 
 suite('setVapidDetails()', function() {
   test('is defined', function() {
@@ -55,7 +54,7 @@ suite('setVapidDetails()', function() {
     },
     {
       subject: VALID_SUBJECT_URL,
-      publicKey: urlBase64Helper.encode(Buffer.alloc(60)),
+      publicKey: Buffer.alloc(60).toString('base64url'),
       privateKey: VALID_PRIVATE_KEY
     },
     {
@@ -81,7 +80,7 @@ suite('setVapidDetails()', function() {
     {
       subject: VALID_SUBJECT_URL,
       publicKey: VALID_PUBLIC_KEY,
-      privateKey: urlBase64Helper.encode(Buffer.alloc(60))
+      privateKey: Buffer.alloc(60).toString('base64url')
     },
     {
       subject: VALID_SUBJECT_URL,
