@@ -327,6 +327,16 @@ suite('sendNotification', function() {
         }
       }
     }, {
+      testTitle: 'send/receive with proxy',
+      requestOptions: {
+        subscription: {
+          // The default endpoint will be added by the test
+        },
+        extraOptions: {
+          proxy: 'http://127.0.0.1:7890'
+        }
+      }
+    }, {
       testTitle: 'server returns 201',
       requestOptions: {
         subscription: {
