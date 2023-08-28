@@ -12,8 +12,13 @@ const mocha = require('mocha');
 const WebPushConstants = require('../src/web-push-constants.js');
 
 suite('sendNotification', function() {
+  let webPush;
+
+  mocha.beforeEach(function () {
+    webPush = require('../src/index');
+  });
+
   test('is defined', function() {
-    const webPush = require('../src/index');
     assert(webPush.sendNotification);
   });
 
@@ -364,7 +369,6 @@ suite('sendNotification', function() {
       validRequest.requestOptions.extraOptions = validRequest.requestOptions.extraOptions || {};
       validRequest.requestOptions.extraOptions.contentEncoding = WebPushConstants.supportedContentEncodings.AES_GCM;
 
-      const webPush = require('../src/index');
       return webPush.sendNotification(
         validRequest.requestOptions.subscription,
         validRequest.requestOptions.message,
@@ -392,7 +396,6 @@ suite('sendNotification', function() {
       validRequest.requestOptions.extraOptions = validRequest.requestOptions.extraOptions || {};
       validRequest.requestOptions.extraOptions.contentEncoding = WebPushConstants.supportedContentEncodings.AES_128_GCM;
 
-      const webPush = require('../src/index');
       return webPush.sendNotification(
         validRequest.requestOptions.subscription,
         validRequest.requestOptions.message,
@@ -582,7 +585,6 @@ suite('sendNotification', function() {
         validGCMRequest.globalOptions.gcmAPIKey = 'my_gcm_key';
       }
 
-      const webPush = require('../src/index');
       if (validGCMRequest.globalOptions.gcmAPIKey) {
         webPush.setGCMAPIKey(validGCMRequest.globalOptions.gcmAPIKey);
       }
@@ -799,7 +801,6 @@ suite('sendNotification', function() {
       invalidRequest.requestOptions.extraOptions = invalidRequest.requestOptions.extraOptions || {};
       invalidRequest.requestOptions.extraOptions.contentEncoding = WebPushConstants.supportedContentEncodings.AES_GCM;
 
-      const webPush = require('../src/index');
       return webPush.sendNotification(
         invalidRequest.requestOptions.subscription,
         invalidRequest.requestOptions.message,
@@ -825,7 +826,6 @@ suite('sendNotification', function() {
       invalidRequest.requestOptions.extraOptions = invalidRequest.requestOptions.extraOptions || {};
       invalidRequest.requestOptions.extraOptions.contentEncoding = WebPushConstants.supportedContentEncodings.AES_128_GCM;
 
-      const webPush = require('../src/index');
       return webPush.sendNotification(
         invalidRequest.requestOptions.subscription,
         invalidRequest.requestOptions.message,
@@ -843,7 +843,6 @@ suite('sendNotification', function() {
     const currentServerPort = serverPort;
     return closeServer()
     .then(function() {
-      const webPush = require('../src/index');
       return webPush.sendNotification({
         endpoint: 'https://127.0.0.1:' + currentServerPort
       })
