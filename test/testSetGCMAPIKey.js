@@ -1,40 +1,40 @@
 'use strict';
 
 const assert = require('assert');
-const webPush = require('../src/index');
+const { setGCMAPIKey } = require('../src/index');
 
 suite('setGCMAPIKey', function() {
   test('is defined', function() {
-    assert(webPush.setGCMAPIKey);
+    assert(setGCMAPIKey);
   });
 
   test('non-empty string', function() {
     assert.doesNotThrow(function() {
-      webPush.setGCMAPIKey('AIzaSyAwmdX6KKd4hPfIcGU2SOfj9vuRDW6u-wo');
+      setGCMAPIKey('AIzaSyAwmdX6KKd4hPfIcGU2SOfj9vuRDW6u-wo');
     });
   });
 
   test('reset GCM API Key with null', function() {
     assert.doesNotThrow(function() {
-      webPush.setGCMAPIKey(null);
+      setGCMAPIKey(null);
     });
   });
 
   test('empty string', function() {
     assert.throws(function() {
-      webPush.setGCMAPIKey('');
+      setGCMAPIKey('');
     }, Error);
   });
 
   test('non string', function() {
     assert.throws(function() {
-      webPush.setGCMAPIKey(42);
+      setGCMAPIKey(42);
     }, Error);
   });
 
   test('undefined value', function() {
     assert.throws(function() {
-      webPush.setGCMAPIKey();
+      setGCMAPIKey();
     }, Error);
   });
 });

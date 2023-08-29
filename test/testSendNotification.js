@@ -12,9 +12,16 @@ const mocha = require('mocha');
 const WebPushConstants = require('../src/web-push-constants.js');
 
 suite('sendNotification', function() {
+  let sendNotification;
+  let setGCMAPIKey;
+  let setVapidDetails;
+
+  mocha.beforeEach(function () {
+    ({ sendNotification, setGCMAPIKey, setVapidDetails } = require('../src/index'));
+  });
+
   test('is defined', function() {
-    const webPush = require('../src/index');
-    assert(webPush.sendNotification);
+    assert(sendNotification);
   });
 
   let server;
@@ -364,8 +371,7 @@ suite('sendNotification', function() {
       validRequest.requestOptions.extraOptions = validRequest.requestOptions.extraOptions || {};
       validRequest.requestOptions.extraOptions.contentEncoding = WebPushConstants.supportedContentEncodings.AES_GCM;
 
-      const webPush = require('../src/index');
-      return webPush.sendNotification(
+      return sendNotification(
         validRequest.requestOptions.subscription,
         validRequest.requestOptions.message,
         validRequest.requestOptions.extraOptions
@@ -392,8 +398,7 @@ suite('sendNotification', function() {
       validRequest.requestOptions.extraOptions = validRequest.requestOptions.extraOptions || {};
       validRequest.requestOptions.extraOptions.contentEncoding = WebPushConstants.supportedContentEncodings.AES_128_GCM;
 
-      const webPush = require('../src/index');
-      return webPush.sendNotification(
+      return sendNotification(
         validRequest.requestOptions.subscription,
         validRequest.requestOptions.message,
         validRequest.requestOptions.extraOptions
@@ -582,19 +587,18 @@ suite('sendNotification', function() {
         validGCMRequest.globalOptions.gcmAPIKey = 'my_gcm_key';
       }
 
-      const webPush = require('../src/index');
       if (validGCMRequest.globalOptions.gcmAPIKey) {
-        webPush.setGCMAPIKey(validGCMRequest.globalOptions.gcmAPIKey);
+        setGCMAPIKey(validGCMRequest.globalOptions.gcmAPIKey);
       }
       if (validGCMRequest.globalOptions.vapidDetails) {
-        webPush.setVapidDetails(
+        setVapidDetails(
           validGCMRequest.globalOptions.vapidDetails.subject,
           validGCMRequest.globalOptions.vapidDetails.publicKey,
           validGCMRequest.globalOptions.vapidDetails.privateKey
         );
       }
 
-      return webPush.sendNotification(
+      return sendNotification(
         validGCMRequest.requestOptions.subscription,
         validGCMRequest.requestOptions.message,
         validGCMRequest.requestOptions.extraOptions
@@ -799,8 +803,7 @@ suite('sendNotification', function() {
       invalidRequest.requestOptions.extraOptions = invalidRequest.requestOptions.extraOptions || {};
       invalidRequest.requestOptions.extraOptions.contentEncoding = WebPushConstants.supportedContentEncodings.AES_GCM;
 
-      const webPush = require('../src/index');
-      return webPush.sendNotification(
+      return sendNotification(
         invalidRequest.requestOptions.subscription,
         invalidRequest.requestOptions.message,
         invalidRequest.requestOptions.extraOptions
@@ -825,8 +828,7 @@ suite('sendNotification', function() {
       invalidRequest.requestOptions.extraOptions = invalidRequest.requestOptions.extraOptions || {};
       invalidRequest.requestOptions.extraOptions.contentEncoding = WebPushConstants.supportedContentEncodings.AES_128_GCM;
 
-      const webPush = require('../src/index');
-      return webPush.sendNotification(
+      return sendNotification(
         invalidRequest.requestOptions.subscription,
         invalidRequest.requestOptions.message,
         invalidRequest.requestOptions.extraOptions
@@ -843,8 +845,7 @@ suite('sendNotification', function() {
     const currentServerPort = serverPort;
     return closeServer()
     .then(function() {
-      const webPush = require('../src/index');
-      return webPush.sendNotification({
+      return sendNotification({
         endpoint: 'https://127.0.0.1:' + currentServerPort
       })
       .then(function() {

@@ -1,7 +1,7 @@
 'use strict';
 
 const assert = require('assert');
-const webPush = require('../src/index');
+const { setVapidDetails } = require('../src/index');
 
 const VALID_SUBJECT_MAILTO = 'mailto: example@example.com';
 const VALID_SUBJECT_URL = 'https://exampe.com/contact';
@@ -10,24 +10,24 @@ const VALID_PRIVATE_KEY = Buffer.alloc(32).toString('base64url');
 
 suite('setVapidDetails()', function() {
   test('is defined', function() {
-    assert(webPush.setVapidDetails);
+    assert(setVapidDetails);
   });
 
   test('Valid URL input', function() {
     assert.doesNotThrow(function() {
-      webPush.setVapidDetails(VALID_SUBJECT_URL, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY);
+      setVapidDetails(VALID_SUBJECT_URL, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY);
     });
   });
 
   test('Valid mailto: input', function() {
     assert.doesNotThrow(function() {
-      webPush.setVapidDetails(VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY);
+      setVapidDetails(VALID_SUBJECT_MAILTO, VALID_PUBLIC_KEY, VALID_PRIVATE_KEY);
     });
   });
 
   test('reset Vapid Details with null', function() {
     assert.doesNotThrow(function() {
-      webPush.setVapidDetails(null);
+      setVapidDetails(null);
     });
   });
 
@@ -107,7 +107,7 @@ suite('setVapidDetails()', function() {
   test('Invalid input should throw an error', function() {
     invalidInputs.forEach(function(invalidInput, index) {
       assert.throws(function() {
-        webPush.setVapidDetails(
+        setVapidDetails(
           invalidInput.subject,
           invalidInput.publicKey,
           invalidInput.privateKey

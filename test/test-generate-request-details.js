@@ -1,7 +1,7 @@
 'use strict';
 
 const assert = require('assert');
-const webPush = require('../src/index');
+const { generateRequestDetails } = require('../src/index');
 const crypto = require('crypto');
 const jws = require('jws');
 const urlParse = require('url').parse;
@@ -9,7 +9,7 @@ const https = require('https');
 
 suite('Test Generate Request Details', function() {
   test('is defined', function() {
-    assert(webPush.generateRequestDetails);
+    assert(generateRequestDetails);
   });
 
   const userCurve = crypto.createECDH('prime256v1');
@@ -241,7 +241,7 @@ suite('Test Generate Request Details', function() {
       }
 
       assert.throws(function() {
-        return webPush.generateRequestDetails(
+        return generateRequestDetails(
           invalidRequest.requestOptions.subscription,
           invalidRequest.requestOptions.message,
           invalidRequest.requestOptions.extraOptions
@@ -260,7 +260,7 @@ suite('Test Generate Request Details', function() {
         'Urgency': 'normal'
       }
     };
-    let details = webPush.generateRequestDetails(
+    let details = generateRequestDetails(
       subscription,
       message,
       extraOptions
@@ -283,7 +283,7 @@ suite('Test Generate Request Details', function() {
       }
     };
 
-    const requestDetails = webPush.generateRequestDetails(subscription, null, extraOptions);
+    const requestDetails = generateRequestDetails(subscription, null, extraOptions);
     const authHeader = requestDetails.headers.Authorization;
 
     // Get the Encoded JWT Token from the Authorization Header
@@ -311,7 +311,7 @@ suite('Test Generate Request Details', function() {
       contentEncoding: 'aesgcm'
     };
 
-    const requestDetails = webPush.generateRequestDetails(subscription, null, extraOptions);
+    const requestDetails = generateRequestDetails(subscription, null, extraOptions);
     const authHeader = requestDetails.headers.Authorization;
 
     // Get the Encoded JWT Token from the Authorization Header
@@ -331,7 +331,7 @@ suite('Test Generate Request Details', function() {
     let extraOptions = {
       'proxy': 'proxy'
     };
-    let details = webPush.generateRequestDetails(
+    let details = generateRequestDetails(
       subscription,
       message,
       extraOptions
@@ -347,7 +347,7 @@ suite('Test Generate Request Details', function() {
     let extraOptions = {
       proxy: proxyOption
     };
-    let details = webPush.generateRequestDetails(
+    let details = generateRequestDetails(
       subscription,
       null,
       extraOptions
@@ -362,7 +362,7 @@ suite('Test Generate Request Details', function() {
     let extraOptions = {
       agent: new https.Agent({ keepAlive: true })
     };
-    let details = webPush.generateRequestDetails(
+    let details = generateRequestDetails(
       subscription,
       null,
       extraOptions

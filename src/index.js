@@ -17,5 +17,5 @@ module.exports = {
   setGCMAPIKey: webPush.setGCMAPIKey,
   setVapidDetails: webPush.setVapidDetails,
   generateRequestDetails: webPush.generateRequestDetails,
-  sendNotification: webPush.sendNotification
+  sendNotification: webPush.sendNotification.bind(webPush)
 };
