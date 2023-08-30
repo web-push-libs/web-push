@@ -86,7 +86,7 @@ function validateSubject(subject) {
         + 'sending notifications.');
     }
   } catch (err) {
-    throw new Error('Vapid subject is not a valid URL. ' + subject);
+    throw new Error('Vapid subject is not a valid URL. ' + subject, { cause: err });
   }
 }
 
