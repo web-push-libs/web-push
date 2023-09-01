@@ -75,19 +75,20 @@ function validateSubject(subject) {
     + 'mailto: address. ' + subject);
   }
 
+  let subjectParseResult = null;
   try {
-    const subjectParseResult = new URL(subject);
-    if (!['https:', 'mailto:'].includes(subjectParseResult.protocol)) {
-      throw new Error('Vapid subject is not an https: or mailto: URL. ' + subject);
-    }
-    if (subjectParseResult.hostname === 'localhost') {
-      console.warn('Vapid subject points to a localhost web URI, which is unsupported by '
-        + 'Apple\'s push notification server and will result in a BadJwtToken error when '
-        + 'sending notifications.');
-    }
+    subjectParseResult = new URL(subject);
   } catch (err) {
     throw new Error('Vapid subject is not a valid URL. ' + subject);
   }
+  if (!['https:', 'mailto:'].includes(subjectParseResult.protocol)) {
+    throw new Error('Vapid subject is not an https: or mailto: URL. ' + subject);
+  }
+  if (subjectParseResult.hostname === 'localhost') {
+    console.warn('Vapid subject points to a localhost web URI, which is unsupported by '
+      + 'Apple\'s push notification server and will result in a BadJwtToken error when '
+      + 'sending notifications.');
+    }
 }
 
 function validatePublicKey(publicKey) {
