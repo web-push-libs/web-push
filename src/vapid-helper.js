@@ -75,8 +75,9 @@ function validateSubject(subject) {
     + 'mailto: address. ' + subject);
   }
 
+  let subjectParseResult = null;
   try {
-    const subjectParseResult = new URL(subject);
+    subjectParseResult = new URL(subject);
   } catch (err) {
     throw new Error('Vapid subject is not a valid URL. ' + subject);
   }
