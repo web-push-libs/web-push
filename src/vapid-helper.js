@@ -77,7 +77,6 @@ function validateSubject(subject) {
 
   try {
     const subjectParseResult = new URL(subject);
-    }
   } catch (err) {
     throw new Error('Vapid subject is not a valid URL. ' + subject);
   }
@@ -88,6 +87,7 @@ function validateSubject(subject) {
     console.warn('Vapid subject points to a localhost web URI, which is unsupported by '
       + 'Apple\'s push notification server and will result in a BadJwtToken error when '
       + 'sending notifications.');
+    }
 }
 
 function validatePublicKey(publicKey) {
