@@ -574,13 +574,6 @@ object will contain:
 </tbody>
 </table>
 
-# Help
-
-**Service Worker Cookbook**
-
-The [Service Worker Cookbook](https://serviceworke.rs/) is full of Web Push
-examples using this library.
-
 # Running tests
 
 > Prerequisites:
