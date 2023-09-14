@@ -578,7 +578,7 @@ object will contain:
 
 **MDN**
 
-There's an example on [MDN](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Tutorials/js13kGames/Re-engageable_Notifications_Push)
+There's an example on [MDN](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Tutorials/js13kGames/Re-engageable_Notifications_Push).
 
 Also, the [Service Worker Cookbook](https://github.com/mdn/serviceworker-cookbook) is full of Web Push
 examples using this library.
