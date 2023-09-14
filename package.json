@@ -37,7 +37,7 @@
   },
   "devDependencies": {
     "chromedriver": "116.0.0",
-    "del": "6.0.0",
+    "del": "7.1.0",
     "eslint": "8.49.0",
     "eslint-config-airbnb": "19.0.4",
     "eslint-plugin-import": "2.28.1",
