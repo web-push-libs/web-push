@@ -1,4 +1,5 @@
-'use strict';
+import assert from 'assert';
+import { spawn } from 'child_process';
 
 (function() {
   const invalidNodeVersions = /0.(10|12).(\d+)/;
@@ -6,9 +7,6 @@
     console.log('Skipping CLI tests as they can\'t run on node: ' + process.versions.node);
     return;
   }
-
-  const assert = require('assert');
-  const spawn = require('child_process').spawn;
 
   const cliPath = 'src/cli.js';
 

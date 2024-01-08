@@ -1,11 +1,9 @@
-'use strict';
+import http from 'http';
+import portfinder from 'portfinder';
+import fs from 'fs';
+import path from 'path';
 
-const http = require('http');
-const portfinder = require('portfinder');
-const fs = require('fs');
-const path = require('path');
-
-function createServer() {
+export function createServer() {
   const demoPath = 'test/data/demo';
 
   const server = http.createServer(function(req, res) {
@@ -55,5 +53,3 @@ function createServer() {
     });
   });
 }
-
-module.exports = createServer;

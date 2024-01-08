@@ -1,11 +1,9 @@
-'use strict';
-
-const assert = require('assert');
-const sinon = require('sinon');
-const crypto = require('crypto');
-const mocha = require('mocha');
-const webPush = require('../src/index');
-const vapidHelper = require('../src/vapid-helper');
+import assert from 'assert';
+import sinon from 'sinon';
+import crypto from 'crypto';
+import mocha from 'mocha';
+import * as webPush from '../src/index.js';
+import * as vapidHelper from '../src/vapid-helper.js';
 
 const VALID_AUDIENCE = 'https://example.com';
 const VALID_SUBJECT_MAILTO = 'mailto:example@example.com';

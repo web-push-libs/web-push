@@ -1,7 +1,5 @@
-'use strict';
-
-const assert = require('assert');
-const { setVapidDetails } = require('../src/index');
+import assert from 'assert';
+import { setVapidDetails } from '../src/index.js';
 
 const VALID_SUBJECT_MAILTO = 'mailto: example@example.com';
 const VALID_SUBJECT_URL = 'https://exampe.com/contact';

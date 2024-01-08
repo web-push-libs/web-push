@@ -5,5 +5,8 @@
   "rules": {
     "max-len": 0,
     "global-require": 0
+  },
+  "parserOptions": {
+    "sourceType": "module"
   }
 }

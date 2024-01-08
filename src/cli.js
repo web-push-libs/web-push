@@ -1,9 +1,7 @@
 #! /usr/bin/env node
 /* eslint consistent-return:0 */
-
-'use strict';
-
-const webPush = require('../src/index.js');
+import * as webPush from '../src/index.js';
+import minimist from 'minimist';
 
 const printUsageDetails = () => {
   const actions = [
@@ -80,7 +78,7 @@ const sendNotification = args => {
     options.TTL = args.ttl;
   }
 
-  if (argv['vapid-subject'] || argv['vapid-pubkey'] || argv['vapid-pvtkey']) {
+  if (args['vapid-subject'] || args['vapid-pubkey'] || args['vapid-pvtkey']) {
     options.vapidDetails = {
       subject: args['vapid-subject'] || null,
       publicKey: args['vapid-pubkey'] || null,
@@ -112,20 +110,24 @@ const sendNotification = args => {
   });
 };
 
-const action = process.argv[2];
-const argv = require('minimist')(process.argv.slice(3));
-switch (action) {
-  case 'send-notification':
-    if (!argv.endpoint) {
-      return printUsageDetails();
-    }
+const executeCliAction = () => {
+  const action = process.argv[2];
+  const argv = minimist(process.argv.slice(3));
+  switch (action) {
+    case 'send-notification':
+      if (!argv.endpoint) {
+        return printUsageDetails();
+      }
 
-    sendNotification(argv);
-    break;
-  case 'generate-vapid-keys':
-    generateVapidKeys(argv.json || false);
-    break;
-  default:
-    printUsageDetails();
-    break;
-}
+      sendNotification(argv);
+      break;
+    case 'generate-vapid-keys':
+      generateVapidKeys(argv.json || false);
+      break;
+    default:
+      printUsageDetails();
+      break;
+  }
+};
+
+executeCliAction();

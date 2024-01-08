@@ -1,26 +1,22 @@
-'use strict';
+import assert from 'assert';
+import crypto from 'crypto';
+import https from 'https';
+import fs from 'fs';
+// import path from 'path';
+import ece from 'http_ece';
+import portfinder from 'portfinder';
+import jws from 'jws';
+import mocha from 'mocha';
+import WebPushConstants from '../src/web-push-constants.js';
+import { generateVAPIDKeys } from '../src/vapid-helper.js';
+import {
+  sendNotification,
+  setGCMAPIKey,
+  setVapidDetails
+} from '../src/index.js';
 
-const assert = require('assert');
-const crypto = require('crypto');
-const https = require('https');
-const fs = require('fs');
-const path = require('path');
-const ece = require('http_ece');
-const portfinder = require('portfinder');
-const jws = require('jws');
-const mocha = require('mocha');
-const WebPushConstants = require('../src/web-push-constants.js');
-
-suite('sendNotification', function() {
-  let sendNotification;
-  let setGCMAPIKey;
-  let setVapidDetails;
-
-  mocha.beforeEach(function () {
-    ({ sendNotification, setGCMAPIKey, setVapidDetails } = require('../src/index'));
-  });
-
-  test('is defined', function() {
+suite('sendNotification', function () {
+  test('is defined', function () {
     assert(sendNotification);
   });
 
@@ -44,8 +40,8 @@ suite('sendNotification', function() {
     requestDetails = null;
 
     // Delete caches of web push libs to start clean between test runs
-    delete require.cache[path.join(__dirname, '..', 'src', 'index.js')];
-    delete require.cache[path.join(__dirname, '..', 'src', 'web-push-lib.js')];
+    // delete require.cache[path.join(__dirname, '..', 'src', 'index.js')];
+    // delete require.cache[path.join(__dirname, '..', 'src', 'web-push-lib.js')];
 
     // Reset https request mock
     https.request = certHTTPSRequest;
@@ -72,7 +68,7 @@ suite('sendNotification', function() {
     auth: userAuth.toString('base64url')
   };
 
-  const vapidKeys = require('../src/vapid-helper').generateVAPIDKeys();
+  const vapidKeys = generateVAPIDKeys();
 
   function startServer() {
     const options = {

@@ -1,7 +1,5 @@
-'use strict';
-
-const os = require('os');
-const seleniumAssistant = require('selenium-assistant');
+import os from 'os';
+import seleniumAssistant from 'selenium-assistant';
 
 const MAX_RETRIES = 3;
 let expiration;

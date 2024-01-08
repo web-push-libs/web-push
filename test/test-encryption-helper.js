@@ -1,9 +1,7 @@
-'use strict';
-
-const assert = require('assert');
-const crypto = require('crypto');
-const webPush = require('../src/index');
-const ece = require('http_ece');
+import assert from 'assert';
+import crypto from 'crypto';
+import * as webPush from '../src/index.js';
+import ece from 'http_ece';
 
 const userCurve = crypto.createECDH('prime256v1');
 const VALID_PUBLIC_KEY = userCurve.generateKeys().toString('base64url');
