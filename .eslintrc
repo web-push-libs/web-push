@@ -3,6 +3,9 @@
   "env": {
     "es6": true
   },
+  "parserOptions": {
+    "sourceType": "module"
+  },
   "rules": {
     "no-var": 2,
     "no-const-assign": 2,

@@ -1,5 +1,3 @@
-'use strict';
-
 const WebPushConstants = {};
 
 WebPushConstants.supportedContentEncodings = {
@@ -14,4 +12,4 @@ WebPushConstants.supportedUrgency = {
   HIGH: 'high'
 };
 
-module.exports = WebPushConstants;
+export default WebPushConstants;

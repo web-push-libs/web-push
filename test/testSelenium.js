@@ -1,18 +1,16 @@
-'use strict';
-
-const seleniumAssistant = require('selenium-assistant');
-const webdriver = require('selenium-webdriver');
-const seleniumFirefox = require('selenium-webdriver/firefox');
-const assert = require('assert');
-const mkdirp = require('mkdirp');
-const fs = require('fs');
-const del = require('del');
-const webPush = require('../src/index');
-const createServer = require('./helpers/create-server');
+import seleniumAssistant from 'selenium-assistant';
+import webdriver from 'selenium-webdriver';
+import seleniumFirefox from 'selenium-webdriver/firefox/index.js';
+import assert from 'assert';
+import * as mkdirp from 'mkdirp';
+import fs from 'fs';
+import del from 'del';
+import * as webPush from '../src/index.js';
+import { createServer } from './helpers/create-server.js';
 
 // We need geckodriver on the path
-require('geckodriver');
-require('chromedriver');
+import 'geckodriver';
+import 'chromedriver';
 
 const vapidKeys = webPush.generateVAPIDKeys();
 

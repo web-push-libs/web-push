@@ -1,7 +1,5 @@
-'use strict';
-
-const assert = require('assert');
-const { setGCMAPIKey } = require('../src/index');
+import assert from 'assert';
+import { setGCMAPIKey } from '../src/index.js';
 
 suite('setGCMAPIKey', function() {
   test('is defined', function() {

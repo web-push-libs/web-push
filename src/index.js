@@ -1,21 +1,23 @@
-'use strict';
-
-const vapidHelper = require('./vapid-helper.js');
-const encryptionHelper = require('./encryption-helper.js');
-const WebPushLib = require('./web-push-lib.js');
-const WebPushError = require('./web-push-error.js');
-const WebPushConstants = require('./web-push-constants.js');
+import { getVapidHeaders, generateVAPIDKeys } from './vapid-helper.js';
+import { encrypt } from './encryption-helper.js';
+import { WebPushLib } from './web-push-lib.js';
+import WebPushError from './web-push-error.js';
+import WebPushConstants from './web-push-constants.js';
 
 const webPush = new WebPushLib();
 
-module.exports = {
-  WebPushError: WebPushError,
-  supportedContentEncodings: WebPushConstants.supportedContentEncodings,
-  encrypt: encryptionHelper.encrypt,
-  getVapidHeaders: vapidHelper.getVapidHeaders,
-  generateVAPIDKeys: vapidHelper.generateVAPIDKeys,
-  setGCMAPIKey: webPush.setGCMAPIKey,
-  setVapidDetails: webPush.setVapidDetails,
-  generateRequestDetails: webPush.generateRequestDetails,
-  sendNotification: webPush.sendNotification.bind(webPush)
+const { supportedContentEncodings } = WebPushConstants;
+const { setGCMAPIKey, setVapidDetails, generateRequestDetails } = webPush;
+const sendNotification = webPush.sendNotification.bind(webPush);
+
+export {
+  WebPushError,
+  supportedContentEncodings,
+  encrypt,
+  getVapidHeaders,
+  generateVAPIDKeys,
+  setGCMAPIKey,
+  setVapidDetails,
+  generateRequestDetails,
+  sendNotification
 };

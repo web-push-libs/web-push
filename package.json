@@ -2,7 +2,8 @@
   "name": "web-push",
   "version": "3.6.7",
   "description": "Web Push library for Node.js",
-  "main": "src/index.js",
+  "type": "module",
+  "exports": "./src/index.js",
   "bin": {
     "web-push": "src/cli.js"
   },
