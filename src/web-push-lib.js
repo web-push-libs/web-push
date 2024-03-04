@@ -17,7 +17,7 @@ const DEFAULT_TTL = 2419200;
  */
 function WebPushLib() {
   this.gcmAPIKey = '';
-  this.vapidDetails;
+  this.vapidDetails = undefined;
 }
 
 /**
