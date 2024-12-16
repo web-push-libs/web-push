@@ -44,7 +44,7 @@
     "geckodriver": "4.3.0",
     "nyc": "15.1.0",
     "mkdirp": "3.0.1",
-    "mocha": "10.2.0",
+    "mocha": "10.4.0",
     "portfinder": "1.0.32",
     "selenium-assistant": "5.4.0",
     "sinon": "17.0.1"
