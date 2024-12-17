@@ -464,6 +464,32 @@ object will contain:
 
 <hr />
 
+# Using multiple instances of `WebPushLib`
+
+The functions `setGCMAPIKey`, `setVapidDetails`, `generateRequestDetails`, `sendNotification`
+exported by this module are bounded to a global instance of `WebPushLib`.
+
+In scenarios where multiple instances of `WebPushLib` is needed, you can create separate instances by:
+```js
+const { WebPushLib } = require('web-push');
+
+const webpush1 = new WebPushLib();
+webpush1.setGCMAPIKey('<Your GCM API Key Here>');
+webpush1.setVapidDetails(
+  'mailto:example@yourdomain.org',
+  vapidKeys1.publicKey,
+  vapidKeys1.privateKey
+);
+
+const webpush2 = new WebPushLib();
+webpush2.setGCMAPIKey('<Another GCM API Key Here>');
+webpush2.setVapidDetails(
+  'mailto:example2@yourdomain.org',
+  vapidKeys2.publicKey,
+  vapidKeys2.privateKey
+);
+```
+
 # Browser Support
 
 <table>

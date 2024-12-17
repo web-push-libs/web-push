@@ -9,13 +9,14 @@ const WebPushConstants = require('./web-push-constants.js');
 const webPush = new WebPushLib();
 
 module.exports = {
+  WebPushLib: WebPushLib,
   WebPushError: WebPushError,
   supportedContentEncodings: WebPushConstants.supportedContentEncodings,
   encrypt: encryptionHelper.encrypt,
   getVapidHeaders: vapidHelper.getVapidHeaders,
   generateVAPIDKeys: vapidHelper.generateVAPIDKeys,
-  setGCMAPIKey: webPush.setGCMAPIKey,
-  setVapidDetails: webPush.setVapidDetails,
-  generateRequestDetails: webPush.generateRequestDetails,
+  setGCMAPIKey: webPush.setGCMAPIKey.bind(webPush),
+  setVapidDetails: webPush.setVapidDetails.bind(webPush),
+  generateRequestDetails: webPush.generateRequestDetails.bind(webPush),
   sendNotification: webPush.sendNotification.bind(webPush)
 };
