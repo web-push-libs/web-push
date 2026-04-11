@@ -271,7 +271,7 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
         requestDetails.headers.Authorization = 'key=' + currentGCMAPIKey;
       }
     } else if (currentVapidDetails) {
-      const parsedUrl = url.parse(subscription.endpoint);
+      const parsedUrl = new URL(subscription.endpoint);
       const audience = parsedUrl.protocol + '//'
       + parsedUrl.host;
 
@@ -345,7 +345,7 @@ WebPushLib.prototype.sendNotification = function(subscription, payload, options)
 
     return new Promise(function(resolve, reject) {
       const httpsOptions = {};
-      const urlParts = url.parse(requestDetails.endpoint);
+      const urlParts = new URL(requestDetails.endpoint);
       httpsOptions.hostname = urlParts.hostname;
       httpsOptions.port = urlParts.port;
       httpsOptions.path = urlParts.path;
