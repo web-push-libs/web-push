@@ -1,287 +1,225 @@
 'use strict';
 
-const seleniumAssistant = require('selenium-assistant');
-const webdriver = require('selenium-webdriver');
-const seleniumFirefox = require('selenium-webdriver/firefox');
+const { chromium, firefox } = require('playwright');
 const assert = require('assert');
 const fs = require('fs');
+const path = require('path');
 const webPush = require('../src/index');
 const createServer = require('./helpers/create-server');
 
-// We need geckodriver on the path
-require('geckodriver');
-require('chromedriver');
-
-const vapidKeys = webPush.generateVAPIDKeys();
-
+const CHROME_CHANNEL = process.env.CHROME_CHANNEL || 'chrome';
 const PUSH_TEST_TIMEOUT = 120 * 1000;
+const vapidKeys = webPush.generateVAPIDKeys();
 const VAPID_PARAM = {
   subject: 'mailto:web-push@mozilla.org',
   privateKey: vapidKeys.privateKey,
   publicKey: vapidKeys.publicKey
 };
-const testDirectory = './test/output/';
 
-webPush.setGCMAPIKey('AIzaSyAwmdX6KKd4hPfIcGU2SOfj9vuRDW6u-wo');
+const browsers = [
+  {
+    name: 'Chrome',
+    createContext: async () => {
+      const userDataDir = fs.mkdtempSync(path.join(__dirname, '.chrome-profile-'));
+      const context = await chromium.launchPersistentContext(userDataDir, {
+        channel: CHROME_CHANNEL,
+        headless: false,
+        ignoreDefaultArgs: ['--disable-background-networking']
+      });
+      return {
+        context,
+        cleanup: async () => {
+          await context.close();
+          fs.rmSync(userDataDir, { recursive: true, force: true });
+        }
+      };
+    }
+  },
+  {
+    name: 'Firefox',
+    // Skipped because firefox from playwright does not support push notifications
+    skip: true,
+    createContext: async () => {
+      const browser = await firefox.launch({
+        firefoxUserPrefs: {
+          'dom.push.testing.ignorePermission': true,
+          'notification.prompt.testing': true,
+          'notification.prompt.testing.allow': true,
+          'permissions.default.desktop-notification': 1
+        }
+      });
+      const context = await browser.newContext();
+      return {
+        context,
+        cleanup: () => browser.close()
+      };
+    }
+  }
+];
 
-let globalServer;
-let globalDriver;
-let testServerURL;
+async function openSubscription(context, vapidPublicKey) {
+  const server = await createServer();
+  const origin = 'http://127.0.0.1:' + server.port;
+  await context.grantPermissions(['notifications'], { origin });
 
-function runTest(browser, options) {
-  options = options || {};
+  const page = await context.newPage();
+  let testServerURL = origin;
+  if (vapidPublicKey) {
+    testServerURL += '?vapid=' + vapidPublicKey;
+  }
+  await page.goto(testServerURL);
 
-  if (process.env.CI) {
-    return Promise.resolve();
+  const serviceWorkerSupported = await page.evaluate(
+    () => typeof navigator.serviceWorker !== 'undefined'
+  );
+  assert(serviceWorkerSupported);
+
+  await page.waitForFunction(() => typeof window.subscribeSuccess !== 'undefined');
+
+  const subscribeError = await page.evaluate(
+    () => (window.subscribeSuccess ? null : String(window.subscribeError))
+  );
+  if (subscribeError) {
+    throw new Error('subscribeError: ' + subscribeError);
   }
 
-  return createServer(options, webPush)
-  .then(function(server) {
-    globalServer = server;
-    testServerURL = 'http://127.0.0.1:' + server.port;
+  const subscriptionString = await page.evaluate(() => window.testSubscription);
+  if (!subscriptionString) {
+    throw new Error('No subscription found.');
+  }
 
-    if (browser.getId() === 'firefox') {
-      // This is based off of: https://bugzilla.mozilla.org/show_bug.cgi?id=1275521
-      // Unfortunately it doesn't seem to work :(
-      const ffProfile = new seleniumFirefox.Profile();
-      ffProfile.setPreference('dom.push.testing.ignorePermission', true);
-      ffProfile.setPreference('notification.prompt.testing', true);
-      ffProfile.setPreference('notification.prompt.testing.allow', true);
-      browser.getSeleniumOptions().setProfile(ffProfile);
-    } else if (browser.getId() === 'chrome') {
-      const chromeOperaPreferences = {
-        profile: {
-          content_settings: {
-            exceptions: {
-              notifications: {}
-            }
-          }
-        }
-      };
-      chromeOperaPreferences.profile.content_settings.exceptions.notifications[testServerURL + ',*'] = {
-        setting: 1
-      };
-
-      // Write to a file
-      const tempPreferenceDir = './test/output/temp/chromeOperaPreferences';
-      fs.mkdirSync(tempPreferenceDir + '/Default', { recursive: true });
-
-      // NOTE: The Default part of this path might be Chrome specific.
-      fs.writeFileSync(tempPreferenceDir + '/Default/Preferences', JSON.stringify(chromeOperaPreferences));
-
-      const seleniumOptions = browser.getSeleniumOptions();
-      seleniumOptions.addArguments('user-data-dir=' + tempPreferenceDir + '/');
-    }
-
-    return browser.getSeleniumDriver();
-  })
-  .then(function(driver) {
-    globalDriver = driver;
-
-    if (options.vapid) {
-      testServerURL += '?vapid=' + options.vapid.publicKey;
-    }
-
-    return globalDriver.get(testServerURL)
-    .then(function() {
-      return globalDriver.executeScript(function() {
-        return typeof navigator.serviceWorker !== 'undefined';
-      });
-    })
-    .then(function(serviceWorkerSupported) {
-      assert(serviceWorkerSupported);
-    })
-    .then(function() {
-      return globalDriver.wait(function() {
-        return globalDriver.executeScript(function() {
-          return typeof window.subscribeSuccess !== 'undefined';
-        });
-      });
-    })
-    .then(function() {
-      return globalDriver.executeScript(function() {
-        if (!window.subscribeSuccess) {
-          return window.subscribeError;
-        }
-
-        return null;
-      });
-    })
-    .then(function(subscribeError) {
-      if (subscribeError) {
-        console.log('subscribeError: ', subscribeError);
-        throw subscribeError;
-      }
-
-      return globalDriver.executeScript(function() {
-        return window.testSubscription;
-      });
-    })
-    .then(function(subscription) {
-      if (!subscription) {
-        throw new Error('No subscription found.');
-      }
-
-      subscription = JSON.parse(subscription);
-
-      let promise;
-      let pushPayload = null;
-      let vapid = null;
-      let contentEncoding = null;
-      if (options) {
-        pushPayload = options.payload;
-        vapid = options.vapid;
-        contentEncoding = options.contentEncoding;
-      }
-
-      if (!pushPayload) {
-        promise = webPush.sendNotification(subscription, null, {
-          vapidDetails: vapid,
-          contentEncoding: contentEncoding
-        });
-      } else {
-        if (!subscription.keys) {
-          throw new Error('Require subscription.keys not found.');
-        }
-
-        promise = webPush.sendNotification(subscription, pushPayload, {
-          vapidDetails: vapid,
-          contentEncoding: contentEncoding
-        });
-      }
-
-      return promise
-      .then(function(response) {
-        if (response.length > 0) {
-          const data = JSON.parse(response);
-          if (typeof data.failure !== 'undefined' && data.failure > 0) {
-            throw new Error('Bad GCM Response: ' + response);
-          }
-        }
-      });
-    })
-    .then(function() {
-      const expectedTitle = options.payload ? options.payload : 'no payload';
-      return globalDriver.wait(function() {
-        return webdriver.until.titleIs(expectedTitle, 60000);
-      });
-    });
-  });
+  return { server, page, subscription: JSON.parse(subscriptionString) };
 }
 
-seleniumAssistant.printAvailableBrowserInfo();
-
-const availableBrowsers = seleniumAssistant.getLocalBrowsers();
-availableBrowsers.forEach(function(browser) {
-  if (browser.getId() !== 'chrome' && browser.getId() !== 'firefox') {
-    return;
-  }
-
-  suite('Selenium ' + browser.getPrettyName(), function() {
-    if (process.env.CI) {
-      this.retries(3);
+async function sendNotificationWithRetry(subscription, payload, options, attemptsLeft) {
+  try {
+    return await webPush.sendNotification(subscription, payload, options);
+  } catch (err) {
+    if (err.statusCode === 410 && attemptsLeft > 0) {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 2000);
+      });
+      return sendNotificationWithRetry(subscription, payload, options, attemptsLeft - 1);
     }
+    throw err;
+  }
+}
 
-    setup(function() {
-      globalServer = null;
+browsers.forEach(function(browser) {
+  const defineSuite = browser.skip ? suite.skip : suite;
 
-      return fs.promises.rm(testDirectory, { recursive: true, force: true });
+  defineSuite('Playwright ' + browser.name, function() {
+    let launched;
+    let server;
+
+    suiteSetup(async function() {
+      this.timeout(60000);
+      launched = await browser.createContext();
+
+      // Prime the push service connection with a throwaway subscription so the
+      // first real test does not pay the cold-start cost (the initial subscribe
+      // after launch is slow to connect). Best effort: ignore failures here.
+      try {
+        const warmup = await openSubscription(launched.context, VAPID_PARAM.publicKey);
+        warmup.server.close();
+        await warmup.page.close();
+      } catch {
+        // The connection attempt still primes FCM even if this subscribe times out.
+      }
+    });
+
+    suiteTeardown(async function() {
+      // Tearing down a Chrome context with a live FCM connection can take ~15s,
+      // so this runs once per suite rather than once per test.
+      this.timeout(60000);
+
+      if (launched) {
+        await launched.cleanup();
+        launched = null;
+      }
     });
 
     teardown(function() {
-      this.timeout(10000);
+      if (server) {
+        server.close();
+        server = null;
+      }
+    });
 
-      return seleniumAssistant.killWebDriver(globalDriver)
-      .catch(function(err) {
-        console.log('Error killing web driver: ', err);
-      })
-      .then(function() {
-        globalDriver = null;
+    async function runTest(options) {
+      options = options || {};
 
-        return fs.promises.rm(testDirectory, { recursive: true, force: true })
-        .catch(function() {
-          console.warn('Unable to delete test directory, going to wait 2 '
-          + 'seconds and try again');
-          // Add a timeout so that if the browser
-          // changes any files in the test directory
-          // it doesn't cause del to throw an error
-          // (i.e. del checks files in directory, deletes them
-          // while another process adds a file, then del fails
-          // to remove a non-empty directory).
-          return new Promise(function(resolve) {
-            setTimeout(resolve, 2000);
-          });
-        })
-        .then(function() {
-          return fs.promises.rm(testDirectory, { recursive: true, force: true });
-        });
-      })
-      .then(function() {
-        if (globalServer) {
-          globalServer.close();
-          globalServer = null;
+      const opened = await openSubscription(
+        launched.context,
+        options.vapid ? options.vapid.publicKey : null
+      );
+      server = opened.server;
+      const page = opened.page;
+      try {
+        const subscription = opened.subscription;
+
+        const pushPayload = options.payload;
+        if (pushPayload && !subscription.keys) {
+          throw new Error('Require subscription.keys not found.');
         }
-      });
-    });
 
-    test('send/receive notification without payload with ' + browser.getPrettyName() + ' (aesgcm)', function() {
-      this.timeout(PUSH_TEST_TIMEOUT);
-      return runTest(browser, {
-        contentEncoding: webPush.supportedContentEncodings.AES_GCM
-      });
-    });
+        const response = await sendNotificationWithRetry(subscription, pushPayload || null, {
+          vapidDetails: options.vapid,
+          contentEncoding: options.contentEncoding
+        }, 4);
 
-    test('send/receive notification without payload with ' + browser.getPrettyName() + ' (aes128gcm)', function() {
-      this.timeout(PUSH_TEST_TIMEOUT);
-      return runTest(browser, {
-        contentEncoding: webPush.supportedContentEncodings.AES_128_GCM
-      });
-    });
+        if (response.body && response.body.length > 0) {
+          let data;
+          try {
+            data = JSON.parse(response.body);
+          } catch {
+            data = null;
+          }
 
-    test('send/receive notification with payload with ' + browser.getPrettyName() + ' (aesgcm)', function() {
-      this.timeout(PUSH_TEST_TIMEOUT);
-      return runTest(browser, {
-        payload: 'marco',
-        contentEncoding: webPush.supportedContentEncodings.AES_GCM
-      });
-    });
+          if (data && typeof data.failure !== 'undefined' && data.failure > 0) {
+            throw new Error('Bad GCM Response: ' + response.body);
+          }
+        }
 
-    test('send/receive notification with payload with ' + browser.getPrettyName() + ' (aes128gcm)', function() {
-      this.timeout(PUSH_TEST_TIMEOUT);
-      return runTest(browser, {
-        payload: 'marco',
-        contentEncoding: webPush.supportedContentEncodings.AES_128_GCM
-      });
-    });
+        const expectedTitle = options.payload ? options.payload : 'no payload';
+        await page.waitForFunction(
+          (title) => document.title === title,
+          expectedTitle,
+          { timeout: 60000 }
+        );
+      } finally {
+        await page.close();
+      }
+    }
 
-    test('send/receive notification with vapid with ' + browser.getPrettyName() + ' (aesgcm)', function() {
+    test('send/receive notification with vapid with ' + browser.name + ' (aesgcm)', function() {
       this.timeout(PUSH_TEST_TIMEOUT);
-      return runTest(browser, {
+      return runTest({
         vapid: VAPID_PARAM,
         contentEncoding: webPush.supportedContentEncodings.AES_GCM
       });
     });
 
-    test('send/receive notification with vapid with ' + browser.getPrettyName() + ' (aes128gcm)', function() {
+    test('send/receive notification with vapid with ' + browser.name + ' (aes128gcm)', function() {
       this.timeout(PUSH_TEST_TIMEOUT);
-      return runTest(browser, {
+      return runTest({
         vapid: VAPID_PARAM,
         contentEncoding: webPush.supportedContentEncodings.AES_128_GCM
       });
     });
 
-    test('send/receive notification with payload & vapid with ' + browser.getPrettyName() + ' (aesgcm)', function() {
+    test('send/receive notification with payload & vapid with ' + browser.name + ' (aesgcm)', function() {
       this.timeout(PUSH_TEST_TIMEOUT);
-      return runTest(browser, {
+      return runTest({
         payload: 'marco',
         vapid: VAPID_PARAM,
         contentEncoding: webPush.supportedContentEncodings.AES_GCM
       });
     });
 
-    test('send/receive notification with payload & vapid with ' + browser.getPrettyName() + ' (aes128gcm)', function() {
+    test('send/receive notification with payload & vapid with ' + browser.name + ' (aes128gcm)', function() {
       this.timeout(PUSH_TEST_TIMEOUT);
-      return runTest(browser, {
+      return runTest({
         payload: 'marco',
         vapid: VAPID_PARAM,
         contentEncoding: webPush.supportedContentEncodings.AES_128_GCM
