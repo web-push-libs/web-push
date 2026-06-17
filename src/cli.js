@@ -1,6 +1,6 @@
 #! /usr/bin/env node
 
-import minimist from 'minimist';
+import { parseArgs } from 'node:util';
 
 import * as webPush from '../src/index.js';
 
@@ -76,10 +76,10 @@ const sendNotification = args => {
   const options = {};
 
   if (args.ttl) {
-    options.TTL = args.ttl;
+    options.TTL = Number(args.ttl);
   }
 
-  if (argv['vapid-subject'] || argv['vapid-pubkey'] || argv['vapid-pvtkey']) {
+  if (args['vapid-subject'] || args['vapid-pubkey'] || args['vapid-pvtkey']) {
     options.vapidDetails = {
       subject: args['vapid-subject'] || null,
       publicKey: args['vapid-pubkey'] || null,
@@ -111,19 +111,37 @@ const sendNotification = args => {
   });
 };
 
-const action = process.argv[2];
-const argv = minimist(process.argv.slice(3));
+const { values: args, positionals } = parseArgs({
+  args: process.argv.slice(2),
+  allowPositionals: true,
+  options: {
+    endpoint: { type: 'string' },
+    key: { type: 'string' },
+    auth: { type: 'string' },
+    payload: { type: 'string' },
+    ttl: { type: 'string' },
+    encoding: { type: 'string' },
+    'vapid-subject': { type: 'string' },
+    'vapid-pubkey': { type: 'string' },
+    'vapid-pvtkey': { type: 'string' },
+    proxy: { type: 'string' },
+    'gcm-api-key': { type: 'string' },
+    json: { type: 'boolean' }
+  }
+});
+
+const action = positionals[0];
 switch (action) {
   case 'send-notification':
-    if (!argv.endpoint) {
+    if (!args.endpoint) {
       printUsageDetails();
       break;
     }
 
-    sendNotification(argv);
+    sendNotification(args);
     break;
   case 'generate-vapid-keys':
-    generateVapidKeys(argv.json || false);
+    generateVapidKeys(args.json || false);
     break;
   default:
     printUsageDetails();
