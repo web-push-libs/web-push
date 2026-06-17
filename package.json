@@ -8,7 +8,7 @@
   },
   "scripts": {
     "download-browser": "node --harmony ./test/helpers/download-test-browsers.js",
-    "lint": "node ./node_modules/eslint/bin/eslint --ignore-path .gitignore '.'",
+    "lint": "eslint src test",
     "pretest": "npm run lint && npm run download-browser",
     "test": "nyc --reporter=lcov --reporter=text mocha -- --ui tdd test/test*"
   },
@@ -36,11 +36,11 @@
     "minimist": "^1.2.5"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "chromedriver": "123.0.3",
-    "eslint": "8.56.0",
-    "eslint-config-airbnb": "19.0.4",
-    "eslint-plugin-import": "2.29.1",
+    "eslint": "^10.6.0",
     "geckodriver": "4.3.0",
+    "globals": "^17.6.0",
     "mocha": "10.4.0",
     "nyc": "15.1.0",
     "portfinder": "1.0.32",
