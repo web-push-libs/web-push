@@ -13,42 +13,39 @@ const DEFAULT_TTL = 2419200;
 let gcmAPIKey = '';
 let vapidDetails;
 
-export function WebPushLib() {
+export class WebPushLib {
+  /**
+   * When sending messages to a GCM endpoint you need to set the GCM API key
+   * by either calling setGMAPIKey() or passing in the API key as an option
+   * to sendNotification().
+   * @param  {string} apiKey The API key to send with the GCM request.
+   */
+  setGCMAPIKey(apiKey) {
+    if (apiKey === null) {
+      gcmAPIKey = null;
+      return;
+    }
 
-}
+    if (typeof apiKey === 'undefined'
+    || typeof apiKey !== 'string'
+    || apiKey.length === 0) {
+      throw new Error('The GCM API Key should be a non-empty string or null.');
+    }
 
-/**
- * When sending messages to a GCM endpoint you need to set the GCM API key
- * by either calling setGMAPIKey() or passing in the API key as an option
- * to sendNotification().
- * @param  {string} apiKey The API key to send with the GCM request.
- */
-WebPushLib.prototype.setGCMAPIKey = function(apiKey) {
-  if (apiKey === null) {
-    gcmAPIKey = null;
-    return;
+    gcmAPIKey = apiKey;
   }
 
-  if (typeof apiKey === 'undefined'
-  || typeof apiKey !== 'string'
-  || apiKey.length === 0) {
-    throw new Error('The GCM API Key should be a non-empty string or null.');
-  }
-
-  gcmAPIKey = apiKey;
-};
-
-/**
- * When making requests where you want to define VAPID details, call this
- * method before sendNotification() or pass in the details and options to
- * sendNotification.
- * @param  {string} subject    This must be either a URL or a 'mailto:'
- * address. For example: 'https://my-site.com/contact' or
- * 'mailto: contact@my-site.com'
- * @param  {string} publicKey  The public VAPID key, a URL safe, base64 encoded string
- * @param  {string} privateKey The private VAPID key, a URL safe, base64 encoded string.
- */
-WebPushLib.prototype.setVapidDetails = function(subject, publicKey, privateKey) {
+  /**
+   * When making requests where you want to define VAPID details, call this
+   * method before sendNotification() or pass in the details and options to
+   * sendNotification.
+   * @param  {string} subject    This must be either a URL or a 'mailto:'
+   * address. For example: 'https://my-site.com/contact' or
+   * 'mailto: contact@my-site.com'
+   * @param  {string} publicKey  The public VAPID key, a URL safe, base64 encoded string
+   * @param  {string} privateKey The private VAPID key, a URL safe, base64 encoded string.
+   */
+  setVapidDetails(subject, publicKey, privateKey) {
     if (arguments.length === 1 && arguments[0] === null) {
       vapidDetails = null;
       return;
@@ -63,7 +60,7 @@ WebPushLib.prototype.setVapidDetails = function(subject, publicKey, privateKey) 
       publicKey: publicKey,
       privateKey: privateKey
     };
-  };
+  }
 
   /**
    * To get the details of a request to trigger a push message, without sending
@@ -80,7 +77,7 @@ WebPushLib.prototype.setVapidDetails = function(subject, publicKey, privateKey) 
    * @return {Object}                       This method returns an Object which
    * contains 'endpoint', 'method', 'headers' and 'payload'.
    */
-WebPushLib.prototype.generateRequestDetails = function(subscription, payload, options) {
+  generateRequestDetails(subscription, payload, options) {
     if (!subscription || !subscription.endpoint) {
       throw new Error('You must pass in a subscription with at least '
       + 'an endpoint.');
@@ -317,23 +314,23 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
     }
 
     return requestDetails;
-  };
+  }
 
-/**
- * To send a push notification call this method with a subscription, optional
- * payload and any options.
- * @param  {PushSubscription} subscription The PushSubscription you wish to
- * send the notification to.
- * @param  {string|Buffer} [payload]       The payload you wish to send to the
- * the user.
- * @param  {Object} [options]              Options for the GCM API key and
- * vapid keys can be passed in if they are unique for each notification you
- * wish to send.
- * @return {Promise}                       This method returns a Promise which
- * resolves if the sending of the notification was successful, otherwise it
- * rejects.
- */
-WebPushLib.prototype.sendNotification = function(subscription, payload, options) {
+  /**
+   * To send a push notification call this method with a subscription, optional
+   * payload and any options.
+   * @param  {PushSubscription} subscription The PushSubscription you wish to
+   * send the notification to.
+   * @param  {string|Buffer} [payload]       The payload you wish to send to the
+   * the user.
+   * @param  {Object} [options]              Options for the GCM API key and
+   * vapid keys can be passed in if they are unique for each notification you
+   * wish to send.
+   * @return {Promise}                       This method returns a Promise which
+   * resolves if the sending of the notification was successful, otherwise it
+   * rejects.
+   */
+  sendNotification(subscription, payload, options) {
     let requestDetails;
     try {
       requestDetails = this.generateRequestDetails(subscription, payload, options);
@@ -405,4 +402,5 @@ WebPushLib.prototype.sendNotification = function(subscription, payload, options)
 
       pushRequest.end();
     });
-  };
+  }
+}
