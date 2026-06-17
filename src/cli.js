@@ -1,8 +1,8 @@
 #! /usr/bin/env node
 
-'use strict';
+import minimist from 'minimist';
 
-const webPush = require('../src/index.js');
+import * as webPush from '../src/index.js';
 
 const printUsageDetails = () => {
   const actions = [
@@ -112,7 +112,7 @@ const sendNotification = args => {
 };
 
 const action = process.argv[2];
-const argv = require('minimist')(process.argv.slice(3));
+const argv = minimist(process.argv.slice(3));
 switch (action) {
   case 'send-notification':
     if (!argv.endpoint) {
