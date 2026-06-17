@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import crypto from 'node:crypto';
-import sinon from 'sinon';
-import mocha from 'mocha';
+import { spyOn, restoreAll } from 'tinyspy';
+import { suite, test, afterEach } from 'mocha';
 import * as webPush from '../src/index.js';
 import * as vapidHelper from '../src/vapid-helper.js';
 
@@ -20,14 +20,8 @@ const VALID_CONTENT_ENCODING = webPush.supportedContentEncodings.AES_GCM;
 const VALID_EXPIRATION = Math.floor(Date.now() / 1000) + (60 * 60 * 12);
 
 suite('Test Vapid Helpers', function() {
-  const sandbox = sinon.createSandbox();
-
-  mocha.beforeEach(function() {
-    sandbox.restore();
-  });
-
-  mocha.after(function() {
-    sandbox.restore();
+  afterEach(function() {
+    restoreAll();
   });
 
   test('is defined', function() {
@@ -48,7 +42,7 @@ suite('Test Vapid Helpers', function() {
   });
 
   test('generate vapid keys with padding', function() {
-    sandbox.stub(crypto, 'createECDH').callsFake(() => {
+    spyOn(crypto, 'createECDH', () => {
       return {
         generateKeys: () => {},
         getPublicKey: () => Buffer.alloc(60),

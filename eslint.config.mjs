@@ -20,17 +20,6 @@ export default defineConfig([
   },
   {
     files: [
-      'test/**/*.js',
-    ],
-    languageOptions: {
-      globals: {
-        ...globals.node,
-        ...globals.mocha
-      }
-    }
-  },
-  {
-    files: [
       'test/testBrowsers.js'
     ],
     languageOptions: {

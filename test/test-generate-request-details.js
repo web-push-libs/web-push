@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 import crypto from 'node:crypto';
-import { parse as urlParse } from 'node:url';
 import https from 'node:https';
 import jws from 'jws';
+import { suite, test } from 'mocha';
 import { generateRequestDetails } from '../src/index.js';
 import * as vapidHelper from '../src/vapid-helper.js';
 
@@ -340,7 +340,7 @@ suite('Test Generate Request Details', function() {
     let subscription = {
       endpoint: 'https://127.0.0.1:8080'
     };
-    let proxyOption = urlParse('http://proxy');
+    let proxyOption = new URL('http://proxy');
     let extraOptions = {
       proxy: proxyOption
     };

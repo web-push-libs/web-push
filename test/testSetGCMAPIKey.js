@@ -1,4 +1,5 @@
 import assert from 'node:assert';
+import { suite, test } from 'mocha';
 import { setGCMAPIKey } from '../src/index.js';
 
 suite('setGCMAPIKey', function() {
