@@ -32,7 +32,7 @@
     "asn1.js": "^5.3.0",
     "http_ece": "1.2.0",
     "https-proxy-agent": "^7.0.0",
-    "jws": "^4.0.0",
+    "jws": "^4.0.1",
     "minimist": "^1.2.5"
   },
   "devDependencies": {
@@ -41,8 +41,8 @@
     "eslint-config-airbnb": "19.0.4",
     "eslint-plugin-import": "2.29.1",
     "geckodriver": "4.3.0",
-    "nyc": "15.1.0",
     "mocha": "10.4.0",
+    "nyc": "15.1.0",
     "portfinder": "1.0.32",
     "selenium-assistant": "5.4.0",
     "sinon": "17.0.1"
