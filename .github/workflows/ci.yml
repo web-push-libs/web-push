@@ -11,9 +11,8 @@ jobs:
           - ubuntu-latest
           - macos-latest
         node:
-          - "16" # Maintenance LTS
+          - "22" # Maintenance LTS
           - "lts/*"
-          - "20"
 
     steps:
       - name: Checkout repository
