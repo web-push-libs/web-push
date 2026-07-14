@@ -75,11 +75,16 @@ function validateSubject(subject) {
     + 'mailto: address. ' + subject);
   }
 
-  let subjectParseResult = null;
+  let subjectParseResult;
   try {
     subjectParseResult = new URL(subject);
   } catch (err) {
-    throw new Error('Vapid subject is not a valid URL. ' + subject);
+    throw new Error(
+      'Vapid subject is not a valid URL. ' + subject,
+      {
+        cause: err
+      }
+    );
   }
   if (!['https:', 'mailto:'].includes(subjectParseResult.protocol)) {
     throw new Error('Vapid subject is not an https: or mailto: URL. ' + subject);
@@ -195,9 +200,14 @@ function getVapidHeaders(audience, subject, publicKey, privateKey, contentEncodi
   }
 
   try {
-    new URL(audience); // eslint-disable-line no-new
+    new URL(audience);
   } catch (err) {
-    throw new Error('VAPID audience is not a url. ' + audience);
+    throw new Error(
+      'VAPID audience is not a url. ' + audience,
+      {
+        cause: err
+      }
+    );
   }
 
   validateSubject(subject);

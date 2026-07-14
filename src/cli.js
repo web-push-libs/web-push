@@ -1,5 +1,4 @@
 #! /usr/bin/env node
-/* eslint consistent-return:0 */
 
 'use strict';
 
@@ -117,7 +116,8 @@ const argv = require('minimist')(process.argv.slice(3));
 switch (action) {
   case 'send-notification':
     if (!argv.endpoint) {
-      return printUsageDetails();
+      printUsageDetails();
+      break;
     }
 
     sendNotification(argv);

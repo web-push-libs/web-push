@@ -252,7 +252,6 @@ suite('Test Generate Request Details', function() {
 
   test('Extra headers', function() {
     let subscription = { endpoint: 'https://127.0.0.1:8080' };
-    let message;
     let extraOptions = {
       TTL: 100,
       headers: {
@@ -262,7 +261,7 @@ suite('Test Generate Request Details', function() {
     };
     let details = generateRequestDetails(
       subscription,
-      message,
+      undefined,
       extraOptions
     );
     assert.equal(details.headers.TTL, extraOptions.TTL);
@@ -327,13 +326,12 @@ suite('Test Generate Request Details', function() {
 
   test('Proxy option', function() {
     let subscription = { endpoint: 'https://127.0.0.1:8080' };
-    let message;
     let extraOptions = {
       'proxy': 'proxy'
     };
     let details = generateRequestDetails(
       subscription,
-      message,
+      undefined,
       extraOptions
     );
     assert.equal(details.proxy, extraOptions.proxy);

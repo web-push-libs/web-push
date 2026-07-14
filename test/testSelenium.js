@@ -61,7 +61,6 @@ function runTest(browser, options) {
       chromeOperaPreferences.profile.content_settings.exceptions.notifications[testServerURL + ',*'] = {
         setting: 1
       };
-      /* eslint-enable camelcase */
 
       // Write to a file
       const tempPreferenceDir = './test/output/temp/chromeOperaPreferences';
