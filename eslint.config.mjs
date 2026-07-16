@@ -31,7 +31,7 @@ export default defineConfig([
   },
   {
     files: [
-      'test/testSelenium.js'
+      'test/testBrowsers.js'
     ],
     languageOptions: {
       globals: {
