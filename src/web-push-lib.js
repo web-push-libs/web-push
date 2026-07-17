@@ -11,11 +11,12 @@ const urlBase64Helper = require('./urlsafe-base64-helper');
 // Default TTL is four weeks.
 const DEFAULT_TTL = 2419200;
 
-let gcmAPIKey = '';
-let vapidDetails;
-
+/**
+ * @constructor
+ */
 function WebPushLib() {
-
+  this.gcmAPIKey = '';
+  this.vapidDetails = undefined;
 }
 
 /**
@@ -26,7 +27,7 @@ function WebPushLib() {
  */
 WebPushLib.prototype.setGCMAPIKey = function(apiKey) {
   if (apiKey === null) {
-    gcmAPIKey = null;
+    this.gcmAPIKey = null;
     return;
   }
 
@@ -36,7 +37,7 @@ WebPushLib.prototype.setGCMAPIKey = function(apiKey) {
     throw new Error('The GCM API Key should be a non-empty string or null.');
   }
 
-  gcmAPIKey = apiKey;
+  this.gcmAPIKey = apiKey;
 };
 
 /**
@@ -51,7 +52,7 @@ WebPushLib.prototype.setGCMAPIKey = function(apiKey) {
  */
 WebPushLib.prototype.setVapidDetails = function(subject, publicKey, privateKey) {
     if (arguments.length === 1 && arguments[0] === null) {
-      vapidDetails = null;
+      this.vapidDetails = null;
       return;
     }
 
@@ -59,7 +60,7 @@ WebPushLib.prototype.setVapidDetails = function(subject, publicKey, privateKey) 
     vapidHelper.validatePublicKey(publicKey);
     vapidHelper.validatePrivateKey(privateKey);
 
-    vapidDetails = {
+    this.vapidDetails = {
       subject: subject,
       publicKey: publicKey,
       privateKey: privateKey
@@ -103,8 +104,8 @@ WebPushLib.prototype.generateRequestDetails = function(subscription, payload, op
       }
     }
 
-    let currentGCMAPIKey = gcmAPIKey;
-    let currentVapidDetails = vapidDetails;
+    let currentGCMAPIKey = this.gcmAPIKey;
+    let currentVapidDetails = this.vapidDetails;
     let timeToLive = DEFAULT_TTL;
     let extraHeaders = {};
     let contentEncoding = webPushConstants.supportedContentEncodings.AES_128_GCM;
