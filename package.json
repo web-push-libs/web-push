@@ -39,7 +39,7 @@
     "@eslint/js": "^10.0.1",
     "chromedriver": "123.0.3",
     "eslint": "^10.6.0",
-    "geckodriver": "4.3.0",
+    "geckodriver": "6.1.1",
     "globals": "^17.6.0",
     "mocha": "10.4.0",
     "nyc": "15.1.0",
