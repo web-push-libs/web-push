@@ -37,7 +37,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "chromedriver": "123.0.3",
+    "chromedriver": "151.0.0",
     "eslint": "^10.6.0",
     "geckodriver": "4.3.0",
     "globals": "^17.6.0",
