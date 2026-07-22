@@ -29,7 +29,12 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium firefox
 
-      - name: Run tests
+      - name: Run tests (Linux)
+        if: runner.os == 'Linux'
+        run: xvfb-run --auto-servernum npm test
+
+      - name: Run tests (macOS)
+        if: runner.os == 'macOS'
         run: npm test
 
       - name: Upload coverage
