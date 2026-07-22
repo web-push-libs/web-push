@@ -1,6 +1,6 @@
-'use strict';
+import { inherits } from 'node:util';
 
-function WebPushError(message, statusCode, headers, body, endpoint) {
+export function WebPushError(message, statusCode, headers, body, endpoint) {
   Error.captureStackTrace(this, this.constructor);
 
   this.name = this.constructor.name;
@@ -11,6 +11,4 @@ function WebPushError(message, statusCode, headers, body, endpoint) {
   this.endpoint = endpoint;
 }
 
-require('util').inherits(WebPushError, Error);
-
-module.exports = WebPushError;
+inherits(WebPushError, Error);

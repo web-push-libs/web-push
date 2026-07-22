@@ -1,11 +1,10 @@
-'use strict';
-
-const assert = require('assert');
-const { generateRequestDetails } = require('../src/index');
-const crypto = require('crypto');
-const jws = require('jws');
-const urlParse = require('url').parse;
-const https = require('https');
+import assert from 'node:assert';
+import crypto from 'node:crypto';
+import { parse as urlParse } from 'node:url';
+import https from 'node:https';
+import jws from 'jws';
+import { generateRequestDetails } from '../src/index.js';
+import * as vapidHelper from '../src/vapid-helper.js';
 
 suite('Test Generate Request Details', function() {
   test('is defined', function() {
@@ -15,7 +14,7 @@ suite('Test Generate Request Details', function() {
   const userCurve = crypto.createECDH('prime256v1');
   const userPublicKey = userCurve.generateKeys();
   const userAuth = crypto.randomBytes(16);
-  const vapidKeys = require('../src/vapid-helper').generateVAPIDKeys();
+  const vapidKeys = vapidHelper.generateVAPIDKeys();
 
   const VALID_KEYS = {
     p256dh: userPublicKey.toString('base64url'),

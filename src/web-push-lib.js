@@ -1,12 +1,11 @@
-'use strict';
+import https from 'node:https';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 
-const https = require('https');
-
-const WebPushError = require('./web-push-error.js');
-const vapidHelper = require('./vapid-helper.js');
-const encryptionHelper = require('./encryption-helper.js');
-const webPushConstants = require('./web-push-constants.js');
-const urlBase64Helper = require('./urlsafe-base64-helper');
+import { WebPushError } from './web-push-error.js';
+import * as vapidHelper from './vapid-helper.js';
+import * as encryptionHelper from './encryption-helper.js';
+import * as webPushConstants from './web-push-constants.js';
+import * as urlBase64Helper from './urlsafe-base64-helper.js';
 
 // Default TTL is four weeks.
 const DEFAULT_TTL = 2419200;
@@ -14,7 +13,7 @@ const DEFAULT_TTL = 2419200;
 let gcmAPIKey = '';
 let vapidDetails;
 
-function WebPushLib() {
+export function WebPushLib() {
 
 }
 
@@ -361,7 +360,6 @@ WebPushLib.prototype.sendNotification = function(subscription, payload, options)
       }
 
       if (requestDetails.proxy) {
-        const { HttpsProxyAgent } = require('https-proxy-agent');
         httpsOptions.agent = new HttpsProxyAgent(requestDetails.proxy);
       }
 
@@ -408,5 +406,3 @@ WebPushLib.prototype.sendNotification = function(subscription, payload, options)
       pushRequest.end();
     });
   };
-
-module.exports = WebPushLib;

@@ -1,11 +1,12 @@
-'use strict';
+import assert from 'node:assert';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { chromium, firefox } from 'playwright';
+import * as webPush from '../src/index.js';
+import { createServer } from './helpers/create-server.js';
 
-const { chromium, firefox } = require('playwright');
-const assert = require('assert');
-const fs = require('fs');
-const path = require('path');
-const webPush = require('../src/index');
-const createServer = require('./helpers/create-server');
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const CHROME_CHANNEL = process.env.CHROME_CHANNEL || 'chrome';
 const PUSH_TEST_TIMEOUT = 120 * 1000;

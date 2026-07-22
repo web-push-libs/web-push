@@ -1,15 +1,10 @@
-'use strict';
+import assert from 'node:assert';
+import { spawn } from 'node:child_process';
 
-(function() {
-  const invalidNodeVersions = /0.(10|12).(\d+)/;
-  if (process.versions.node.match(invalidNodeVersions)) {
-    console.log('Skipping CLI tests as they can\'t run on node: ' + process.versions.node);
-    return;
-  }
-
-  const assert = require('assert');
-  const spawn = require('child_process').spawn;
-
+const invalidNodeVersions = /0.(10|12).(\d+)/;
+if (process.versions.node.match(invalidNodeVersions)) {
+  console.log('Skipping CLI tests as they can\'t run on node: ' + process.versions.node);
+} else {
   const cliPath = 'src/cli.js';
 
   suite('Test CLI', function() {
@@ -192,4 +187,4 @@
       });
     });
   });
-})();
+}

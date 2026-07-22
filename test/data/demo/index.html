@@ -7,7 +7,7 @@
 <body>
   <h1>Test Page</h1>
 
-<script type="text/javascript">
+<script type="module">
 function base64UrlToUint8Array(base64UrlData) {
   const padding = '='.repeat((4 - base64UrlData.length % 4) % 4);
   const base64 = (base64UrlData + padding)
@@ -21,27 +21,23 @@ function base64UrlToUint8Array(base64UrlData) {
   return buffer;
 }
 
-(function() {
-  if (!('serviceWorker' in navigator)) {
-    return;
-  }
-
-  return navigator.serviceWorker.register('service-worker.js')
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js', { type: 'module' })
   .then(function(registration) {
     console.log('service worker registered');
     return navigator.serviceWorker.ready;
   })
   .then(function(reg) {
-    var channel = new MessageChannel();
+    const channel = new MessageChannel();
     channel.port1.onmessage = function(e) {
       window.document.title = e.data;
     }
     reg.active.postMessage('setup', [channel.port2]);
 
-    var subscribeOptions = { userVisibleOnly: true };
+    const subscribeOptions = { userVisibleOnly: true };
     // Figure out the vapid key
-    var searchParam = window.location.search;
-    vapidRegex = searchParam.match(/vapid=(.[^&]*)/);
+    const searchParam = window.location.search;
+    const vapidRegex = searchParam.match(/vapid=(.[^&]*)/);
     if (vapidRegex) {
       // Convert the base 64 encoded string
       subscribeOptions.applicationServerKey = base64UrlToUint8Array(vapidRegex[1]);
@@ -60,7 +56,7 @@ function base64UrlToUint8Array(base64UrlData) {
     window.subscribeSuccess = false;
     window.subscribeError = err;
   });
-})();
+}
 </script>
 </body>
 </html>

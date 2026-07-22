@@ -1,25 +1,16 @@
-'use strict';
-
-const assert = require('assert');
-const crypto = require('crypto');
-const https = require('https');
-const fs = require('fs');
-const path = require('path');
-const ece = require('http_ece');
-const portfinder = require('portfinder');
-const jws = require('jws');
-const mocha = require('mocha');
-const WebPushConstants = require('../src/web-push-constants.js');
+import assert from 'node:assert';
+import crypto from 'node:crypto';
+import https from 'node:https';
+import fs from 'node:fs';
+import ece from 'http_ece';
+import portfinder from 'portfinder';
+import jws from 'jws';
+import mocha from 'mocha';
+import * as WebPushConstants from '../src/web-push-constants.js';
+import { sendNotification, setGCMAPIKey, setVapidDetails } from '../src/index.js';
+import * as vapidHelper from '../src/vapid-helper.js';
 
 suite('sendNotification', function() {
-  let sendNotification;
-  let setGCMAPIKey;
-  let setVapidDetails;
-
-  mocha.beforeEach(function () {
-    ({ sendNotification, setGCMAPIKey, setVapidDetails } = require('../src/index'));
-  });
-
   test('is defined', function() {
     assert(sendNotification);
   });
@@ -43,9 +34,9 @@ suite('sendNotification', function() {
     requestBody = null;
     requestDetails = null;
 
-    // Delete caches of web push libs to start clean between test runs
-    delete require.cache[path.join(__dirname, '..', 'src', 'index.js')];
-    delete require.cache[path.join(__dirname, '..', 'src', 'web-push-lib.js')];
+    // Reset the module-level GCM/VAPID state to start clean between test runs
+    setGCMAPIKey(null);
+    setVapidDetails(null);
 
     // Reset https request mock
     https.request = certHTTPSRequest;
@@ -72,7 +63,7 @@ suite('sendNotification', function() {
     auth: userAuth.toString('base64url')
   };
 
-  const vapidKeys = require('../src/vapid-helper').generateVAPIDKeys();
+  const vapidKeys = vapidHelper.generateVAPIDKeys();
 
   function startServer() {
     const options = {
