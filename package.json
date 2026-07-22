@@ -43,7 +43,7 @@
     "globals": "^17.6.0",
     "mocha": "^11.7.6",
     "playwright": "^1.61.0",
-    "portfinder": "1.0.32",
+    "portfinder": "1.0.38",
     "tinyspy": "^4.0.4"
   },
   "engines": {
