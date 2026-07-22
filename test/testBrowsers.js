@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium, firefox } from 'playwright';
+import { suite, test, suiteSetup, suiteTeardown, teardown } from 'mocha';
 import * as webPush from '../src/index.js';
 import { createServer } from './helpers/create-server.js';
 

@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import ece from 'http_ece';
 import portfinder from 'portfinder';
 import jws from 'jws';
-import mocha from 'mocha';
+import { suite, test, beforeEach, after } from 'mocha';
 import * as WebPushConstants from '../src/web-push-constants.js';
 import { sendNotification, setGCMAPIKey, setVapidDetails } from '../src/index.js';
 import * as vapidHelper from '../src/vapid-helper.js';
@@ -24,13 +24,13 @@ suite('sendNotification', function() {
   const originalHTTPSRequest = https.request;
 
   // https request mock to accept self-signed certificate.
-  // Probably worth switching with proxyquire and sinon.
+  // Probably worth switching with proxyquire or similar
   const certHTTPSRequest = function(options, listener) {
     options.rejectUnauthorized = false;
     return originalHTTPSRequest.call(https, options, listener);
   };
 
-  mocha.beforeEach(function() {
+  beforeEach(function() {
     requestBody = null;
     requestDetails = null;
 
@@ -49,7 +49,7 @@ suite('sendNotification', function() {
     return returnPromise;
   });
 
-  mocha.after(function() {
+  after(function() {
     return closeServer();
   });
 
@@ -559,7 +559,7 @@ suite('sendNotification', function() {
   validGCMRequests.forEach(function(validGCMRequest) {
     test(validGCMRequest.testTitle, function() {
       // This mocks out the httpsrequest used by web push.
-      // Probably worth switching with proxyquire and sinon.
+      // Probably worth switching with proxyquire or similar
       https.request = function(options, listener) {
         options.hostname = '127.0.0.1';
         options.port = serverPort;

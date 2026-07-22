@@ -1,190 +1,191 @@
 import assert from 'node:assert';
 import { spawn } from 'node:child_process';
+import { suite, test } from 'mocha';
 
-const invalidNodeVersions = /0.(10|12).(\d+)/;
-if (process.versions.node.match(invalidNodeVersions)) {
-  console.log('Skipping CLI tests as they can\'t run on node: ' + process.versions.node);
-} else {
-  const cliPath = 'src/cli.js';
+const cliPath = 'src/cli.js';
 
-  suite('Test CLI', function() {
-    test('no args run', function() {
-      return new Promise(function(resolve) {
-        const webpushCLISpawn = spawn('node', [
-          cliPath
-        ]);
-        let errorData = '';
-        let consoleOutput = '';
-        webpushCLISpawn.stdout.on('data', function(data) {
-          consoleOutput += data;
-        });
+suite('Test CLI', function() {
+  test('no args run', async () => {
+    const webpushCLISpawn = spawn('node', [
+      cliPath
+    ]);
+    let errorData = '';
+    let consoleOutput = '';
+    webpushCLISpawn.stdout.on('data', function(data) {
+      consoleOutput += data;
+    });
 
-        webpushCLISpawn.stderr.on('data', function(data) {
-          errorData += data;
-        });
+    webpushCLISpawn.stderr.on('data', function(data) {
+      errorData += data;
+    });
 
-        webpushCLISpawn.on('close', function(code) {
-          // No args should have code 1
-          assert(code, 1);
-
-          assert.equal(errorData, '');
-          assert.notEqual(consoleOutput.indexOf('web-push send-notification'), -1);
-          assert.notEqual(consoleOutput.indexOf('web-push generate-vapid-keys'), -1);
-          resolve();
-        });
+    const code = await new Promise((resolve) => {
+      webpushCLISpawn.once('close', (c) => {
+        resolve(c);
       });
     });
 
-    test('test send-notification no args', function() {
-      return new Promise(function(resolve) {
-        const webpushCLISpawn = spawn('node', [
-          cliPath,
-          'send-notification'
-        ]);
+    // No args should have code 1
+    assert(code, 1);
 
-        webpushCLISpawn.on('close', function(code) {
-          // No args should have code 1
-          assert.equal(code, 1);
-          resolve();
-        });
-      });
-    });
-
-    test('test send-notification only endpoint', function() {
-      return new Promise(function(resolve) {
-        const webpushCLISpawn = spawn('node', [
-          cliPath,
-          'send-notification',
-          '--endpoint=https://example.push-service.com/'
-        ]);
-
-        let errorData = '';
-        let consoleOutput = '';
-        webpushCLISpawn.stdout.on('data', function(data) {
-          consoleOutput += data;
-        });
-
-        webpushCLISpawn.stderr.on('data', function(data) {
-          errorData += data;
-        });
-
-        webpushCLISpawn.on('close', function(code) {
-          assert.equal(code, 0);
-          assert.equal(errorData, '');
-          assert.equal(consoleOutput.indexOf('Error sending push message: '), 0);
-          resolve();
-        });
-      });
-    });
-
-    test('test send-notification all options', function() {
-      return new Promise(function(resolve) {
-        const webpushCLISpawn = spawn('node', [
-          cliPath,
-          'send-notification',
-          '--endpoint=https://example.push-service.com/',
-          '--key=browser-key',
-          '--auth=auth',
-          '--payload=hello',
-          '--ttl=1234',
-          '--encoding=aesgcm',
-          '--vapid-subject=http://example.push-serice.com/contact',
-          '--vapid-pubkey=vapid-publicKey',
-          '--vapid-pvtkey=vapid-privateKey',
-          '--gcm-api-key=qwerty'
-        ]);
-
-        let errorData = '';
-        let consoleOutput = '';
-        webpushCLISpawn.stdout.on('data', function(data) {
-          consoleOutput += data;
-        });
-
-        webpushCLISpawn.stderr.on('data', function(data) {
-          errorData += data;
-        });
-
-        webpushCLISpawn.on('close', function(code) {
-          assert.equal(code, 0);
-          assert.equal(errorData, '');
-          assert.equal(consoleOutput.indexOf('Error sending push message: '), 0);
-          resolve();
-        });
-      });
-    });
-
-    test('test generate vapid keys', function() {
-      return new Promise(function(resolve) {
-        const webpushCLISpawn = spawn('node', [
-          cliPath,
-          'generate-vapid-keys'
-        ]);
-
-        let errorData = '';
-        let consoleOutput = '';
-        webpushCLISpawn.stdout.on('data', function(data) {
-          consoleOutput += data;
-        });
-
-        webpushCLISpawn.stderr.on('data', function(data) {
-          errorData += data;
-        });
-
-        webpushCLISpawn.on('close', function(code) {
-          assert.equal(code, 0);
-          assert.equal(errorData, '');
-          assert.notEqual(consoleOutput.indexOf('Public Key:'), -1);
-          assert.notEqual(consoleOutput.indexOf('Private Key:'), -1);
-
-          const lines = consoleOutput.split('\n');
-          const publicKeyTitleIndex = lines.findIndex(function(line) {
-            return line.indexOf('Public Key:') !== -1;
-          });
-          const publicKey = lines[publicKeyTitleIndex + 1].trim();
-          assert.equal(Buffer.from(publicKey, 'base64url').length, 65);
-
-          const privateKeyTitleIndex = lines.findIndex(function(line) {
-            return line.indexOf('Private Key:') !== -1;
-          });
-          const privateKey = lines[privateKeyTitleIndex + 1].trim();
-          assert.equal(Buffer.from(privateKey, 'base64url').length, 32);
-          resolve();
-        });
-      });
-    });
-
-    test('test generate JSON vapid keys', function() {
-      return new Promise(function(resolve) {
-        const webpushCLISpawn = spawn('node', [
-          cliPath,
-          'generate-vapid-keys',
-          '--json'
-        ]);
-
-        let errorData = '';
-        let consoleOutput = '';
-        webpushCLISpawn.stdout.on('data', function(data) {
-          consoleOutput += data;
-        });
-
-        webpushCLISpawn.stderr.on('data', function(data) {
-          errorData += data;
-        });
-
-        webpushCLISpawn.on('close', function(code) {
-          assert.equal(code, 0);
-          assert.equal(errorData, '');
-
-          const vapidKeys = JSON.parse(consoleOutput);
-          assert(vapidKeys.publicKey);
-          assert(vapidKeys.privateKey);
-
-          assert.equal(Buffer.from(vapidKeys.privateKey, 'base64url').length, 32);
-          assert.equal(Buffer.from(vapidKeys.publicKey, 'base64url').length, 65);
-
-          resolve();
-        });
-      });
-    });
+    assert.equal(errorData, '');
+    assert.notEqual(consoleOutput.indexOf('web-push send-notification'), -1);
+    assert.notEqual(consoleOutput.indexOf('web-push generate-vapid-keys'), -1);
   });
-}
+
+  test('test send-notification no args', async () => {
+    const webpushCLISpawn = spawn('node', [
+      cliPath,
+      'send-notification'
+    ]);
+
+    const code = await new Promise((resolve) => {
+      webpushCLISpawn.once('close', (c) => {
+        resolve(c);
+      });
+    });
+
+    // No args should have code 1
+    assert.equal(code, 1);
+  });
+
+  test('test send-notification only endpoint', async () => {
+    const webpushCLISpawn = spawn('node', [
+      cliPath,
+      'send-notification',
+      '--endpoint=https://example.push-service.com/'
+    ]);
+
+    let errorData = '';
+    let consoleOutput = '';
+    webpushCLISpawn.stdout.on('data', function(data) {
+      consoleOutput += data;
+    });
+
+    webpushCLISpawn.stderr.on('data', function(data) {
+      errorData += data;
+    });
+
+    const code = await new Promise((resolve) => {
+      webpushCLISpawn.once('close', (c) => {
+        resolve(c);
+      });
+    });
+
+    assert.equal(code, 0);
+    assert.equal(errorData, '');
+    assert.equal(consoleOutput.indexOf('Error sending push message: '), 0);
+  });
+
+  test('test send-notification all options', async () => {
+    const webpushCLISpawn = spawn('node', [
+      cliPath,
+      'send-notification',
+      '--endpoint=https://example.push-service.com/',
+      '--key=browser-key',
+      '--auth=auth',
+      '--payload=hello',
+      '--ttl=1234',
+      '--encoding=aesgcm',
+      '--vapid-subject=http://example.push-serice.com/contact',
+      '--vapid-pubkey=vapid-publicKey',
+      '--vapid-pvtkey=vapid-privateKey',
+      '--gcm-api-key=qwerty'
+    ]);
+
+    let errorData = '';
+    let consoleOutput = '';
+    webpushCLISpawn.stdout.on('data', function(data) {
+      consoleOutput += data;
+    });
+
+    webpushCLISpawn.stderr.on('data', function(data) {
+      errorData += data;
+    });
+
+    const code = await new Promise((resolve) => {
+      webpushCLISpawn.once('close', (c) => {
+        resolve(c);
+      });
+    });
+
+    assert.equal(code, 0);
+    assert.equal(errorData, '');
+    assert.equal(consoleOutput.indexOf('Error sending push message: '), 0);
+  });
+
+  test('test generate vapid keys', async () => {
+    const webpushCLISpawn = spawn('node', [
+      cliPath,
+      'generate-vapid-keys'
+    ]);
+
+    let errorData = '';
+    let consoleOutput = '';
+    webpushCLISpawn.stdout.on('data', function(data) {
+      consoleOutput += data;
+    });
+
+    webpushCLISpawn.stderr.on('data', function(data) {
+      errorData += data;
+    });
+
+    const code = await new Promise((resolve) => {
+      webpushCLISpawn.once('close', (c) => {
+        resolve(c);
+      });
+    });
+
+    assert.equal(code, 0);
+    assert.equal(errorData, '');
+    assert.notEqual(consoleOutput.indexOf('Public Key:'), -1);
+    assert.notEqual(consoleOutput.indexOf('Private Key:'), -1);
+
+    const lines = consoleOutput.split('\n');
+    const publicKeyTitleIndex = lines.findIndex(function(line) {
+      return line.indexOf('Public Key:') !== -1;
+    });
+    const publicKey = lines[publicKeyTitleIndex + 1].trim();
+    assert.equal(Buffer.from(publicKey, 'base64url').length, 65);
+
+    const privateKeyTitleIndex = lines.findIndex(function(line) {
+      return line.indexOf('Private Key:') !== -1;
+    });
+    const privateKey = lines[privateKeyTitleIndex + 1].trim();
+    assert.equal(Buffer.from(privateKey, 'base64url').length, 32);
+  });
+
+  test('test generate JSON vapid keys', async () => {
+    const webpushCLISpawn = spawn('node', [
+      cliPath,
+      'generate-vapid-keys',
+      '--json'
+    ]);
+
+    let errorData = '';
+    let consoleOutput = '';
+    webpushCLISpawn.stdout.on('data', function(data) {
+      consoleOutput += data;
+    });
+
+    webpushCLISpawn.stderr.on('data', function(data) {
+      errorData += data;
+    });
+
+    const code = await new Promise((resolve) => {
+      webpushCLISpawn.once('close', (c) => {
+        resolve(c);
+      });
+    });
+
+    assert.equal(code, 0);
+    assert.equal(errorData, '');
+
+    const vapidKeys = JSON.parse(consoleOutput);
+    assert(vapidKeys.publicKey);
+    assert(vapidKeys.privateKey);
+
+    assert.equal(Buffer.from(vapidKeys.privateKey, 'base64url').length, 32);
+    assert.equal(Buffer.from(vapidKeys.publicKey, 'base64url').length, 65);
+  });
+});

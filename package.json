@@ -11,7 +11,7 @@
     "download-browser": "playwright install chromium firefox",
     "lint": "eslint src test",
     "pretest": "npm run lint && npm run download-browser",
-    "test": "nyc --reporter=lcov --reporter=text mocha -- --ui tdd test/test*"
+    "test": "c8 --reporter=lcov --reporter=text mocha -- --ui tdd test/test*"
   },
   "repository": {
     "type": "git",
@@ -38,13 +38,13 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "c8": "^11.0.0",
     "eslint": "^10.6.0",
     "globals": "^17.6.0",
-    "mocha": "10.4.0",
-    "nyc": "15.1.0",
+    "mocha": "^11.7.6",
     "playwright": "^1.61.0",
     "portfinder": "1.0.32",
-    "sinon": "17.0.1"
+    "tinyspy": "^4.0.4"
   },
   "engines": {
     "node": ">= 16"

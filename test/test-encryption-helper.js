@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 import crypto from 'node:crypto';
 import ece from 'http_ece';
+import { suite, test } from 'mocha';
 import * as webPush from '../src/index.js';
 
 const userCurve = crypto.createECDH('prime256v1');

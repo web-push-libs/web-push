@@ -1,4 +1,5 @@
 import assert from 'node:assert';
+import { suite, test } from 'mocha';
 import { setVapidDetails } from '../src/index.js';
 
 const VALID_SUBJECT_MAILTO = 'mailto: example@example.com';
