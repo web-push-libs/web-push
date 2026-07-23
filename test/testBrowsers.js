@@ -10,6 +10,10 @@ import { createServer } from './helpers/create-server.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const CHROME_CHANNEL = process.env.CHROME_CHANNEL || 'chrome';
+// here, `moz-` makes playwright use the system firefox instead of the
+// one playwright ships. The one playwright ships has no push service keys.
+const FIREFOX_CHANNEL = process.env.FIREFOX_CHANNEL || 'moz-firefox';
+const FIREFOX_PATH = process.env.FIREFOX_PATH;
 const PUSH_TEST_TIMEOUT = 120 * 1000;
 const vapidKeys = webPush.generateVAPIDKeys();
 const VAPID_PARAM = {
@@ -39,10 +43,11 @@ const browsers = [
   },
   {
     name: 'Firefox',
-    // Skipped because firefox from playwright does not support push notifications
-    skip: true,
     createContext: async () => {
       const browser = await firefox.launch({
+        channel: FIREFOX_CHANNEL,
+        executablePath: FIREFOX_PATH,
+        headless: false,
         firefoxUserPrefs: {
           'dom.push.testing.ignorePermission': true,
           'notification.prompt.testing': true,
@@ -108,9 +113,7 @@ async function sendNotificationWithRetry(subscription, payload, options, attempt
 }
 
 browsers.forEach(function(browser) {
-  const defineSuite = browser.skip ? suite.skip : suite;
-
-  defineSuite('Playwright ' + browser.name, function() {
+  suite('Playwright ' + browser.name, function() {
     let launched;
     let server;
 
