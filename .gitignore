@@ -3,5 +3,6 @@ node_modules/
 test/output/
 .nyc_output/
 
-# Chrome profiles created by browser push tests
+# Browser profiles created by browser push tests
 test/.chrome-profile-*
+test/.firefox-profile-*

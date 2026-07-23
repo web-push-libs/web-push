@@ -39,21 +39,26 @@ const browsers = [
   },
   {
     name: 'Firefox',
-    // Skipped because firefox from playwright does not support push notifications
-    skip: true,
     createContext: async () => {
-      const browser = await firefox.launch({
+      const userDataDir = fs.mkdtempSync(path.join(__dirname, '.firefox-profile-'));
+      const context = await firefox.launchPersistentContext(userDataDir, {
+        headless: false,
         firefoxUserPrefs: {
+          // Playwright's Firefox build ships without a push server URL set.
+          'dom.push.serverURL': 'wss://push.services.mozilla.com/',
+          'dom.push.connection.enabled': true,
           'dom.push.testing.ignorePermission': true,
           'notification.prompt.testing': true,
           'notification.prompt.testing.allow': true,
           'permissions.default.desktop-notification': 1
         }
       });
-      const context = await browser.newContext();
       return {
         context,
-        cleanup: () => browser.close()
+        cleanup: async () => {
+          await context.close();
+          fs.rmSync(userDataDir, { recursive: true, force: true });
+        }
       };
     }
   }
@@ -108,9 +113,7 @@ async function sendNotificationWithRetry(subscription, payload, options, attempt
 }
 
 browsers.forEach(function(browser) {
-  const defineSuite = browser.skip ? suite.skip : suite;
-
-  defineSuite('Playwright ' + browser.name, function() {
+  suite('Playwright ' + browser.name, function() {
     let launched;
     let server;
 
