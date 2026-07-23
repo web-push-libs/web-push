@@ -10,10 +10,6 @@ import { createServer } from './helpers/create-server.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const CHROME_CHANNEL = process.env.CHROME_CHANNEL || 'chrome';
-// here, `moz-` makes playwright use the system firefox instead of the
-// one playwright ships. The one playwright ships has no push service keys.
-const FIREFOX_CHANNEL = process.env.FIREFOX_CHANNEL || 'moz-firefox';
-const FIREFOX_PATH = process.env.FIREFOX_PATH;
 const PUSH_TEST_TIMEOUT = 120 * 1000;
 const vapidKeys = webPush.generateVAPIDKeys();
 const VAPID_PARAM = {
@@ -44,11 +40,12 @@ const browsers = [
   {
     name: 'Firefox',
     createContext: async () => {
-      const browser = await firefox.launch({
-        channel: FIREFOX_CHANNEL,
-        executablePath: FIREFOX_PATH,
+      const userDataDir = fs.mkdtempSync(path.join(__dirname, '.firefox-profile-'));
+      const context = await firefox.launchPersistentContext(userDataDir, {
         headless: false,
         firefoxUserPrefs: {
+          // Playwright's Firefox build ships without a push server URL set.
+          'dom.push.serverURL': 'wss://push.services.mozilla.com/',
           'dom.push.connection.enabled': true,
           'dom.push.testing.ignorePermission': true,
           'notification.prompt.testing': true,
@@ -56,10 +53,12 @@ const browsers = [
           'permissions.default.desktop-notification': 1
         }
       });
-      const context = await browser.newContext();
       return {
         context,
-        cleanup: () => browser.close()
+        cleanup: async () => {
+          await context.close();
+          fs.rmSync(userDataDir, { recursive: true, force: true });
+        }
       };
     }
   }

@@ -27,28 +27,14 @@ jobs:
         run: npm install
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
-
-      # Playwright's own Firefox build ships without push service keys, so the
-      # tests use a Mozilla build over WebDriver BiDi instead.
-      - name: Install Firefox
-        id: firefox
-        uses: browser-actions/setup-firefox@0bc507ddf224827e3b1af68e014d5e42ab93e795 # v1.7.2
-
-      - name: Install Firefox system dependencies (Linux)
-        if: runner.os == 'Linux'
-        run: npx playwright install-deps firefox
+        run: npx playwright install --with-deps chromium firefox
 
       - name: Run tests (Linux)
         if: runner.os == 'Linux'
-        env:
-          FIREFOX_PATH: ${{ steps.firefox.outputs.firefox-path }}
         run: xvfb-run --auto-servernum npm test
 
       - name: Run tests (macOS)
         if: runner.os == 'macOS'
-        env:
-          FIREFOX_PATH: ${{ steps.firefox.outputs.firefox-path }}
         run: npm test
 
       - name: Trust coveralls (macOS)
