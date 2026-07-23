@@ -49,6 +49,7 @@ const browsers = [
         executablePath: FIREFOX_PATH,
         headless: false,
         firefoxUserPrefs: {
+          'dom.push.connection.enabled': true,
           'dom.push.testing.ignorePermission': true,
           'notification.prompt.testing': true,
           'notification.prompt.testing.allow': true,
