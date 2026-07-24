@@ -8,6 +8,8 @@
     "web-push": "src/cli.js"
   },
   "scripts": {
+    "build:clean": "node -e \"require('fs').rmSync('./lib', { recursive: true, force: true })\"",
+    "build": "npm run build:clean && tsc",
     "download-browser": "playwright install chromium firefox",
     "lint": "eslint src test",
     "pretest": "npm run lint && npm run download-browser",
@@ -38,13 +40,16 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/jws": "^3.2.11",
+    "@types/node": "^26.1.1",
     "c8": "^11.0.0",
     "eslint": "^10.6.0",
     "globals": "^17.6.0",
     "mocha": "^11.7.6",
     "playwright": "^1.61.0",
     "portfinder": "1.0.38",
-    "tinyspy": "^4.0.4"
+    "tinyspy": "^4.0.4",
+    "typescript": "^7.0.2"
   },
   "engines": {
     "node": ">= 16"
