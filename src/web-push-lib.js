@@ -104,7 +104,7 @@ export class WebPushLib {
     let timeToLive = DEFAULT_TTL;
     let extraHeaders = {};
     let contentEncoding = webPushConstants.supportedContentEncodings.AES_128_GCM;
-    let urgency = webPushConstants.supportedUrgency.NORMAL;
+    let urgency;
     let topic;
     let proxy;
     let agent;
@@ -223,10 +223,13 @@ export class WebPushLib {
       timeToLive = DEFAULT_TTL;
     }
 
+    // Defaults are seeded first so that anything supplied through the
+    // `headers` option can override them.
     const requestDetails = {
       method: 'POST',
       headers: {
-        TTL: timeToLive
+        TTL: timeToLive,
+        Urgency: webPushConstants.supportedUrgency.NORMAL
       }
     };
     Object.keys(extraHeaders).forEach(function (header) {
@@ -292,7 +295,9 @@ export class WebPushLib {
       requestDetails.headers.Authorization = 'key=' + currentGCMAPIKey;
     }
 
-    requestDetails.headers.Urgency = urgency;
+    if (urgency) {
+      requestDetails.headers.Urgency = urgency;
+    }
 
     if (topic) {
       requestDetails.headers.Topic = topic;
