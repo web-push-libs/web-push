@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "emitDeclarationOnly": true,
+    "removeComments": true,
+    "allowJs": true,
+    "outDir": "./types",
+    "rootDir": "./src",
+    "module": "node18",
+    "target": "esnext",
+    "types": ["node"],
+    "sourceMap": false,
+    "declaration": true,
+    "declarationMap": false,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noImplicitOverride": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strict": true,
+    "isolatedModules": true,
+    "noUncheckedSideEffectImports": true,
+    "erasableSyntaxOnly": true,
+    "skipLibCheck": true
+  },
+  "include": ["src"]
+}

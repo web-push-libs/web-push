@@ -10,15 +10,54 @@ import * as urlBase64Helper from './urlsafe-base64-helper.js';
 // Default TTL is four weeks.
 const DEFAULT_TTL = 2419200;
 
+/**
+ * @import { supportedUrgency, supportedContentEncodings } from './web-push-constants.js'
+ */
+
+/**
+ * @typedef {Object} VapidDetails
+ * @property {string} subject
+ * @property {string} publicKey
+ * @property {string} privateKey
+ */
+
+/**
+ * @typedef {Object} RequestDetailsOptions
+ * @property {string=} gcmAPIKey
+ * @property {VapidDetails=} vapidDetails
+ * @property {number=} TTL
+ * @property {(typeof supportedContentEncodings[keyof typeof supportedContentEncodings])=} contentEncoding
+ * @property {(typeof supportedUrgency[keyof typeof supportedUrgency])=} urgency
+ * @property {string=} topic
+ * @property {Record<string, string>=} headers
+ * @property {string | URL=} proxy
+ * @property {https.Agent=} agent
+ * @property {number=} timeout
+ */
+
+/**
+ * @typedef {Object} RequestDetails
+ * @property {string} endpoint
+ * @property {string} method
+ * @property {Record<string, string>} headers
+ * @property {Buffer<ArrayBuffer>=} body
+ * @property {string | URL=} proxy
+ * @property {https.Agent=} agent
+ * @property {number=} timeout
+ */
+
+/** @type {string | null} */
 let gcmAPIKey = '';
-let vapidDetails;
+/** @type {null | VapidDetails} */
+let vapidDetails = null;
 
 export class WebPushLib {
   /**
    * When sending messages to a GCM endpoint you need to set the GCM API key
    * by either calling setGMAPIKey() or passing in the API key as an option
    * to sendNotification().
-   * @param  {string} apiKey The API key to send with the GCM request.
+   * @param  {string|null} apiKey The API key to send with the GCM request.
+   * @return {void}
    */
   setGCMAPIKey(apiKey) {
     if (apiKey === null) {
@@ -67,14 +106,14 @@ export class WebPushLib {
    * a push notification call this method.
    *
    * This method will throw an error if there is an issue with the input.
-   * @param  {PushSubscription} subscription The PushSubscription you wish to
+   * @param  {PushSubscription} subscription       The PushSubscription you wish to
    * send the notification to.
-   * @param  {string|Buffer} [payload]       The payload you wish to send to the
+   * @param  {string|Buffer<ArrayBuffer>=} payload The payload you wish to send to the
    * the user.
-   * @param  {Object} [options]              Options for the GCM API key and
+   * @param  {RequestDetailsOptions=} options      Options for the GCM API key and
    * vapid keys can be passed in if they are unique for each notification you
    * wish to send.
-   * @return {Object}                       This method returns an Object which
+   * @return {RequestDetails}                      This method returns an Object which
    * contains 'endpoint', 'method', 'headers' and 'payload'.
    */
   generateRequestDetails(subscription, payload, options) {
@@ -319,16 +358,16 @@ export class WebPushLib {
   /**
    * To send a push notification call this method with a subscription, optional
    * payload and any options.
-   * @param  {PushSubscription} subscription The PushSubscription you wish to
+   * @param  {PushSubscription} subscription       The PushSubscription you wish to
    * send the notification to.
-   * @param  {string|Buffer} [payload]       The payload you wish to send to the
+   * @param  {string|Buffer<ArrayBuffer>=} payload The payload you wish to send to the
    * the user.
-   * @param  {Object} [options]              Options for the GCM API key and
+   * @param  {RequestDetailsOptions=} options      Options for the GCM API key and
    * vapid keys can be passed in if they are unique for each notification you
    * wish to send.
-   * @return {Promise}                       This method returns a Promise which
-   * resolves if the sending of the notification was successful, otherwise it
-   * rejects.
+   * @return {Promise<{statusCode: number; body: string; headers: Record<string, string>}>}
+   * This method returns a Promise which resolves if the sending of the
+   * notification was successful, otherwise it rejects.
    */
   sendNotification(subscription, payload, options) {
     let requestDetails;
