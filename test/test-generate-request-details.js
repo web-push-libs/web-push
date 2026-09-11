@@ -255,7 +255,9 @@ suite('Test Generate Request Details', function() {
       TTL: 100,
       headers: {
         'Topic': 'topic',
-        'Urgency': 'normal'
+        // Deliberately not the default urgency, so that this assertion can
+        // actually fail if the header is overwritten.
+        'Urgency': 'high'
       }
     };
     let details = generateRequestDetails(
@@ -266,6 +268,28 @@ suite('Test Generate Request Details', function() {
     assert.equal(details.headers.TTL, extraOptions.TTL);
     assert.equal(details.headers.Topic, extraOptions.headers.Topic);
     assert.equal(details.headers.Urgency, extraOptions.headers.Urgency);
+  });
+
+  test('Default urgency is used when no urgency is supplied', function() {
+    const subscription = { endpoint: 'https://127.0.0.1:8080' };
+
+    const details = generateRequestDetails(subscription, undefined, {});
+
+    assert.equal(details.headers.Urgency, 'normal');
+  });
+
+  test('Urgency option takes precedence over an Urgency extra header', function() {
+    const subscription = { endpoint: 'https://127.0.0.1:8080' };
+    const extraOptions = {
+      urgency: 'low',
+      headers: {
+        'Urgency': 'high'
+      }
+    };
+
+    const details = generateRequestDetails(subscription, undefined, extraOptions);
+
+    assert.equal(details.headers.Urgency, extraOptions.urgency);
   });
 
   test('Audience contains port with aes128gcm', function() {
