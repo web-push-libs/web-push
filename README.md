@@ -48,6 +48,39 @@ const pushSubscription = {
 webpush.sendNotification(pushSubscription, 'Your Push Payload Text');
 ```
 
+## Security considerations
+
+A `PushSubscription` usually comes from the browser, so treat its `endpoint` as
+untrusted input. `sendNotification()` makes an HTTPS POST to whatever URL it is
+given, which means an attacker who can register a subscription can point your
+server at internal hosts (SSRF) or at a server that never finishes responding.
+
+- Validate the endpoint before storing it, e.g. only accept `https:` URLs on the
+default port whose hostname belongs to a known push service:
+
+```javascript
+const PUSH_HOSTS = [
+  /^fcm\.googleapis\.com$/,
+  /^updates\.push\.services\.mozilla\.com$/,
+  /\.push\.apple\.com$/,
+  /\.notify\.windows\.com$/
+];
+
+function isPushEndpoint(endpoint) {
+  try {
+    const url = new URL(endpoint);
+    return url.protocol === 'https:' && url.port === ''
+      && PUSH_HOSTS.some((re) => re.test(url.hostname));
+  } catch {
+    return false;
+  }
+}
+```
+
+- Set the `timeout` option. There is no timeout by default, and a socket timeout
+does not bound the total time of a slow response, so consider an overall
+deadline as well.
+
 ## Using VAPID Key for applicationServerKey
 
 When subscribing to push messages, you'll need to pass your VAPID key,

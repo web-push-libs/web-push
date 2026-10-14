@@ -81,7 +81,10 @@ suite('sendNotification', function() {
       req.on('end', function() {
         requestDetails = req;
 
-        if (req.url.indexOf('statusCode=404') !== -1) {
+        if (req.url.indexOf('largeResponse') !== -1) {
+          res.writeHead(201);
+          res.end(Buffer.alloc(1024 * 1024, 'a'));
+        } else if (req.url.indexOf('statusCode=404') !== -1) {
           res.writeHead(404);
           res.end();
         } else {
@@ -829,6 +832,17 @@ suite('sendNotification', function() {
       }, function() {
         // NOOP, this error is expected
       });
+    });
+  });
+
+  test('rejects when the push service response is too large', function() {
+    return sendNotification({
+      endpoint: 'https://127.0.0.1:' + serverPort + '?largeResponse'
+    })
+    .then(function() {
+      throw new Error('sendNotification should have rejected due to a large response');
+    }, function(err) {
+      assert(/exceeded/.test(err.message), err.message);
     });
   });
 
