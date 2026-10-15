@@ -81,7 +81,20 @@ suite('sendNotification', function() {
       req.on('end', function() {
         requestDetails = req;
 
-        if (req.url.indexOf('largeResponse') !== -1) {
+        if (req.url.indexOf('abortedResponse') !== -1) {
+          res.writeHead(201, { 'Content-Length': 100 });
+          res.write('partial');
+          setTimeout(function() {
+            res.destroy();
+          }, 20);
+        } else if (req.url.indexOf('stalledResponse') !== -1) {
+          res.writeHead(201, { 'Content-Length': 100 });
+          res.write('partial');
+        } else if (req.url.indexOf('responseSize=') !== -1) {
+          const size = Number(new URL(req.url, 'https://localhost').searchParams.get('responseSize'));
+          res.writeHead(201);
+          res.end(Buffer.alloc(size, 'a'));
+        } else if (req.url.indexOf('largeResponse') !== -1) {
           res.writeHead(201);
           res.end(Buffer.alloc(1024 * 1024, 'a'));
         } else if (req.url.indexOf('statusCode=404') !== -1) {
@@ -833,6 +846,33 @@ suite('sendNotification', function() {
         // NOOP, this error is expected
       });
     });
+  });
+
+  [undefined, 100].forEach(function(timeout) {
+    test('rejects an interrupted response with timeout ' + timeout, function() {
+      return assert.rejects(sendNotification({
+        endpoint: 'https://127.0.0.1:' + serverPort + '?abortedResponse'
+      }, null, { timeout }), { code: 'ECONNRESET' });
+    });
+  });
+
+  test('rejects a stalled response on socket timeout', function() {
+    return assert.rejects(sendNotification({
+      endpoint: 'https://127.0.0.1:' + serverPort + '?stalledResponse'
+    }, null, { timeout: 50 }), /Socket timeout/);
+  });
+
+  test('accepts a response at the size limit', async function() {
+    const response = await sendNotification({
+      endpoint: 'https://127.0.0.1:' + serverPort + '?responseSize=65536'
+    });
+    assert.equal(response.body.length, 65536);
+  });
+
+  test('rejects a response one byte over the size limit', function() {
+    return assert.rejects(sendNotification({
+      endpoint: 'https://127.0.0.1:' + serverPort + '?responseSize=65537'
+    }), /Push service response exceeded 65536 bytes/);
   });
 
   test('rejects when the push service response is too large', function() {

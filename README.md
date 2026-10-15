@@ -233,12 +233,16 @@ or an "options" object with more specific properties.
 A promise that resolves if the notification was sent successfully
 with details of the request, otherwise it rejects.
 
-In both cases, resolving or rejecting, you'll be able to access the following
-values on the returned object or error.
+For a complete HTTP response, the returned object or HTTP error contains the
+following values:
 
 - *statusCode*, the status code of the response from the push service;
 - *headers*, the headers of the response from the push service;
 - *body*, the body of the response from the push service.
+
+Responses larger than 64 KiB are rejected and the request is destroyed.
+Interrupted responses and socket timeouts also reject the promise. These
+transport errors do not include the complete HTTP response fields above.
 
 <hr />
 

@@ -368,6 +368,10 @@ export class WebPushLib {
         let responseText = '';
         let responseBytes = 0;
 
+        // A truncated response errors on the response stream, not necessarily
+        // on the request. Reject instead of leaving the notification pending.
+        pushResponse.on('error', reject);
+
         pushResponse.on('data', function(chunk) {
           responseBytes += chunk.length;
           if (responseBytes > MAX_RESPONSE_BYTES) {
