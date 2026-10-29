@@ -269,6 +269,7 @@ Globally sets the application's VAPID subject, public key, and private key, to b
 The `setVapidDetails` method expects the following input:
 
 - *subject*: the VAPID server contact information, as either an `https:` or `mailto:` URI ([as per the VAPID spec](https://datatracker.ietf.org/doc/html/draft-thomson-webpush-vapid#section-2.1)).
+  Use a real, externally valid contact URI rather than a local placeholder such as `mailto:user@localhost`; Apple Push may reject localhost-based subjects with `403 BadJwtToken`.
 - *publicKey*: the VAPID public key.
 - *privateKey*: the VAPID private key.
 
