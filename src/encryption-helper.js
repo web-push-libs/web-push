@@ -1,6 +1,13 @@
 import crypto from 'node:crypto';
 import ece from 'http_ece';
 
+/**
+ * @param {string} userPublicKey
+ * @param {string} userAuth
+ * @param {Buffer<ArrayBuffer>|string} payload
+ * @param {string} contentEncoding
+ * @return {{localPublicKey: Buffer<ArrayBuffer>, salt: string, cipherText: Buffer<ArrayBuffer>}}
+ */
 export function encrypt(userPublicKey, userAuth, payload, contentEncoding) {
   if (!userPublicKey) {
     throw new Error('No user public key provided for encryption.');

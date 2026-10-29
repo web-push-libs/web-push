@@ -25,6 +25,10 @@ const ECPrivateKeyASN = asn1.define('ECPrivateKey', function() {
   );
 });
 
+/**
+ * @param {Buffer<ArrayBuffer>} key The private key to convert to PEM format.
+ * @return {string} The PEM formatted private key.
+ */
 function toPEM(key) {
   return ECPrivateKeyASN.encode({
     version: 1,
@@ -35,6 +39,9 @@ function toPEM(key) {
   });
 }
 
+/**
+ * @return {({publicKey: string, privateKey: string})} The generated VAPID keys.
+ */
 export function generateVAPIDKeys() {
   const curve = crypto.createECDH('prime256v1');
   curve.generateKeys();
@@ -63,6 +70,10 @@ export function generateVAPIDKeys() {
   };
 }
 
+/**
+ * @param {string} subject The VAPID subject to validate.
+ * @return {void}
+ */
 export function validateSubject(subject) {
   if (!subject) {
     throw new Error('No subject set in vapidDetails.subject.');
@@ -94,6 +105,10 @@ export function validateSubject(subject) {
     }
 }
 
+/**
+ * @param {string} publicKey The VAPID public key to validate.
+ * @return {void}
+ */
 export function validatePublicKey(publicKey) {
   if (!publicKey) {
     throw new Error('No key set vapidDetails.publicKey');
@@ -115,6 +130,10 @@ export function validatePublicKey(publicKey) {
   }
 }
 
+/**
+ * @param {string} privateKey The VAPID private key to validate.
+ * @return {void}
+ */
 export function validatePrivateKey(privateKey) {
   if (!privateKey) {
     throw new Error('No key set in vapidDetails.privateKey');
@@ -141,8 +160,8 @@ export function validatePrivateKey(privateKey) {
  * the expiration in the future by adding the passed `numSeconds`
  * with the current seconds from Unix Epoch
  *
- * @param {Number} numSeconds Number of seconds to be added
- * @return {Number} Future expiration in seconds
+ * @param {number} numSeconds Number of seconds to be added
+ * @return {number} Future expiration in seconds
  */
 export function getFutureExpirationTimestamp(numSeconds) {
   const futureExp = new Date();
@@ -154,7 +173,8 @@ export function getFutureExpirationTimestamp(numSeconds) {
  * Validates the Expiration Header based on the VAPID Spec
  * Throws error of type `Error` if the expiration is not validated
  *
- * @param {Number} expiration Expiration seconds from Epoch to be validated
+ * @param {number} expiration Expiration seconds from Epoch to be validated
+ * @return {void}
  */
 export function validateExpiration(expiration) {
   if (!Number.isInteger(expiration)) {
@@ -175,6 +195,12 @@ export function validateExpiration(expiration) {
 }
 
 /**
+ * @typedef {Object} VapidHeaders
+ * @property {string} Authorization The Authorization header value.
+ * @property {string=} Crypto-Key The Crypto-Key header value.
+ */
+
+/**
  * This method takes the required VAPID parameters and returns the required
  * header to be added to a Web Push Protocol Request.
  * @param  {string} audience        This must be the origin of the push service.
@@ -183,8 +209,8 @@ export function validateExpiration(expiration) {
  * @param  {string} publicKey       The VAPID public key.
  * @param  {string} privateKey      The VAPID private key.
  * @param  {string} contentEncoding The contentEncoding type.
- * @param  {integer} [expiration]   The expiration of the VAPID JWT.
- * @return {Object}                 Returns an Object with the Authorization and
+ * @param  {number=} expiration     The expiration of the VAPID JWT.
+ * @return {VapidHeaders}           Returns an Object with the Authorization and
  * 'Crypto-Key' values to be used as headers.
  */
 export function getVapidHeaders(audience, subject, publicKey, privateKey, contentEncoding, expiration) {
