@@ -6,3 +6,6 @@ test/output/
 # Browser profiles created by browser push tests
 test/.chrome-profile-*
 test/.firefox-profile-*
+
+# published tsc output
+/types
