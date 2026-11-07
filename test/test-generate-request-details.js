@@ -366,4 +366,21 @@ suite('Test Generate Request Details', function() {
     );
     assert.equal(details.agent, extraOptions.agent);
   });
+
+  test('Signal option preserves the AbortSignal reference', function() {
+    const controller = new AbortController();
+    const details = generateRequestDetails(
+      { endpoint: 'https://127.0.0.1:8080' },
+      null,
+      { signal: controller.signal }
+    );
+
+    assert.strictEqual(details.signal, controller.signal);
+  });
+
+  test('Omitted signal does not add a request detail', function() {
+    const details = generateRequestDetails({ endpoint: 'https://127.0.0.1:8080' });
+
+    assert.equal(Object.prototype.hasOwnProperty.call(details, 'signal'), false);
+  });
 });
