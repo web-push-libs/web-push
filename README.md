@@ -127,7 +127,8 @@ const options = {
     publicKey: '< URL Safe Base64 Encoded Public Key >',
     privateKey: '< URL Safe Base64 Encoded Private Key >'
   },
-  timeout: <Number>
+  timeout: <Number>,
+  signal: <AbortSignal>,
   TTL: <Number>,
   headers: {
     '< header name >': '< header value >'
@@ -182,6 +183,13 @@ request only. This overrides any API key set via `setGCMAPIKey()`.
 - **vapidDetails** should be an object with *subject*, *publicKey* and
 *privateKey* values defined. These values should follow the [VAPID Spec](https://tools.ietf.org/html/draft-thomson-webpush-vapid).
 - **timeout** is a value in milliseconds that specifies the request's socket timeout. On timeout, the request will be destroyed and the promise will be rejected with a meaningful error. It's a common misconception that a socket timeout is the timeout to receive the full response. So if you have a socket timeout of 1 second, and a response comprised of 3 TCP packets, where each response packet takes 0.9 seconds to arrive, for a total response time of 2.7 seconds, then there will be no timeout. Once a socket 'timeout' triggers the request will be aborted by the library (by default undefined).
+- **signal** is an optional `AbortSignal` for cancelling the HTTP request,
+including while waiting for its response body. An already-aborted signal rejects
+without sending the request. Cancellation rejects with Node.js's `AbortError`
+(`code: 'ABORT_ERR'`). It also cancels a pending connection to a configured proxy.
+Cancellation during connection setup with a custom `agent` depends on that
+agent's support. This option does not change the socket `timeout` and cannot
+undo a notification already accepted by the push service.
 - **TTL** is a value in seconds that describes how long a push message is
 retained by the push service (by default, four weeks).
 - **headers** is an object with all the extra headers you want to add to the request.
@@ -393,7 +401,8 @@ const options = {
   contentEncoding: '< Encoding type, e.g.: aesgcm or aes128gcm >',
   urgency:'< Default is normal "Defult" >',
   topic:'< Use a maximum of 32 characters from the URL or filename-safe Base64 characters sets. >',
-  proxy: '< proxy server options >'
+  proxy: '< proxy server options >',
+  signal: <AbortSignal>
 }
 
 try {
@@ -452,6 +461,8 @@ retained by the push service (by default, four weeks).
 - **proxy** is the [HttpsProxyAgent's constructor argument](https://github.com/TooTallNate/node-https-proxy-agent#new-httpsproxyagentobject-options)
 that may either be a string URI of the proxy server (eg. http://< hostname >:< port >)
 or an "options" object with more specific properties.
+- **signal** is an optional `AbortSignal` copied to the request details for a
+custom transport to use.
 
 ### Returns
 
@@ -462,6 +473,10 @@ object will contain:
 - *method*, this will be 'POST';
 - *headers*, the headers to add to the request;
 - *body*, the body of the request (As a Node Buffer).
+
+When supplied, *signal* is the same `AbortSignal` passed in the options.
+`generateRequestDetails()` does not perform I/O or cancel payload generation;
+a custom transport must forward this signal to its own request.
 
 <hr />
 

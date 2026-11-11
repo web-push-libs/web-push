@@ -109,6 +109,7 @@ export class WebPushLib {
     let proxy;
     let agent;
     let timeout;
+    let signal;
 
     if (options) {
       const validOptionKeys = [
@@ -121,7 +122,8 @@ export class WebPushLib {
         'topic',
         'proxy',
         'agent',
-        'timeout'
+        'timeout',
+        'signal'
       ];
       const optionKeys = Object.keys(options);
       for (let i = 0; i < optionKeys.length; i += 1) {
@@ -217,6 +219,8 @@ export class WebPushLib {
       if (typeof options.timeout === 'number') {
         timeout = options.timeout;
       }
+
+      signal = options.signal;
     }
 
     if (typeof timeToLive === 'undefined') {
@@ -313,6 +317,10 @@ export class WebPushLib {
       requestDetails.timeout = timeout;
     }
 
+    if (signal !== undefined) {
+      requestDetails.signal = signal;
+    }
+
     return requestDetails;
   }
 
@@ -352,12 +360,18 @@ export class WebPushLib {
         httpsOptions.timeout = requestDetails.timeout;
       }
 
+      if (requestDetails.signal !== undefined) {
+        httpsOptions.signal = requestDetails.signal;
+      }
+
       if (requestDetails.agent) {
         httpsOptions.agent = requestDetails.agent;
       }
 
       if (requestDetails.proxy) {
-        httpsOptions.agent = new HttpsProxyAgent(requestDetails.proxy);
+        httpsOptions.agent = new HttpsProxyAgent(requestDetails.proxy, {
+          signal: requestDetails.signal
+        });
       }
 
       const pushRequest = https.request(httpsOptions, function(pushResponse) {
