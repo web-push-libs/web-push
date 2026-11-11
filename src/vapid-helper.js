@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import { URL } from 'node:url';
-import asn1 from 'asn1.js';
+import * as asn1js from 'asn1js';
 import jws from 'jws';
 
 import * as WebPushConstants from './web-push-constants.js';
@@ -14,29 +14,34 @@ const DEFAULT_EXPIRATION_SECONDS = 12 * 60 * 60;
 // Maximum expiration is 24 hours according. (See VAPID spec)
 const MAX_EXPIRATION_SECONDS = 24 * 60 * 60;
 
-const ECPrivateKeyASN = asn1.define('ECPrivateKey', function() {
-  this.seq().obj(
-    this.key('version').int(),
-    this.key('privateKey').octstr(),
-    this.key('parameters').explicit(0).objid()
-      .optional(),
-    this.key('publicKey').explicit(1).bitstr()
-      .optional()
-  );
-});
+// OID for the prime256v1 (P-256) curve
+const PRIME256V1_OID = '1.2.840.10045.3.1.7';
 
 /**
+ * Encodes a raw EC private key as a PEM formatted ECPrivateKey (RFC 5915).
  * @param {Buffer<ArrayBuffer>} key The private key to convert to PEM format.
  * @return {string} The PEM formatted private key.
  */
 function toPEM(key) {
-  return ECPrivateKeyASN.encode({
-    version: 1,
-    privateKey: key,
-    parameters: [1, 2, 840, 10045, 3, 1, 7] // prime256v1
-  }, 'pem', {
-    label: 'EC PRIVATE KEY'
+  const ecPrivateKey = new asn1js.Sequence({
+    value: [
+      new asn1js.Integer({ value: 1 }),
+      new asn1js.OctetString({ valueHex: key }),
+      new asn1js.Constructed({
+        idBlock: { tagClass: 3, tagNumber: 0 },
+        value: [new asn1js.ObjectIdentifier({ value: PRIME256V1_OID })]
+      })
+    ]
   });
+
+  const base64 = Buffer.from(ecPrivateKey.toBER()).toString('base64');
+  const lines = base64.match(/.{1,64}/g) ?? [];
+
+  return [
+    '-----BEGIN EC PRIVATE KEY-----',
+    ...lines,
+    '-----END EC PRIVATE KEY-----'
+  ].join('\n');
 }
 
 /**
