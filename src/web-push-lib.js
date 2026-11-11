@@ -10,6 +10,10 @@ import * as urlBase64Helper from './urlsafe-base64-helper.js';
 // Default TTL is four weeks.
 const DEFAULT_TTL = 2419200;
 
+// Push services reply with small bodies. Anything larger is not buffered, so an
+// untrusted subscription endpoint can't make the server hold an unbounded response.
+const MAX_RESPONSE_BYTES = 64 * 1024;
+
 let gcmAPIKey = '';
 let vapidDetails;
 
@@ -362,8 +366,19 @@ export class WebPushLib {
 
       const pushRequest = https.request(httpsOptions, function(pushResponse) {
         let responseText = '';
+        let responseBytes = 0;
+
+        // A truncated response errors on the response stream, not necessarily
+        // on the request. Reject instead of leaving the notification pending.
+        pushResponse.on('error', reject);
 
         pushResponse.on('data', function(chunk) {
+          responseBytes += chunk.length;
+          if (responseBytes > MAX_RESPONSE_BYTES) {
+            pushRequest.destroy(new Error('Push service response exceeded '
+            + MAX_RESPONSE_BYTES + ' bytes'));
+            return;
+          }
           responseText += chunk;
         });
 
