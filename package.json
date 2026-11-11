@@ -8,6 +8,8 @@
     "web-push": "src/cli.js"
   },
   "scripts": {
+    "build:clean": "node -e \"require('fs').rmSync('./lib', { recursive: true, force: true })\"",
+    "build": "npm run build:clean && tsc",
     "download-browser": "playwright install chromium firefox",
     "lint": "eslint src test",
     "pretest": "npm run lint && npm run download-browser",
@@ -30,20 +32,23 @@
   },
   "homepage": "https://github.com/web-push-libs/web-push#readme",
   "dependencies": {
-    "asn1.js": "^5.3.0",
+    "asn1js": "^4.0.0",
     "http_ece": "1.2.1",
     "https-proxy-agent": "^9.1.0",
     "jws": "^4.0.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/jws": "^3.2.11",
+    "@types/node": "^26.1.1",
     "c8": "^12.0.0",
     "eslint": "^10.6.0",
     "globals": "^17.6.0",
     "mocha": "^12.0.0",
     "playwright": "^1.61.0",
     "portfinder": "1.0.38",
-    "tinyspy": "^4.0.4"
+    "tinyspy": "^4.0.4",
+    "typescript": "^7.0.2"
   },
   "engines": {
     "node": ">= 16"
