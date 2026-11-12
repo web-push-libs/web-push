@@ -181,6 +181,9 @@ any of the following values defined, although none of them are required.
 request only. This overrides any API key set via `setGCMAPIKey()`.
 - **vapidDetails** should be an object with *subject*, *publicKey* and
 *privateKey* values defined. These values should follow the [VAPID Spec](https://tools.ietf.org/html/draft-thomson-webpush-vapid).
+The private key may be a base64url string or a private P-256 (`prime256v1`)
+[`KeyObject`](https://nodejs.org/api/crypto.html#class-keyobject). The public key
+remains a base64url string.
 - **timeout** is a value in milliseconds that specifies the request's socket timeout. On timeout, the request will be destroyed and the promise will be rejected with a meaningful error. It's a common misconception that a socket timeout is the timeout to receive the full response. So if you have a socket timeout of 1 second, and a response comprised of 3 TCP packets, where each response packet takes 0.9 seconds to arrive, for a total response time of 2.7 seconds, then there will be no timeout. Once a socket 'timeout' triggers the request will be aborted by the library (by default undefined).
 - **TTL** is a value in seconds that describes how long a push message is
 retained by the push service (by default, four weeks).
@@ -271,7 +274,29 @@ The `setVapidDetails` method expects the following input:
 - *subject*: the VAPID server contact information, as either an `https:` or `mailto:` URI ([as per the VAPID spec](https://datatracker.ietf.org/doc/html/draft-thomson-webpush-vapid#section-2.1)).
   Use a real, externally valid contact URI rather than a local placeholder such as `mailto:user@localhost`; Apple Push may reject localhost-based subjects with `403 BadJwtToken`.
 - *publicKey*: the VAPID public key.
-- *privateKey*: the VAPID private key.
+- *privateKey*: the VAPID private key, as a base64url string or a private P-256 (`prime256v1`) [`KeyObject`](https://nodejs.org/api/crypto.html#class-keyobject).
+
+To reuse a prepared private key, load your persisted P-256 key once, outside the
+send loop. For example, if it is stored as PEM:
+
+```javascript
+import { createPrivateKey } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+
+const privateKey = createPrivateKey(readFileSync('vapid-private-key.pem'));
+
+webpush.setVapidDetails(
+  'mailto:user@example.org',
+  process.env.VAPID_PUBLIC_KEY,
+  privateKey
+);
+```
+
+The public key must correspond to the private key. Reusing the `KeyObject`
+avoids decoding and parsing the private key for every signature. It can also be
+passed in `options.vapidDetails.privateKey` or directly to `getVapidHeaders()`.
+Public, symmetric and non-P-256 key objects are rejected. Each request still
+gets its own VAPID JWT; the JWT expiration and signing algorithm are unchanged.
 
 ### Returns
 
@@ -352,7 +377,7 @@ The `getVapidHeaders()` method expects the following input:
 - *audience*: the origin of the **push service**.
 - *subject*: the mailto or URL for your application.
 - *publicKey*: the VAPID public key.
-- *privateKey*: the VAPID private key.
+- *privateKey*: the VAPID private key, as a base64url string or a private P-256 (`prime256v1`) [`KeyObject`](https://nodejs.org/api/crypto.html#class-keyobject).
 - *contentEncoding*: the type of content encoding to use (e.g. aesgcm or aes128gcm).
 
 ### Returns

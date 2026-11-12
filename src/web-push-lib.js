@@ -43,7 +43,7 @@ export class WebPushLib {
    * address. For example: 'https://my-site.com/contact' or
    * 'mailto: contact@my-site.com'
    * @param  {string} publicKey  The public VAPID key, a URL safe, base64 encoded string
-   * @param  {string} privateKey The private VAPID key, a URL safe, base64 encoded string.
+   * @param  {string|import('node:crypto').KeyObject} privateKey The base64url private VAPID key or a private P-256 KeyObject.
    */
   setVapidDetails(subject, publicKey, privateKey) {
     if (arguments.length === 1 && arguments[0] === null) {

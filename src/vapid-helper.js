@@ -120,6 +120,15 @@ export function validatePrivateKey(privateKey) {
     throw new Error('No key set in vapidDetails.privateKey');
   }
 
+  if (privateKey instanceof crypto.KeyObject) {
+    if (privateKey.type !== 'private'
+    || privateKey.asymmetricKeyType !== 'ec'
+    || privateKey.asymmetricKeyDetails?.namedCurve !== 'prime256v1') {
+      throw new Error('Vapid private key must be a private P-256 KeyObject.');
+    }
+    return;
+  }
+
   if (typeof privateKey !== 'string') {
     throw new Error('Vapid private key must be a URL safe Base 64 '
     + 'encoded string.');
@@ -181,7 +190,7 @@ export function validateExpiration(expiration) {
  * @param  {string} subject         This should be a URL or a 'mailto:' email
  * address.
  * @param  {string} publicKey       The VAPID public key.
- * @param  {string} privateKey      The VAPID private key.
+ * @param  {string|import('node:crypto').KeyObject} privateKey The base64url VAPID private key or a private P-256 KeyObject.
  * @param  {string} contentEncoding The contentEncoding type.
  * @param  {integer} [expiration]   The expiration of the VAPID JWT.
  * @return {Object}                 Returns an Object with the Authorization and
@@ -212,7 +221,9 @@ export function getVapidHeaders(audience, subject, publicKey, privateKey, conten
   validatePublicKey(publicKey);
   validatePrivateKey(privateKey);
 
-  privateKey = Buffer.from(privateKey, 'base64url');
+  if (typeof privateKey === 'string') {
+    privateKey = Buffer.from(privateKey, 'base64url');
+  }
 
   if (expiration) {
     validateExpiration(expiration);
@@ -234,7 +245,7 @@ export function getVapidHeaders(audience, subject, publicKey, privateKey, conten
   const jwt = jws.sign({
     header: header,
     payload: jwtPayload,
-    privateKey: toPEM(privateKey)
+    privateKey: privateKey instanceof crypto.KeyObject ? privateKey : toPEM(privateKey)
   });
 
   if (contentEncoding === WebPushConstants.supportedContentEncodings.AES_128_GCM) {
