@@ -207,6 +207,56 @@ values on the returned object or error.
 - *headers*, the headers of the response from the push service;
 - *body*, the body of the response from the push service.
 
+### Handling errors
+
+`sendNotification()` rejects with a `WebPushError` when the push service returns
+a non-2xx response. The error carries the same `statusCode`, `headers`, and
+`body` as a successful response, so you can inspect `err.statusCode` to decide
+what to do next:
+
+- **404 or 410** — the subscription is gone (the browser unsubscribed, or the
+  endpoint expired). Remove it from your subscription store; retrying will
+  never succeed. The protocol requires a 404 for a push message sent to an
+  expired subscription ([RFC 8030 §7.3](https://datatracker.ietf.org/doc/html/rfc8030#section-7.3));
+  some push services return 410 (Gone) instead, which HTTP defines as a
+  permanent condition ([RFC 9110 §15.5.11](https://datatracker.ietf.org/doc/html/rfc9110#section-15.5.11)).
+- **400** — the push service rejected the request as malformed. The protocol
+  requires a 400 for a missing `TTL` header, multiple `Urgency` values, or an
+  invalid `Topic` ([RFC 8030 §5.2](https://datatracker.ietf.org/doc/html/rfc8030#section-5.2),
+  [§5.3](https://datatracker.ietf.org/doc/html/rfc8030#section-5.3),
+  [§5.4](https://datatracker.ietf.org/doc/html/rfc8030#section-5.4)), and
+  VAPID recommends one when the same key is used for signing and for
+  encryption ([RFC 8292 §3.2](https://datatracker.ietf.org/doc/html/rfc8292#section-3.2)).
+  This is a problem with the request, not a transient failure.
+- **401 or 403** — VAPID authentication was missing or rejected, for example
+  because the JWT is invalid or the subscription was created with a different
+  application server key ([RFC 8292 §2](https://datatracker.ietf.org/doc/html/rfc8292#section-2),
+  [§4.2](https://datatracker.ietf.org/doc/html/rfc8292#section-4.2)). Check
+  your VAPID details; retrying with the same keys will not succeed.
+- **413** — the payload was too large for the push service. Push services
+  must accept a payload body of up to 4096 bytes
+  ([RFC 8030 §7.2](https://datatracker.ietf.org/doc/html/rfc8030#section-7.2)),
+  which leaves at most 3993 bytes of plaintext with the default `aes128gcm`
+  encoding ([RFC 8291 §4](https://datatracker.ietf.org/doc/html/rfc8291#section-4)).
+- **429** — you're being rate-limited by the push service
+  ([RFC 8030 §8.4](https://datatracker.ietf.org/doc/html/rfc8030#section-8.4)).
+  Back off and retry later, waiting at least as long as the `Retry-After`
+  header in `err.headers` asks when it is present; do not remove the
+  subscription.
+- **5xx** — the push service itself had a problem. Safe to retry, and not a
+  reason to remove the subscription.
+
+```javascript
+webpush.sendNotification(pushSubscription, payload).catch((err) => {
+  if (err.statusCode === 404 || err.statusCode === 410) {
+    // The subscription is no longer valid — stop sending to it.
+    removeSubscriptionFromDatabase(pushSubscription);
+  } else {
+    console.error('Push notification failed', err.statusCode, err.body);
+  }
+});
+```
+
 <hr />
 
 ## generateVAPIDKeys()
